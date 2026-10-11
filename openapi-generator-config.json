@@ -1,0 +1,8 @@
+{
+  "packageName": "bmc",
+  "module": "github.com/bare-metal-cloud/client-go",
+  "withGoMod": true,
+  "enumClassPrefix": true,
+  "generateInterfaces": true,
+  "useOneOfDiscriminatorLookup": true
+}
