@@ -12,18 +12,16 @@ Two audiences:
 - **BMC's own backend**, which consumes the same client so internal callers
   and third-party integrations share one typed surface.
 
-Status: early scaffold, generated from `bare-metal-cloud/backend` at tag
+Status: scaffold release, generated from `bare-metal-cloud/backend` at tag
 **v1.2.0**. The client regenerates automatically whenever the backend
-publishes a new release tag; the release process (module tags, GOPROXY
-visibility) is still being decided.
+publishes a new release tag, and this repo's own `v*` tags publish straight
+to the Go module proxy (proxy.golang.org / pkg.go.dev).
 
 ## Install
 
 ```bash
-go get github.com/bare-metal-cloud/client-go
+go get github.com/bare-metal-cloud/client-go@v0.1.0
 ```
-
-(Once the first version tag is cut; until then, pin a commit.)
 
 ## Quick start
 
@@ -106,11 +104,11 @@ git tag v0.1.0 && git push origin v0.1.0
 
 ## Visibility
 
-Private for now (ruled 2026-10-11). The spec covers the **entire** API
-surface, including internal and admin endpoints — if this repository ever
-goes public, first decide whether to filter the spec down to
-customer-facing endpoints (the generation pipeline would drop non-public
-paths). Flipping visibility is a one-command change when that day comes.
+Public since 2026-10-11 — publishing to the Go module proxy (and npm, on
+the TypeScript side) requires public content. The spec covers the
+**entire** API surface, including internal and admin endpoints; filtering
+the spec down to customer-facing endpoints remains an open option for a
+future pass (the generation pipeline would drop non-public paths).
 
 ## Known spec quirks handled by the pipeline
 
