@@ -6,9 +6,11 @@ name: generate
 # before any release tag, so the SDK follows dev-release, not `v*` tags (BAR-2638).
 #
 # Trigger paths:
-# 1. repository_dispatch api-spec-updated with client_payload.sha, sent by the
-#    backend's sdk-notify workflow after a green dev-release merge (instant).
-# 2. Hourly cron on the dev-release head (fallback if the ping is missed).
+# 1. repository_dispatch api-spec-updated with client_payload.sha. Sent by the
+#    backend's sdk-notify workflow after a green dev-release merge, once that
+#    backend change is merged (BAR-2638). Until then this path does not fire.
+# 2. Hourly cron on the dev-release head. This is the path that works today,
+#    and the fallback once trigger 1 is live.
 # 3. Manual workflow_dispatch, optional `sha` input (default: dev-release head).
 #
 # Behavior: fetch web/backend/docs/swagger.json at that commit, compare its

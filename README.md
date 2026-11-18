@@ -65,10 +65,12 @@ func main() {
 - `scripts/generate.sh` normalizes the snapshot and regenerates the client
   using `openapi-generator` in Docker (no local Java needed).
 - `.github/workflows/generate.yml` keeps the client in lockstep with the
-  backend API. Every hour (and on any `repository_dispatch` of type
-  `api-spec-updated` carrying a commit `sha`, sent by the backend's notify
-  workflow after a green `dev-release` merge) it fetches the spec **at that
-  commit**, compares its hash with `spec/source-state.json`, and when it moved
+  backend API. Every hour it checks the `dev-release` head. A
+  `repository_dispatch` of type `api-spec-updated` carrying a commit `sha`
+  also triggers it; the backend sends that once its notify change for
+  `dev-release` is merged (BAR-2638), and until then the hourly check alone
+  picks up merges. It fetches the spec **at that commit**, compares its hash
+  with `spec/source-state.json`, and when it moved
   regenerates and opens a pull request from `chore/regenerate`.
 - `.github/workflows/release.yml` tags the next patch release (`v*`) on the
   merge commit of a `chore/regenerate` pull request, so the Go module proxy

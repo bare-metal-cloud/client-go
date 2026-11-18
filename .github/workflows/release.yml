@@ -13,6 +13,12 @@ on:
   pull_request:
     types: [closed]
 
+# Two regeneration merges close together must not both compute the same next
+# tag. Queue them instead (no cancel: each merge still needs its own tag).
+concurrency:
+  group: release-tag
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
