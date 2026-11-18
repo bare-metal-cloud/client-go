@@ -12,10 +12,11 @@ Two audiences:
 - **BMC's own backend**, which consumes the same client so internal callers
   and third-party integrations share one typed surface.
 
-Status: scaffold release, generated from `bare-metal-cloud/backend` at tag
-**v1.2.0**. The client regenerates automatically whenever the backend
-publishes a new release tag, and this repo's own `v*` tags publish straight
-to the Go module proxy (proxy.golang.org / pkg.go.dev).
+Status: generated from `bare-metal-cloud/backend` at the `dev-release`
+integration branch. The client regenerates automatically on every green merge
+to `dev-release` (within the hour at most), and each regeneration merge tags the
+next patch release, which publishes straight to the Go module proxy
+(proxy.golang.org / pkg.go.dev).
 
 ## Install
 
@@ -59,18 +60,22 @@ func main() {
 - `spec/swagger.json` is the normalized snapshot of the API (Swagger 2.0)
   that the current generated code was built from. It is **not edited by
   hand** here; regeneration overwrites it.
-- `spec/source-state.json` records which backend release tag the client
-  currently mirrors, and the hash of the spec at that tag.
+- `spec/source-state.json` records the backend `dev-release` commit the client
+  currently mirrors (`source_sha`), and the hash of the spec at that commit.
 - `scripts/generate.sh` normalizes the snapshot and regenerates the client
   using `openapi-generator` in Docker (no local Java needed).
-- `.github/workflows/generate.yml` keeps the client in lockstep with
-  released backend API versions. Every hour (and on any
-  `repository_dispatch` of type `api-spec-updated`, e.g. the backend's own
-  notify workflow pinging at tag time) it compares the latest `v*` tag on
-  `bare-metal-cloud/backend` against `spec/source-state.json`; when the tag
-  or its spec moved, it fetches the spec **at that tag**, regenerates, and
-  opens a pull request. The tag contract means the SDK always mirrors a
-  released backend, not a moving branch.
+- `.github/workflows/generate.yml` keeps the client in lockstep with the
+  backend API. Every hour it checks the `dev-release` head. A
+  `repository_dispatch` of type `api-spec-updated` carrying a commit `sha`
+  also triggers it; the backend sends that once its notify change for
+  `dev-release` is merged (BAR-2638), and until then the hourly check alone
+  picks up merges. It fetches the spec **at that commit**, compares its hash
+  with `spec/source-state.json`, and when it moved
+  regenerates and opens a pull request from `chore/regenerate`.
+- `.github/workflows/release.yml` tags the next patch release (`v*`) on the
+  merge commit of a `chore/regenerate` pull request, so the Go module proxy
+  picks it up without a manual step. If tag protection refuses the push, cut
+  the tag by hand.
 - Generated code is committed. Consumers get a reviewable release PR per
   API change, and git history documents every API delta.
 - `README.md` and the CI workflows are hand-maintained; the generator is
@@ -91,15 +96,16 @@ identical.
 
 One repository secret, `BMC_BACKEND_SPEC_TOKEN`: a fine-grained personal
 access token with **Contents: read** on `bare-metal-cloud/backend`. Without
-it the tag-watch job skips (it cannot read the private backend repo).
+it the watch job skips (it cannot read the private backend repo).
 
 ## Versioning
 
-Go modules version by git tag. Cut a release after merging a regeneration
-PR:
+Go modules version by git tag. Merging a regeneration PR tags the next patch
+release automatically (`release.yml`). To cut a minor or major version by
+hand:
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+git tag -a v0.2.0 <merge-sha> -m "..." && git push origin v0.2.0
 ```
 
 ## Visibility
