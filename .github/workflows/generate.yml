@@ -1,66 +1,81 @@
 name: generate
 
-# Keeps this SDK in lockstep with released backend API versions.
+# Keeps this SDK in lockstep with the backend API.
+#
+# Source: the backend's integration branch `dev-release`. Features land there
+# before any release tag, so the SDK follows dev-release, not `v*` tags (BAR-2638).
 #
 # Trigger paths:
-# 1. A new `v*` tag on bare-metal-cloud/backend (watched hourly, and on any
-#    repository_dispatch of type api-spec-updated, e.g. the backend's own
-#    sdk-notify workflow pinging us at tag time).
-# 2. Manual workflow_dispatch.
+# 1. repository_dispatch api-spec-updated with client_payload.sha, sent by the
+#    backend's sdk-notify workflow after a green dev-release merge (instant).
+# 2. Hourly cron on the dev-release head (fallback if the ping is missed).
+# 3. Manual workflow_dispatch, optional `sha` input (default: dev-release head).
 #
-# Behavior: fetch the spec AT the latest backend tag, compare against
-# spec/source-state.json, and if anything moved regenerate the client and
-# open a release-candidate pull request.
+# Behavior: fetch web/backend/docs/swagger.json at that commit, compare its
+# sha256 with spec/source-state.json, and if it moved regenerate the client and
+# open a pull request from chore/regenerate. Merging that PR tags the next patch
+# release (release.yml).
 #
-# Requires the repository secret BMC_BACKEND_SPEC_TOKEN: a fine-grained
-# personal access token with "Contents: read" on bare-metal-cloud/backend.
-# Without it the job skips (it cannot read the private backend repo).
+# Requires the repository secret BMC_BACKEND_SPEC_TOKEN: a fine-grained personal
+# access token with "Contents: read" on bare-metal-cloud/backend. Without it the
+# job skips (it cannot read the private backend repo).
 
 on:
   workflow_dispatch:
+    inputs:
+      sha:
+        description: "backend commit to generate from (default: dev-release head)"
+        required: false
+        default: ""
   repository_dispatch:
     types: [api-spec-updated]
   schedule:
-    - cron: "23 * * * *" # hourly check; a pushed backend tag is picked up within the hour
+    - cron: "23 * * * *" # hourly fallback; a dev-release merge is picked up within the hour
 
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  watch-released-tag:
+  watch-dev-release:
     runs-on: namespace-profile-bmc
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check released backend tag for spec changes
+      - name: Pick the backend commit and check for spec changes
         id: watch
         env:
           GH_TOKEN: ${{ secrets.BMC_BACKEND_SPEC_TOKEN }}
+          PAYLOAD_SHA: ${{ github.event.client_payload.sha }}
+          INPUT_SHA: ${{ github.event.inputs.sha }}
         run: |
           set -euo pipefail
           if [ -z "${GH_TOKEN:-}" ]; then
-            echo "::warning::BMC_BACKEND_SPEC_TOKEN not set; cannot read bare-metal-cloud/backend. Set the secret to enable tag-driven regeneration."
+            echo "::warning::BMC_BACKEND_SPEC_TOKEN not set; cannot read bare-metal-cloud/backend. Set the secret to enable regeneration."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          tag="$(gh api repos/bare-metal-cloud/backend/tags --jq '[.[].name | select(startswith("v"))] | first')"
-          if [ -z "$tag" ]; then
-            echo "::warning::no v* tag found on bare-metal-cloud/backend"
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
+          sha="${PAYLOAD_SHA:-${INPUT_SHA:-}}"
+          if [ -z "$sha" ]; then
+            sha="$(gh api repos/bare-metal-cloud/backend/git/ref/heads/dev-release --jq .object.sha)"
+          fi
+          # Only a full commit SHA may reach the API path below.
+          if ! printf '%s' "$sha" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::not a full commit sha: '$sha'"
+            exit 1
           fi
 
-          gh api "repos/bare-metal-cloud/backend/contents/web/backend/docs/swagger.json?ref=$tag" \
-            --jq .content | base64 -d > /tmp/spec-raw.json
-          sha="$(sha256sum /tmp/spec-raw.json | awk '{print $1}')"
-
-          state_tag="$(jq -r .source_ref spec/source-state.json)"
+          # Raw media type: the JSON contents API returns an empty "content" for
+          # files over 1 MB, and swagger.json is about 1.9 MB.
+          gh api -H "Accept: application/vnd.github.raw" \
+            "repos/bare-metal-cloud/backend/contents/web/backend/docs/swagger.json?ref=$sha" \
+            > /tmp/spec-raw.json
+          spec_sha="$(sha256sum /tmp/spec-raw.json | awk '{print $1}')"
           state_sha="$(jq -r .raw_spec_sha256 spec/source-state.json)"
 
-          echo "latest released tag: $tag (state: $state_tag)"
-          if [ "$tag" = "$state_tag" ] && [ "$sha" = "$state_sha" ]; then
+          echo "backend commit: $sha (last generated: $(jq -r .source_sha spec/source-state.json))"
+          if [ "$spec_sha" = "$state_sha" ]; then
             echo "spec unchanged since last regeneration"
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -68,8 +83,10 @@ jobs:
 
           cp /tmp/spec-raw.json spec/swagger.json
           echo "changed=true" >> "$GITHUB_OUTPUT"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          # Hash of the raw download, recorded as-is: generate.sh normalises
+          # spec/swagger.json in place, so re-hashing it later would not match.
+          echo "spec_sha=$spec_sha" >> "$GITHUB_OUTPUT"
 
       - name: Set up Go
         if: steps.watch.outputs.changed == 'true'
@@ -89,11 +106,11 @@ jobs:
       - name: Record the new source state
         if: steps.watch.outputs.changed == 'true'
         env:
-          TAG: ${{ steps.watch.outputs.tag }}
-          RAW_SHA: ${{ steps.watch.outputs.sha }}
+          SHA: ${{ steps.watch.outputs.sha }}
+          RAW_SHA: ${{ steps.watch.outputs.spec_sha }}
         run: |
-          jq -n --arg tag "$TAG" --arg sha "$RAW_SHA" \
-            '{source_repo: "bare-metal-cloud/backend", source_ref: $tag, spec_path: "web/backend/docs/swagger.json", raw_spec_sha256: $sha}' \
+          jq -n --arg sha "$SHA" --arg raw "$RAW_SHA" \
+            '{source_repo: "bare-metal-cloud/backend", source_ref: "dev-release", source_sha: $sha, spec_path: "web/backend/docs/swagger.json", raw_spec_sha256: $raw}' \
             > spec/source-state.json
 
       - name: Open regeneration PR
@@ -105,9 +122,10 @@ jobs:
           title: "chore: regenerate client from API spec"
           body: |
             Automated regeneration from the backend OpenAPI spec
-            (`bare-metal-cloud/backend` → `web/backend/docs/swagger.json`).
+            (`bare-metal-cloud/backend` → `web/backend/docs/swagger.json` at
+            dev-release commit `${{ steps.watch.outputs.sha }}`).
 
-            Review the diff as the API delta. Merge cuts the next client
-            release; tag it (`v*`) when ready.
+            Review the diff as the API delta. Merging tags the next patch
+            release automatically.
           commit-message: "chore: regenerate client from API spec"
           delete-branch: true

@@ -1,0 +1,46 @@
+name: release
+
+# Tags the next patch release when a regeneration PR merges, so a backend
+# dev-release change reaches the Go module proxy without a manual step (BAR-2638).
+#
+# Only PRs from the generator branch chore/regenerate are tagged. The tag goes on
+# the merge commit. The version is the latest v* tag with patch + 1.
+#
+# If repository tag protection refuses the push, this job fails and the tag is
+# cut by hand (`git tag -a vX.Y.Z <merge-sha> && git push origin vX.Y.Z`).
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+
+jobs:
+  tag-on-merge:
+    if: github.event.pull_request.merged == true && github.event.pull_request.head.ref == 'chore/regenerate'
+    runs-on: namespace-profile-bmc
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0
+
+      - name: Tag the next patch release
+        env:
+          MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+        run: |
+          set -euo pipefail
+          latest="$(git tag -l 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)"
+          latest="${latest:-v0.0.0}"
+          IFS=. read -r major minor patch <<<"${latest#v}"
+          next="v${major}.${minor}.$((patch + 1))"
+          if git rev-parse -q --verify "refs/tags/$next" >/dev/null; then
+            echo "::error::tag $next already exists"
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$next" -m "Regenerated from backend dev-release (merge $MERGE_SHA)" "$MERGE_SHA"
+          git push origin "refs/tags/$next"
+          echo "tagged $next at $MERGE_SHA"
