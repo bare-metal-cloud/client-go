@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ClientEnvelope** | Pointer to [**HandlersClientEnvelopeDTO**](HandlersClientEnvelopeDTO.md) |  | [optional] 
 **Credentials** | **map[string]interface{}** |  | 
 **Label** | **string** |  | 
 **Scope** | Pointer to **string** |  | [optional] 
@@ -26,6 +27,31 @@ will change when the set of required properties is changed
 NewHandlersUpdateCloudProviderCredentialRequestWithDefaults instantiates a new HandlersUpdateCloudProviderCredentialRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetClientEnvelope
+
+`func (o *HandlersUpdateCloudProviderCredentialRequest) GetClientEnvelope() HandlersClientEnvelopeDTO`
+
+GetClientEnvelope returns the ClientEnvelope field if non-nil, zero value otherwise.
+
+### GetClientEnvelopeOk
+
+`func (o *HandlersUpdateCloudProviderCredentialRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool)`
+
+GetClientEnvelopeOk returns a tuple with the ClientEnvelope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClientEnvelope
+
+`func (o *HandlersUpdateCloudProviderCredentialRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO)`
+
+SetClientEnvelope sets ClientEnvelope field to given value.
+
+### HasClientEnvelope
+
+`func (o *HandlersUpdateCloudProviderCredentialRequest) HasClientEnvelope() bool`
+
+HasClientEnvelope returns a boolean if a field has been set.
 
 ### GetCredentials
 

@@ -26,7 +26,7 @@ type AuditAPI interface {
 	/*
 	GetOrgsOrgIdAuditEvents List org audit events
 
-	Paginated (cursor/limit) audit events for the active organization. Owner/Admin only. Filters: resource_type, actor_user_id, from, to (RFC3339).
+	Paginated (cursor/limit) audit events for the active organization. Owner/Admin only. Filters: resource_type, resource_id, actor_user_id, from, to (RFC3339). resource_type + resource_id together answer the per-resource query (ADR-090 D9: every migration that ran against a named install).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Organization ID
@@ -49,6 +49,7 @@ type ApiGetOrgsOrgIdAuditEventsRequest struct {
 	cursor *string
 	limit *int32
 	resourceType *string
+	resourceId *string
 	actorUserId *int32
 	from *string
 	to *string
@@ -69,6 +70,12 @@ func (r ApiGetOrgsOrgIdAuditEventsRequest) Limit(limit int32) ApiGetOrgsOrgIdAud
 // Filter by resource_type
 func (r ApiGetOrgsOrgIdAuditEventsRequest) ResourceType(resourceType string) ApiGetOrgsOrgIdAuditEventsRequest {
 	r.resourceType = &resourceType
+	return r
+}
+
+// Filter by resource_id (composes with resource_type — the per-install query)
+func (r ApiGetOrgsOrgIdAuditEventsRequest) ResourceId(resourceId string) ApiGetOrgsOrgIdAuditEventsRequest {
+	r.resourceId = &resourceId
 	return r
 }
 
@@ -97,7 +104,7 @@ func (r ApiGetOrgsOrgIdAuditEventsRequest) Execute() (map[string]interface{}, *h
 /*
 GetOrgsOrgIdAuditEvents List org audit events
 
-Paginated (cursor/limit) audit events for the active organization. Owner/Admin only. Filters: resource_type, actor_user_id, from, to (RFC3339).
+Paginated (cursor/limit) audit events for the active organization. Owner/Admin only. Filters: resource_type, resource_id, actor_user_id, from, to (RFC3339). resource_type + resource_id together answer the per-resource query (ADR-090 D9: every migration that ran against a named install).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param orgId Organization ID
@@ -141,6 +148,9 @@ func (a *AuditAPIService) GetOrgsOrgIdAuditEventsExecute(r ApiGetOrgsOrgIdAuditE
 	}
 	if r.resourceType != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "resource_type", r.resourceType, "", "")
+	}
+	if r.resourceId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "resource_id", r.resourceId, "", "")
 	}
 	if r.actorUserId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "actor_user_id", r.actorUserId, "", "")

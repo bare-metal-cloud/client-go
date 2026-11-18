@@ -143,7 +143,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[CookieAuth](../README.md#CookieAuth)
 
 ### HTTP request headers
 

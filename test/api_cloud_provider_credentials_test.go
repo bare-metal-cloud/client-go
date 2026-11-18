@@ -47,6 +47,34 @@ func Test_bmc_CloudProviderCredentialsAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test CloudProviderCredentialsAPIService GetCloudProviderCredentialsIdBuckets", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdBuckets(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test CloudProviderCredentialsAPIService GetCloudProviderCredentialsIdRegistries", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdRegistries(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test CloudProviderCredentialsAPIService PostCloudProviderCredentials", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test

@@ -22,6 +22,7 @@ var _ MappedNullable = &HandlersCreateCloudProviderCredentialRequest{}
 
 // HandlersCreateCloudProviderCredentialRequest struct for HandlersCreateCloudProviderCredentialRequest
 type HandlersCreateCloudProviderCredentialRequest struct {
+	ClientEnvelope *HandlersClientEnvelopeDTO `json:"client_envelope,omitempty"`
 	Credentials map[string]interface{} `json:"credentials"`
 	Label string `json:"label"`
 	Provider string `json:"provider"`
@@ -48,6 +49,38 @@ func NewHandlersCreateCloudProviderCredentialRequest(credentials map[string]inte
 func NewHandlersCreateCloudProviderCredentialRequestWithDefaults() *HandlersCreateCloudProviderCredentialRequest {
 	this := HandlersCreateCloudProviderCredentialRequest{}
 	return &this
+}
+
+// GetClientEnvelope returns the ClientEnvelope field value if set, zero value otherwise.
+func (o *HandlersCreateCloudProviderCredentialRequest) GetClientEnvelope() HandlersClientEnvelopeDTO {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		var ret HandlersClientEnvelopeDTO
+		return ret
+	}
+	return *o.ClientEnvelope
+}
+
+// GetClientEnvelopeOk returns a tuple with the ClientEnvelope field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateCloudProviderCredentialRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool) {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		return nil, false
+	}
+	return o.ClientEnvelope, true
+}
+
+// HasClientEnvelope returns a boolean if a field has been set.
+func (o *HandlersCreateCloudProviderCredentialRequest) HasClientEnvelope() bool {
+	if o != nil && !IsNil(o.ClientEnvelope) {
+		return true
+	}
+
+	return false
+}
+
+// SetClientEnvelope gets a reference to the given HandlersClientEnvelopeDTO and assigns it to the ClientEnvelope field.
+func (o *HandlersCreateCloudProviderCredentialRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO) {
+	o.ClientEnvelope = &v
 }
 
 // GetCredentials returns the Credentials field value
@@ -164,6 +197,9 @@ func (o HandlersCreateCloudProviderCredentialRequest) MarshalJSON() ([]byte, err
 
 func (o HandlersCreateCloudProviderCredentialRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.ClientEnvelope) {
+		toSerialize["client_envelope"] = o.ClientEnvelope
+	}
 	toSerialize["credentials"] = o.Credentials
 	toSerialize["label"] = o.Label
 	toSerialize["provider"] = o.Provider

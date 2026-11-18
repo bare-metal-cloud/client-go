@@ -22,6 +22,76 @@ func Test_bmc_VaultAPIService(t *testing.T) {
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
+	t.Run("Test VaultAPIService DeleteAccessGrantsGrantId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var grantId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.DeleteAccessGrantsGrantId(context.Background(), grantId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService DeleteOrgsOrgIdVaultAccessGrantsId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var id int32
+
+		resp, httpRes, err := apiClient.VaultAPI.DeleteOrgsOrgIdVaultAccessGrantsId(context.Background(), orgId, id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService DeleteOrgsOrgIdVaultRentalsId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var id string
+
+		httpRes, err := apiClient.VaultAPI.DeleteOrgsOrgIdVaultRentalsId(context.Background(), orgId, id).Execute()
+
+		require.Nil(t, err)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService DeleteOrgsOrgIdVaultSharesShareId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var shareId string
+
+		resp, httpRes, err := apiClient.VaultAPI.DeleteOrgsOrgIdVaultSharesShareId(context.Background(), orgId, shareId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetAccessGrants", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.VaultAPI.GetAccessGrants(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test VaultAPIService GetApiV1VaultJitRequests", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -41,6 +111,161 @@ func Test_bmc_VaultAPIService(t *testing.T) {
 		var requestToken string
 
 		resp, httpRes, err := apiClient.VaultAPI.GetApiV1VaultJitStatusRequestToken(context.Background(), requestToken).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultAccessGrants", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultAccessGrants(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultAccessGrantsMe", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultAccessGrantsMe(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultDeliveries", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultDeliveries(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultKeys", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultKeys(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultMachines", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultMachines(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultReceivedShares", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultReceivedShares(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultRentalsId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var id string
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultRentalsId(context.Background(), orgId, id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultSalt", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultSalt(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetOrgsOrgIdVaultShares", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetOrgsOrgIdVaultShares(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetServiceAccountsSaIdAccessGrants", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var saId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetServiceAccountsSaIdAccessGrants(context.Background(), saId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService GetServiceAccountsSaIdAccessGrantsMe", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var saId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.GetServiceAccountsSaIdAccessGrantsMe(context.Background(), saId).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -72,13 +297,42 @@ func Test_bmc_VaultAPIService(t *testing.T) {
 
 	})
 
-	t.Run("Test VaultAPIService PostOrgsOrgIdVaultInit", func(t *testing.T) {
+	t.Run("Test VaultAPIService PostOrgsOrgIdVaultAccessGrants", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		var orgId int32
 
-		resp, httpRes, err := apiClient.VaultAPI.PostOrgsOrgIdVaultInit(context.Background(), orgId).Execute()
+		resp, httpRes, err := apiClient.VaultAPI.PostOrgsOrgIdVaultAccessGrants(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var agentId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets(context.Background(), orgId, agentId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService PostOrgsOrgIdVaultRentals", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.PostOrgsOrgIdVaultRentals(context.Background(), orgId).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -100,13 +354,42 @@ func Test_bmc_VaultAPIService(t *testing.T) {
 
 	})
 
-	t.Run("Test VaultAPIService PostOrgsOrgIdVaultUnlock", func(t *testing.T) {
+	t.Run("Test VaultAPIService PostOrgsOrgIdVaultShares", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		var orgId int32
 
-		resp, httpRes, err := apiClient.VaultAPI.PostOrgsOrgIdVaultUnlock(context.Background(), orgId).Execute()
+		resp, httpRes, err := apiClient.VaultAPI.PostOrgsOrgIdVaultShares(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService PostServiceAccountsSaIdAccessGrants", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var saId int32
+
+		resp, httpRes, err := apiClient.VaultAPI.PostServiceAccountsSaIdAccessGrants(context.Background(), saId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test VaultAPIService PutOrgsOrgIdVaultSlotsSlot", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var slot string
+
+		resp, httpRes, err := apiClient.VaultAPI.PutOrgsOrgIdVaultSlotsSlot(context.Background(), orgId, slot).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

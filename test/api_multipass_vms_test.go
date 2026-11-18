@@ -22,13 +22,13 @@ func Test_bmc_MultipassVmsAPIService(t *testing.T) {
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
-	t.Run("Test MultipassVmsAPIService GetApiV1MultipassVmsId", func(t *testing.T) {
+	t.Run("Test MultipassVmsAPIService GetMultipassVmsId", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		var id int32
 
-		resp, httpRes, err := apiClient.MultipassVmsAPI.GetApiV1MultipassVmsId(context.Background(), id).Execute()
+		resp, httpRes, err := apiClient.MultipassVmsAPI.GetMultipassVmsId(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -36,13 +36,13 @@ func Test_bmc_MultipassVmsAPIService(t *testing.T) {
 
 	})
 
-	t.Run("Test MultipassVmsAPIService GetApiV1MultipassVmsIdHost", func(t *testing.T) {
+	t.Run("Test MultipassVmsAPIService GetMultipassVmsIdHost", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		var id int32
 
-		resp, httpRes, err := apiClient.MultipassVmsAPI.GetApiV1MultipassVmsIdHost(context.Background(), id).Execute()
+		resp, httpRes, err := apiClient.MultipassVmsAPI.GetMultipassVmsIdHost(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -50,13 +50,13 @@ func Test_bmc_MultipassVmsAPIService(t *testing.T) {
 
 	})
 
-	t.Run("Test MultipassVmsAPIService GetApiV1VirtualMachinesHostVmIdMultipassVms", func(t *testing.T) {
+	t.Run("Test MultipassVmsAPIService GetVirtualMachinesHostVmIdMultipassVms", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		var hostVmId int32
 
-		resp, httpRes, err := apiClient.MultipassVmsAPI.GetApiV1VirtualMachinesHostVmIdMultipassVms(context.Background(), hostVmId).Execute()
+		resp, httpRes, err := apiClient.MultipassVmsAPI.GetVirtualMachinesHostVmIdMultipassVms(context.Background(), hostVmId).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

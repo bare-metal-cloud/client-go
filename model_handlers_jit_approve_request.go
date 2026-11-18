@@ -22,7 +22,6 @@ var _ MappedNullable = &HandlersJITApproveRequest{}
 type HandlersJITApproveRequest struct {
 	Decision *string `json:"decision,omitempty"`
 	RequestToken *string `json:"request_token,omitempty"`
-	TotpCode *string `json:"totp_code,omitempty"`
 }
 
 // NewHandlersJITApproveRequest instantiates a new HandlersJITApproveRequest object
@@ -106,38 +105,6 @@ func (o *HandlersJITApproveRequest) SetRequestToken(v string) {
 	o.RequestToken = &v
 }
 
-// GetTotpCode returns the TotpCode field value if set, zero value otherwise.
-func (o *HandlersJITApproveRequest) GetTotpCode() string {
-	if o == nil || IsNil(o.TotpCode) {
-		var ret string
-		return ret
-	}
-	return *o.TotpCode
-}
-
-// GetTotpCodeOk returns a tuple with the TotpCode field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *HandlersJITApproveRequest) GetTotpCodeOk() (*string, bool) {
-	if o == nil || IsNil(o.TotpCode) {
-		return nil, false
-	}
-	return o.TotpCode, true
-}
-
-// HasTotpCode returns a boolean if a field has been set.
-func (o *HandlersJITApproveRequest) HasTotpCode() bool {
-	if o != nil && !IsNil(o.TotpCode) {
-		return true
-	}
-
-	return false
-}
-
-// SetTotpCode gets a reference to the given string and assigns it to the TotpCode field.
-func (o *HandlersJITApproveRequest) SetTotpCode(v string) {
-	o.TotpCode = &v
-}
-
 func (o HandlersJITApproveRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -153,9 +120,6 @@ func (o HandlersJITApproveRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.RequestToken) {
 		toSerialize["request_token"] = o.RequestToken
-	}
-	if !IsNil(o.TotpCode) {
-		toSerialize["totp_code"] = o.TotpCode
 	}
 	return toSerialize, nil
 }

@@ -73,6 +73,13 @@ type ApiDeleteSshConnectionsIdRequest struct {
 	ctx context.Context
 	ApiService SshConnectionsAPI
 	id string
+	force *bool
+}
+
+// Force the delete past the reference guard (admin/owner only)
+func (r ApiDeleteSshConnectionsIdRequest) Force(force bool) ApiDeleteSshConnectionsIdRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteSshConnectionsIdRequest) Execute() (*http.Response, error) {
@@ -116,6 +123,9 @@ func (a *SshConnectionsAPIService) DeleteSshConnectionsIdExecute(r ApiDeleteSshC
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -169,7 +179,29 @@ func (a *SshConnectionsAPIService) DeleteSshConnectionsIdExecute(r ApiDeleteSshC
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

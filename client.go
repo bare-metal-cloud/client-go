@@ -62,13 +62,25 @@ type APIClient struct {
 
 	AgentTokensAPI AgentTokensAPI
 
+	AgentUpdateAPI AgentUpdateAPI
+
 	AgentsAPI AgentsAPI
+
+	AlertsAPI AlertsAPI
+
+	AppsAPI AppsAPI
 
 	AuditAPI AuditAPI
 
 	AuthAPI AuthAPI
 
+	BuildsAPI BuildsAPI
+
+	CapabilitiesAPI CapabilitiesAPI
+
 	CapacityAPI CapacityAPI
+
+	CloneAPI CloneAPI
 
 	CloudProviderCredentialsAPI CloudProviderCredentialsAPI
 
@@ -80,15 +92,37 @@ type APIClient struct {
 
 	DatabasesAPI DatabasesAPI
 
+	DelegationAPI DelegationAPI
+
 	DeploykitAppsAPI DeploykitAppsAPI
 
 	DevicesAPI DevicesAPI
+
+	DomainsAPI DomainsAPI
+
+	EdgeGitAPI EdgeGitAPI
+
+	ElevationsAPI ElevationsAPI
+
+	EngineAPI EngineAPI
+
+	ExploreAPI ExploreAPI
+
+	GitWebhooksAPI GitWebhooksAPI
+
+	GithubAppAPI GithubAppAPI
+
+	GitopsAPI GitopsAPI
+
+	GuardAPI GuardAPI
 
 	HealthAPI HealthAPI
 
 	HelmOperationsAPI HelmOperationsAPI
 
 	ImageRegistriesAPI ImageRegistriesAPI
+
+	JobsAPI JobsAPI
 
 	MeAPI MeAPI
 
@@ -102,13 +136,53 @@ type APIClient struct {
 
 	NetworksAPI NetworksAPI
 
+	NotificationChannelsAPI NotificationChannelsAPI
+
+	NotificationDigestSettingsAPI NotificationDigestSettingsAPI
+
 	OrgS3ConnectionsAPI OrgS3ConnectionsAPI
+
+	PersonGrantsAPI PersonGrantsAPI
 
 	PodsAPI PodsAPI
 
 	RegistrationTokensAPI RegistrationTokensAPI
 
 	RequirementsAPI RequirementsAPI
+
+	RunnerAPI RunnerAPI
+
+	RunnerMachineAPI RunnerMachineAPI
+
+	RunnersAPI RunnersAPI
+
+	RunnersArtifactsAPI RunnersArtifactsAPI
+
+	RunnersCacheAPI RunnersCacheAPI
+
+	RunnersCloudKeysAPI RunnersCloudKeysAPI
+
+	RunnersConnectionsAPI RunnersConnectionsAPI
+
+	RunnersInsightsAPI RunnersInsightsAPI
+
+	RunnersInstallsAPI RunnersInstallsAPI
+
+	RunnersJobsAPI RunnersJobsAPI
+
+	RunnersMachinePolicyAPI RunnersMachinePolicyAPI
+
+	RunnersMachinesAPI RunnersMachinesAPI
+
+	RunnersPackingHostsAPI RunnersPackingHostsAPI
+
+	RunnersPackingPoolsAPI RunnersPackingPoolsAPI
+
+	RunnersPoolSettingsAPI RunnersPoolSettingsAPI
+
+	RunnersProfilesAPI RunnersProfilesAPI
+
+	RunnersUsageAPI RunnersUsageAPI
 
 	S3ConnectionsAPI S3ConnectionsAPI
 
@@ -121,6 +195,8 @@ type APIClient struct {
 	SshConnectionsAPI SshConnectionsAPI
 
 	SshKeysAPI SshKeysAPI
+
+	StacksAPI StacksAPI
 
 	TestErrorPreviewAPI TestErrorPreviewAPI
 
@@ -155,36 +231,74 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.AgentInstallationAPI = (*AgentInstallationAPIService)(&c.common)
 	c.AgentServiceAPI = (*AgentServiceAPIService)(&c.common)
 	c.AgentTokensAPI = (*AgentTokensAPIService)(&c.common)
+	c.AgentUpdateAPI = (*AgentUpdateAPIService)(&c.common)
 	c.AgentsAPI = (*AgentsAPIService)(&c.common)
+	c.AlertsAPI = (*AlertsAPIService)(&c.common)
+	c.AppsAPI = (*AppsAPIService)(&c.common)
 	c.AuditAPI = (*AuditAPIService)(&c.common)
 	c.AuthAPI = (*AuthAPIService)(&c.common)
+	c.BuildsAPI = (*BuildsAPIService)(&c.common)
+	c.CapabilitiesAPI = (*CapabilitiesAPIService)(&c.common)
 	c.CapacityAPI = (*CapacityAPIService)(&c.common)
+	c.CloneAPI = (*CloneAPIService)(&c.common)
 	c.CloudProviderCredentialsAPI = (*CloudProviderCredentialsAPIService)(&c.common)
 	c.CloudProvidersAPI = (*CloudProvidersAPIService)(&c.common)
 	c.ClustersAPI = (*ClustersAPIService)(&c.common)
 	c.ConsoleAPI = (*ConsoleAPIService)(&c.common)
 	c.DatabasesAPI = (*DatabasesAPIService)(&c.common)
+	c.DelegationAPI = (*DelegationAPIService)(&c.common)
 	c.DeploykitAppsAPI = (*DeploykitAppsAPIService)(&c.common)
 	c.DevicesAPI = (*DevicesAPIService)(&c.common)
+	c.DomainsAPI = (*DomainsAPIService)(&c.common)
+	c.EdgeGitAPI = (*EdgeGitAPIService)(&c.common)
+	c.ElevationsAPI = (*ElevationsAPIService)(&c.common)
+	c.EngineAPI = (*EngineAPIService)(&c.common)
+	c.ExploreAPI = (*ExploreAPIService)(&c.common)
+	c.GitWebhooksAPI = (*GitWebhooksAPIService)(&c.common)
+	c.GithubAppAPI = (*GithubAppAPIService)(&c.common)
+	c.GitopsAPI = (*GitopsAPIService)(&c.common)
+	c.GuardAPI = (*GuardAPIService)(&c.common)
 	c.HealthAPI = (*HealthAPIService)(&c.common)
 	c.HelmOperationsAPI = (*HelmOperationsAPIService)(&c.common)
 	c.ImageRegistriesAPI = (*ImageRegistriesAPIService)(&c.common)
+	c.JobsAPI = (*JobsAPIService)(&c.common)
 	c.MeAPI = (*MeAPIService)(&c.common)
 	c.MetricsAPI = (*MetricsAPIService)(&c.common)
 	c.MfaAPI = (*MfaAPIService)(&c.common)
 	c.MultipassHostsAPI = (*MultipassHostsAPIService)(&c.common)
 	c.MultipassVmsAPI = (*MultipassVmsAPIService)(&c.common)
 	c.NetworksAPI = (*NetworksAPIService)(&c.common)
+	c.NotificationChannelsAPI = (*NotificationChannelsAPIService)(&c.common)
+	c.NotificationDigestSettingsAPI = (*NotificationDigestSettingsAPIService)(&c.common)
 	c.OrgS3ConnectionsAPI = (*OrgS3ConnectionsAPIService)(&c.common)
+	c.PersonGrantsAPI = (*PersonGrantsAPIService)(&c.common)
 	c.PodsAPI = (*PodsAPIService)(&c.common)
 	c.RegistrationTokensAPI = (*RegistrationTokensAPIService)(&c.common)
 	c.RequirementsAPI = (*RequirementsAPIService)(&c.common)
+	c.RunnerAPI = (*RunnerAPIService)(&c.common)
+	c.RunnerMachineAPI = (*RunnerMachineAPIService)(&c.common)
+	c.RunnersAPI = (*RunnersAPIService)(&c.common)
+	c.RunnersArtifactsAPI = (*RunnersArtifactsAPIService)(&c.common)
+	c.RunnersCacheAPI = (*RunnersCacheAPIService)(&c.common)
+	c.RunnersCloudKeysAPI = (*RunnersCloudKeysAPIService)(&c.common)
+	c.RunnersConnectionsAPI = (*RunnersConnectionsAPIService)(&c.common)
+	c.RunnersInsightsAPI = (*RunnersInsightsAPIService)(&c.common)
+	c.RunnersInstallsAPI = (*RunnersInstallsAPIService)(&c.common)
+	c.RunnersJobsAPI = (*RunnersJobsAPIService)(&c.common)
+	c.RunnersMachinePolicyAPI = (*RunnersMachinePolicyAPIService)(&c.common)
+	c.RunnersMachinesAPI = (*RunnersMachinesAPIService)(&c.common)
+	c.RunnersPackingHostsAPI = (*RunnersPackingHostsAPIService)(&c.common)
+	c.RunnersPackingPoolsAPI = (*RunnersPackingPoolsAPIService)(&c.common)
+	c.RunnersPoolSettingsAPI = (*RunnersPoolSettingsAPIService)(&c.common)
+	c.RunnersProfilesAPI = (*RunnersProfilesAPIService)(&c.common)
+	c.RunnersUsageAPI = (*RunnersUsageAPIService)(&c.common)
 	c.S3ConnectionsAPI = (*S3ConnectionsAPIService)(&c.common)
 	c.ScheduledAccessAPI = (*ScheduledAccessAPIService)(&c.common)
 	c.SecretsAPI = (*SecretsAPIService)(&c.common)
 	c.SecurityAPI = (*SecurityAPIService)(&c.common)
 	c.SshConnectionsAPI = (*SshConnectionsAPIService)(&c.common)
 	c.SshKeysAPI = (*SshKeysAPIService)(&c.common)
+	c.StacksAPI = (*StacksAPIService)(&c.common)
 	c.TestErrorPreviewAPI = (*TestErrorPreviewAPIService)(&c.common)
 	c.UserAPI = (*UserAPIService)(&c.common)
 	c.VaultAPI = (*VaultAPIService)(&c.common)

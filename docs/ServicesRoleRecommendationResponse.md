@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **DataCoverage** | Pointer to [**ServicesRoleDataCoverage**](ServicesRoleDataCoverage.md) |  | [optional] 
 **MasterCount** | Pointer to **int32** |  | [optional] 
 **MasterCountGuidance** | Pointer to [**[]RolerecsMasterCountOption**](RolerecsMasterCountOption.md) |  | [optional] 
+**NetworkMeasurement** | Pointer to [**ServicesRoleNetworkMeasurement**](ServicesRoleNetworkMeasurement.md) | NetworkMeasurement is the story-144.4 honesty block (ADDITIVE — every pre-existing key stays byte-identical). | [optional] 
 **SupportedMasterCounts** | Pointer to **[]int32** |  | [optional] 
 
 ## Methods
@@ -128,6 +129,31 @@ SetMasterCountGuidance sets MasterCountGuidance field to given value.
 `func (o *ServicesRoleRecommendationResponse) HasMasterCountGuidance() bool`
 
 HasMasterCountGuidance returns a boolean if a field has been set.
+
+### GetNetworkMeasurement
+
+`func (o *ServicesRoleRecommendationResponse) GetNetworkMeasurement() ServicesRoleNetworkMeasurement`
+
+GetNetworkMeasurement returns the NetworkMeasurement field if non-nil, zero value otherwise.
+
+### GetNetworkMeasurementOk
+
+`func (o *ServicesRoleRecommendationResponse) GetNetworkMeasurementOk() (*ServicesRoleNetworkMeasurement, bool)`
+
+GetNetworkMeasurementOk returns a tuple with the NetworkMeasurement field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetNetworkMeasurement
+
+`func (o *ServicesRoleRecommendationResponse) SetNetworkMeasurement(v ServicesRoleNetworkMeasurement)`
+
+SetNetworkMeasurement sets NetworkMeasurement field to given value.
+
+### HasNetworkMeasurement
+
+`func (o *ServicesRoleRecommendationResponse) HasNetworkMeasurement() bool`
+
+HasNetworkMeasurement returns a boolean if a field has been set.
 
 ### GetSupportedMasterCounts
 

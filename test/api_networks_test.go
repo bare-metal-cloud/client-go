@@ -145,6 +145,34 @@ func Test_bmc_NetworksAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test NetworksAPIService PostNetworksIdForceDelete", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.NetworksAPI.PostNetworksIdForceDelete(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test NetworksAPIService PostNetworksIdRetryDelete", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.NetworksAPI.PostNetworksIdRetryDelete(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test NetworksAPIService PostNetworksIdVms", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test

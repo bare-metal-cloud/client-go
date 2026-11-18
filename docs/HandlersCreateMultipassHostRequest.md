@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ClientEnvelope** | Pointer to [**HandlersClientEnvelopeDTO**](HandlersClientEnvelopeDTO.md) | ClientEnvelope is the browser-sealed copy of PrivateSSHKey the server stores (issue #4424, B7); the plaintext is used for the availability probe only and never persisted. | [optional] 
 **Description** | Pointer to **string** |  | [optional] 
 **IpAddress** | Pointer to **string** | Remote connection details (required only if IsLocal is false) | [optional] 
 **IsLocal** | Pointer to **bool** | true for local machine, false for remote | [optional] 
@@ -31,6 +32,31 @@ will change when the set of required properties is changed
 NewHandlersCreateMultipassHostRequestWithDefaults instantiates a new HandlersCreateMultipassHostRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetClientEnvelope
+
+`func (o *HandlersCreateMultipassHostRequest) GetClientEnvelope() HandlersClientEnvelopeDTO`
+
+GetClientEnvelope returns the ClientEnvelope field if non-nil, zero value otherwise.
+
+### GetClientEnvelopeOk
+
+`func (o *HandlersCreateMultipassHostRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool)`
+
+GetClientEnvelopeOk returns a tuple with the ClientEnvelope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClientEnvelope
+
+`func (o *HandlersCreateMultipassHostRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO)`
+
+SetClientEnvelope sets ClientEnvelope field to given value.
+
+### HasClientEnvelope
+
+`func (o *HandlersCreateMultipassHostRequest) HasClientEnvelope() bool`
+
+HasClientEnvelope returns a boolean if a field has been set.
 
 ### GetDescription
 

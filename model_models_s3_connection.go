@@ -20,22 +20,29 @@ var _ MappedNullable = &ModelsS3Connection{}
 
 // ModelsS3Connection struct for ModelsS3Connection
 type ModelsS3Connection struct {
+	// Issue #3576 — Azure Blob (azblob) fields. Account is the storage account name (the endpoint synthesizes from it) and Container is the blob container; both are empty for every other provider. Bucket/region semantics do not apply to azblob rows.
+	Account *string `json:"account,omitempty"`
+	Container *string `json:"container,omitempty"`
 	CreatedAt *string `json:"created_at,omitempty"`
 	CreatedByUserId *int32 `json:"created_by_user_id,omitempty"`
 	// Optional: Default bucket for this connection
 	DefaultBucket *string `json:"default_bucket,omitempty"`
-	// S3 endpoint (auto-filled based on provider, editable for \"other\") AWS: https://s3.<region>.amazonaws.com MinIO: https://<your-minio-host>:9000 Wasabi: https://s3.wasabisys.com GCS: https://storage.googleapis.com
+	// S3 endpoint (auto-filled based on provider, editable for \"other\") AWS: https://s3.<region>.amazonaws.com MinIO: https://<your-minio-host>:9000 Wasabi: https://s3.wasabisys.com GCS: https://storage.googleapis.com azblob: https://<account>.blob.core.windows.net (synthesized at create when the request omits it — the column is not null, so the synthesized value is stored).
 	Endpoint *string `json:"endpoint,omitempty"`
 	Id *int32 `json:"id,omitempty"`
 	// Metadata
 	LastUsedAt *string `json:"last_used_at,omitempty"`
+	// Issues #3576 (azblob) and #3874 (the S3 family) — link mode: when set, the connection carries NO vault credentials of its own (CredentialsEncryptedDataID stays nil) and authenticates at use time through the linked CloudProviderCredential. azblob links an azure credential's service principal (the ACR image-registry shape); the S3 family links an aws-shaped access-key pair (gcs links a gcp credential only when it carries HMAC keys). Accepted pairs: aws/minio/wasabi/other link an aws credential, gcs links a gcp credential, azblob links an azure credential.
+	LinkedCredentialId *int32 `json:"linked_credential_id,omitempty"`
 	// Connection identification
 	Name *string `json:"name,omitempty"`
 	OrgId *int32 `json:"org_id,omitempty"`
 	// Story 104.3: ProjectID is now nullable (*uint) so a row may be org-scoped (ProjectID = nil) instead of project-scoped. The org-vs- project distinction is one branch: `project_id IS NULL` = org-scoped. AutoMigrate applies the NOT NULL → nullable change (dev-stage policy).
 	ProjectId *int32 `json:"project_id,omitempty"`
-	// aws, minio, wasabi, gcs, other
+	// aws, minio, wasabi, gcs, other, azblob
 	Provider *string `json:"provider,omitempty"`
+	// Issue #3874 — the S3-family region. Key-mode rows also carry it inside the sealed credential blob (that is where the probe read it before), but link-mode rows store NO blob of their own, so the region the create validated has nowhere else to live. Explore, the unified test-connection check and the catalog capture read it here. Empty for azblob rows.
+	Region *string `json:"region,omitempty"`
 	UpdatedAt *string `json:"updated_at,omitempty"`
 }
 
@@ -54,6 +61,70 @@ func NewModelsS3Connection() *ModelsS3Connection {
 func NewModelsS3ConnectionWithDefaults() *ModelsS3Connection {
 	this := ModelsS3Connection{}
 	return &this
+}
+
+// GetAccount returns the Account field value if set, zero value otherwise.
+func (o *ModelsS3Connection) GetAccount() string {
+	if o == nil || IsNil(o.Account) {
+		var ret string
+		return ret
+	}
+	return *o.Account
+}
+
+// GetAccountOk returns a tuple with the Account field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsS3Connection) GetAccountOk() (*string, bool) {
+	if o == nil || IsNil(o.Account) {
+		return nil, false
+	}
+	return o.Account, true
+}
+
+// HasAccount returns a boolean if a field has been set.
+func (o *ModelsS3Connection) HasAccount() bool {
+	if o != nil && !IsNil(o.Account) {
+		return true
+	}
+
+	return false
+}
+
+// SetAccount gets a reference to the given string and assigns it to the Account field.
+func (o *ModelsS3Connection) SetAccount(v string) {
+	o.Account = &v
+}
+
+// GetContainer returns the Container field value if set, zero value otherwise.
+func (o *ModelsS3Connection) GetContainer() string {
+	if o == nil || IsNil(o.Container) {
+		var ret string
+		return ret
+	}
+	return *o.Container
+}
+
+// GetContainerOk returns a tuple with the Container field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsS3Connection) GetContainerOk() (*string, bool) {
+	if o == nil || IsNil(o.Container) {
+		return nil, false
+	}
+	return o.Container, true
+}
+
+// HasContainer returns a boolean if a field has been set.
+func (o *ModelsS3Connection) HasContainer() bool {
+	if o != nil && !IsNil(o.Container) {
+		return true
+	}
+
+	return false
+}
+
+// SetContainer gets a reference to the given string and assigns it to the Container field.
+func (o *ModelsS3Connection) SetContainer(v string) {
+	o.Container = &v
 }
 
 // GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
@@ -248,6 +319,38 @@ func (o *ModelsS3Connection) SetLastUsedAt(v string) {
 	o.LastUsedAt = &v
 }
 
+// GetLinkedCredentialId returns the LinkedCredentialId field value if set, zero value otherwise.
+func (o *ModelsS3Connection) GetLinkedCredentialId() int32 {
+	if o == nil || IsNil(o.LinkedCredentialId) {
+		var ret int32
+		return ret
+	}
+	return *o.LinkedCredentialId
+}
+
+// GetLinkedCredentialIdOk returns a tuple with the LinkedCredentialId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsS3Connection) GetLinkedCredentialIdOk() (*int32, bool) {
+	if o == nil || IsNil(o.LinkedCredentialId) {
+		return nil, false
+	}
+	return o.LinkedCredentialId, true
+}
+
+// HasLinkedCredentialId returns a boolean if a field has been set.
+func (o *ModelsS3Connection) HasLinkedCredentialId() bool {
+	if o != nil && !IsNil(o.LinkedCredentialId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLinkedCredentialId gets a reference to the given int32 and assigns it to the LinkedCredentialId field.
+func (o *ModelsS3Connection) SetLinkedCredentialId(v int32) {
+	o.LinkedCredentialId = &v
+}
+
 // GetName returns the Name field value if set, zero value otherwise.
 func (o *ModelsS3Connection) GetName() string {
 	if o == nil || IsNil(o.Name) {
@@ -376,6 +479,38 @@ func (o *ModelsS3Connection) SetProvider(v string) {
 	o.Provider = &v
 }
 
+// GetRegion returns the Region field value if set, zero value otherwise.
+func (o *ModelsS3Connection) GetRegion() string {
+	if o == nil || IsNil(o.Region) {
+		var ret string
+		return ret
+	}
+	return *o.Region
+}
+
+// GetRegionOk returns a tuple with the Region field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsS3Connection) GetRegionOk() (*string, bool) {
+	if o == nil || IsNil(o.Region) {
+		return nil, false
+	}
+	return o.Region, true
+}
+
+// HasRegion returns a boolean if a field has been set.
+func (o *ModelsS3Connection) HasRegion() bool {
+	if o != nil && !IsNil(o.Region) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegion gets a reference to the given string and assigns it to the Region field.
+func (o *ModelsS3Connection) SetRegion(v string) {
+	o.Region = &v
+}
+
 // GetUpdatedAt returns the UpdatedAt field value if set, zero value otherwise.
 func (o *ModelsS3Connection) GetUpdatedAt() string {
 	if o == nil || IsNil(o.UpdatedAt) {
@@ -418,6 +553,12 @@ func (o ModelsS3Connection) MarshalJSON() ([]byte, error) {
 
 func (o ModelsS3Connection) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Account) {
+		toSerialize["account"] = o.Account
+	}
+	if !IsNil(o.Container) {
+		toSerialize["container"] = o.Container
+	}
 	if !IsNil(o.CreatedAt) {
 		toSerialize["created_at"] = o.CreatedAt
 	}
@@ -436,6 +577,9 @@ func (o ModelsS3Connection) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.LastUsedAt) {
 		toSerialize["last_used_at"] = o.LastUsedAt
 	}
+	if !IsNil(o.LinkedCredentialId) {
+		toSerialize["linked_credential_id"] = o.LinkedCredentialId
+	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
@@ -447,6 +591,9 @@ func (o ModelsS3Connection) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Provider) {
 		toSerialize["provider"] = o.Provider
+	}
+	if !IsNil(o.Region) {
+		toSerialize["region"] = o.Region
 	}
 	if !IsNil(o.UpdatedAt) {
 		toSerialize["updated_at"] = o.UpdatedAt

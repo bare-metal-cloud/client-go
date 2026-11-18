@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ClientEnvelope** | Pointer to [**HandlersClientEnvelopeDTO**](HandlersClientEnvelopeDTO.md) | ClientEnvelope is the browser-sealed copy of PrivateSSHKey the server stores (issue #4424, B8); the plaintext is for the live probe only. | [optional] 
 **Description** | Pointer to **string** |  | [optional] 
 **IpAddress** | **string** |  | 
 **IsBastion** | Pointer to **bool** |  | [optional] 
@@ -33,6 +34,31 @@ will change when the set of required properties is changed
 NewHandlersCreateSSHConnectionRequestWithDefaults instantiates a new HandlersCreateSSHConnectionRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetClientEnvelope
+
+`func (o *HandlersCreateSSHConnectionRequest) GetClientEnvelope() HandlersClientEnvelopeDTO`
+
+GetClientEnvelope returns the ClientEnvelope field if non-nil, zero value otherwise.
+
+### GetClientEnvelopeOk
+
+`func (o *HandlersCreateSSHConnectionRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool)`
+
+GetClientEnvelopeOk returns a tuple with the ClientEnvelope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClientEnvelope
+
+`func (o *HandlersCreateSSHConnectionRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO)`
+
+SetClientEnvelope sets ClientEnvelope field to given value.
+
+### HasClientEnvelope
+
+`func (o *HandlersCreateSSHConnectionRequest) HasClientEnvelope() bool`
+
+HasClientEnvelope returns a boolean if a field has been set.
 
 ### GetDescription
 

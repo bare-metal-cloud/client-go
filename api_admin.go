@@ -24,6 +24,436 @@ import (
 type AdminAPI interface {
 
 	/*
+	GetAdminExplorerRequests List explorer access requests (BMC-admin queue)
+
+	The explorer grants ledger's queue snapshot for the
+approver tier: open requests + live grants by default;
+?status= filters (all, requested, active, expired,
+revoked, denied).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAdminExplorerRequestsRequest
+	*/
+	GetAdminExplorerRequests(ctx context.Context) ApiGetAdminExplorerRequestsRequest
+
+	// GetAdminExplorerRequestsExecute executes the request
+	//  @return []HandlersExplorerGrantView
+	GetAdminExplorerRequestsExecute(r ApiGetAdminExplorerRequestsRequest) ([]HandlersExplorerGrantView, *http.Response, error)
+
+	/*
+	GetAdminExplorerViewas View-as session status (BMC-admin)
+
+	The active impersonation session's identity, cluster,
+and expiry — the impersonation banner renders from this.
+A lapsed session reports active=false with expired=true.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAdminExplorerViewasRequest
+	*/
+	GetAdminExplorerViewas(ctx context.Context) ApiGetAdminExplorerViewasRequest
+
+	// GetAdminExplorerViewasExecute executes the request
+	//  @return map[string]interface{}
+	GetAdminExplorerViewasExecute(r ApiGetAdminExplorerViewasRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminAgents List the agent fleet (platform admin)
+
+	The DB-4 fleet read: every agent with org+VM linkage, the
+lifecycle status (all nine model states), and a heartbeat
+reading with explicit provenance — the live Redis connection
+registry first, then agents.last_heartbeat, then unknown.
+A registry TTL-miss is never conflated with unreachable.
+Ordered attention-first: revoked / key_rotation_pending /
+paused lead, then stalest-known-heartbeat first.
+Agent-update epic story 4 additions: each row carries an
+outdated marker (reported version below the signed rail's
+latest, semver compare in Go) and the last update outcome
+(from the audit trail); the envelope carries latest_version
+(absent when the rail is unavailable).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminAgentsRequest
+	*/
+	GetApiV1AdminAgents(ctx context.Context) ApiGetApiV1AdminAgentsRequest
+
+	// GetApiV1AdminAgentsExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminAgentsExecute(r ApiGetApiV1AdminAgentsRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminAgentsId One agent's fleet detail (platform admin)
+
+	The Screen-D drill-in: the agent row (same shape as the
+fleet list), the key history (agent_key_history — fingerprints,
+never raw key bytes), and the tunnel routing state (the
+resolved orchestrator routing key plus the live registry
+entry when one exists).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Agent id
+	@return ApiGetApiV1AdminAgentsIdRequest
+	*/
+	GetApiV1AdminAgentsId(ctx context.Context, id int32) ApiGetApiV1AdminAgentsIdRequest
+
+	// GetApiV1AdminAgentsIdExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminAgentsIdExecute(r ApiGetApiV1AdminAgentsIdRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminAuditEvents List platform audit events (platform admin)
+
+	The platform audit home, plus the impersonated rows of the org
+audit store across orgs (reason visible — platform-admin only).
+Filters: actor_user_id, action, resource_type, outcome,
+subject_org_id, from, to (RFC3339), cursor, limit; and for the
+impersonated query: subject_user_id and reason (substring).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminAuditEventsRequest
+	*/
+	GetApiV1AdminAuditEvents(ctx context.Context) ApiGetApiV1AdminAuditEventsRequest
+
+	// GetApiV1AdminAuditEventsExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminAuditEventsExecute(r ApiGetApiV1AdminAuditEventsRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminBackupOrgsOrgIdEntitlement Get an org's backup entitlement (admin)
+
+	Reads the org's backup entitlement state. Absence of a row is
+the normal state and the FAIL-CLOSED default: row_present=false
+means the org's backup jobs refuse to start until the
+entitlement is enabled.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest
+	*/
+	GetApiV1AdminBackupOrgsOrgIdEntitlement(ctx context.Context, orgId int32) ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest
+
+	// GetApiV1AdminBackupOrgsOrgIdEntitlementExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminBackupOrgsOrgIdEntitlementExecute(r ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminDeployTriage Cross-org failed-deploy triage list (platform admin)
+
+	The failure queue across orgs with attribution (discovery
+DB-7/AN-3): failed jobs from job history, failed deploykit
+install records, and their three optional join legs (job
+history, Temporal visibility, install record) each carrying
+an explicit present/missing/retention_expired badge — rows
+are never dropped for a missing leg. Failed deploys rank
+first; live Temporal legs carry the read-only link to
+/admin/jobs/temporal/{workflow_id}.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminDeployTriageRequest
+	*/
+	GetApiV1AdminDeployTriage(ctx context.Context) ApiGetApiV1AdminDeployTriageRequest
+
+	// GetApiV1AdminDeployTriageExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminDeployTriageExecute(r ApiGetApiV1AdminDeployTriageRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminDeployTriageJobsJobId Job debugger by id across orgs (platform admin)
+
+	One job's status, per-step state, and the per-attempt retry
+timeline with payload and error text, from the TimescaleDB
+step and attempt stores (discovery DB-1). The lookup is by
+id across orgs; the response carries the workflow leg's
+badge and the steps leg's retention badge.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param jobId Job id (UUID)
+	@return ApiGetApiV1AdminDeployTriageJobsJobIdRequest
+	*/
+	GetApiV1AdminDeployTriageJobsJobId(ctx context.Context, jobId string) ApiGetApiV1AdminDeployTriageJobsJobIdRequest
+
+	// GetApiV1AdminDeployTriageJobsJobIdExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminDeployTriageJobsJobIdExecute(r ApiGetApiV1AdminDeployTriageJobsJobIdRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminMonitoringOrgsOrgIdEntitlement Get an org's effective monitoring entitlement (admin)
+
+	Resolves the org's effective subject limit, retention window,
+and grandfather state through the full precedence law
+(explicit rows, the exempt flag, the mode's defaults).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest
+	*/
+	GetApiV1AdminMonitoringOrgsOrgIdEntitlement(ctx context.Context, orgId int32) ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest
+
+	// GetApiV1AdminMonitoringOrgsOrgIdEntitlementExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminMonitoringOrgsOrgIdEntitlementExecute(r ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminOrgs List organizations across orgs (platform admin)
+
+	The Customers explorer org page (mockup Screen B). Searchable
+by org name, organizations.slug, and member user email (all
+indexed); the account's slug is displayed per row but is not a
+search path. Per org: account slug, vault_enabled,
+sudo_window_seconds, member count, cluster and VM footprint
+counts, and the MFA enrolled count. Keyset pagination:
+default page 50, max 200.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminOrgsRequest
+	*/
+	GetApiV1AdminOrgs(ctx context.Context) ApiGetApiV1AdminOrgsRequest
+
+	// GetApiV1AdminOrgsExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminOrgsExecute(r ApiGetApiV1AdminOrgsRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetApiV1AdminOverviewFleet Admin Overview fleet counters (platform admin)
+
+	One counters payload: organizations, users (+ MFA-enrolled subset), clusters, virtual machines (+ unreachable subset), registered vs connected agents. Routine read: no platform audit row.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminOverviewFleetRequest
+	*/
+	GetApiV1AdminOverviewFleet(ctx context.Context) ApiGetApiV1AdminOverviewFleetRequest
+
+	// GetApiV1AdminOverviewFleetExecute executes the request
+	//  @return GetApiV1AdminOverviewFleet200Response
+	GetApiV1AdminOverviewFleetExecute(r ApiGetApiV1AdminOverviewFleetRequest) (*GetApiV1AdminOverviewFleet200Response, *http.Response, error)
+
+	/*
+	GetApiV1AdminOverviewHealth Admin Overview health strip (platform admin)
+
+	One aggregation payload covering PostgreSQL, Redis Sentinel, Temporal, Headscale, agent-service, the workers process, and the Cloudflare edge — every leg always present, degrading loudly. Routine read: no platform audit row.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminOverviewHealthRequest
+	*/
+	GetApiV1AdminOverviewHealth(ctx context.Context) ApiGetApiV1AdminOverviewHealthRequest
+
+	// GetApiV1AdminOverviewHealthExecute executes the request
+	//  @return GetApiV1AdminOverviewHealth200Response
+	GetApiV1AdminOverviewHealthExecute(r ApiGetApiV1AdminOverviewHealthRequest) (*GetApiV1AdminOverviewHealth200Response, *http.Response, error)
+
+	/*
+	GetApiV1AdminOverviewSensors Admin Overview sensors row (platform admin)
+
+	The full platform_sensors read plus watchdog staleness, VM-watchdog bell counts, metrics-collector freshness, and the dead-man candidate count. Routine read: no platform audit row.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminOverviewSensorsRequest
+	*/
+	GetApiV1AdminOverviewSensors(ctx context.Context) ApiGetApiV1AdminOverviewSensorsRequest
+
+	// GetApiV1AdminOverviewSensorsExecute executes the request
+	//  @return GetApiV1AdminOverviewSensors200Response
+	GetApiV1AdminOverviewSensorsExecute(r ApiGetApiV1AdminOverviewSensorsRequest) (*GetApiV1AdminOverviewSensors200Response, *http.Response, error)
+
+	/*
+	GetApiV1AdminOverviewWork Admin Overview work-in-flight board (platform admin)
+
+	Asynq per-queue state (deep-linking /admin/jobs), Temporal open workflow counts per task queue, and the dead-man sweep's stuck-transition candidates. Routine read: no platform audit row.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminOverviewWorkRequest
+	*/
+	GetApiV1AdminOverviewWork(ctx context.Context) ApiGetApiV1AdminOverviewWorkRequest
+
+	// GetApiV1AdminOverviewWorkExecute executes the request
+	//  @return GetApiV1AdminOverviewWork200Response
+	GetApiV1AdminOverviewWorkExecute(r ApiGetApiV1AdminOverviewWorkRequest) (*GetApiV1AdminOverviewWork200Response, *http.Response, error)
+
+	/*
+	GetApiV1AdminPlatformRunnerImages List the base image catalogue (platform admin)
+
+	The platform's bootable OS image catalogue, image_id ASC: id, version,
+arch, digest (empty is legal in v1 and reported honestly), the preinstalled
+software as an array, and releaseState (available|archived) derived from the
+row's archived flag. Platform data on the admin platform surface — no org
+scoping exists on the catalogue.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminPlatformRunnerImagesRequest
+	*/
+	GetApiV1AdminPlatformRunnerImages(ctx context.Context) ApiGetApiV1AdminPlatformRunnerImagesRequest
+
+	// GetApiV1AdminPlatformRunnerImagesExecute executes the request
+	//  @return HandlersRunnerImagesResponse
+	GetApiV1AdminPlatformRunnerImagesExecute(r ApiGetApiV1AdminPlatformRunnerImagesRequest) (*HandlersRunnerImagesResponse, *http.Response, error)
+
+	/*
+	GetApiV1AdminUsers List users across orgs (platform admin)
+
+	The Customers explorer user list. Status is the derived set
+that exists on the model — verified, mfa_enrolled, system (no
+locked/disabled flag is invented). Per user: org memberships
+with role, and last login derived from the newest refresh
+token. Search matches users.email (indexed) only. Keyset
+pagination: default page 50, max 200.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AdminUsersRequest
+	*/
+	GetApiV1AdminUsers(ctx context.Context) ApiGetApiV1AdminUsersRequest
+
+	// GetApiV1AdminUsersExecute executes the request
+	//  @return map[string]interface{}
+	GetApiV1AdminUsersExecute(r ApiGetApiV1AdminUsersRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostAdminExplorerGrantsIdApprove Approve an explorer access request (BMC-admin)
+
+	Activates the pending request as a 24h ad-hoc grant.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Grant ID
+	@return ApiPostAdminExplorerGrantsIdApproveRequest
+	*/
+	PostAdminExplorerGrantsIdApprove(ctx context.Context, id int32) ApiPostAdminExplorerGrantsIdApproveRequest
+
+	// PostAdminExplorerGrantsIdApproveExecute executes the request
+	//  @return HandlersExplorerGrantView
+	PostAdminExplorerGrantsIdApproveExecute(r ApiPostAdminExplorerGrantsIdApproveRequest) (*HandlersExplorerGrantView, *http.Response, error)
+
+	/*
+	PostAdminExplorerGrantsIdDeny Deny an explorer access request (BMC-admin)
+
+	Terminals the pending request as denied (re-requestable).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Grant ID
+	@return ApiPostAdminExplorerGrantsIdDenyRequest
+	*/
+	PostAdminExplorerGrantsIdDeny(ctx context.Context, id int32) ApiPostAdminExplorerGrantsIdDenyRequest
+
+	// PostAdminExplorerGrantsIdDenyExecute executes the request
+	//  @return HandlersExplorerGrantView
+	PostAdminExplorerGrantsIdDenyExecute(r ApiPostAdminExplorerGrantsIdDenyRequest) (*HandlersExplorerGrantView, *http.Response, error)
+
+	/*
+	PostAdminExplorerGrantsIdRevoke Revoke an active explorer grant (BMC-admin)
+
+	Terminals an ACTIVE grant as revoked; the watch gate
+refuses the user's next connection.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Grant ID
+	@return ApiPostAdminExplorerGrantsIdRevokeRequest
+	*/
+	PostAdminExplorerGrantsIdRevoke(ctx context.Context, id int32) ApiPostAdminExplorerGrantsIdRevokeRequest
+
+	// PostAdminExplorerGrantsIdRevokeExecute executes the request
+	//  @return HandlersExplorerGrantView
+	PostAdminExplorerGrantsIdRevokeExecute(r ApiPostAdminExplorerGrantsIdRevokeRequest) (*HandlersExplorerGrantView, *http.Response, error)
+
+	/*
+	PostAdminExplorerViewas Start a view-as-client session (BMC-admin)
+
+	Starts a time-boxed impersonation session over the K8s
+View: the admin's explorer data plane resolves
+authorization AS the impersonated org/user (never more).
+A reason is required; a previous session is superseded
+with its own audited end.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPostAdminExplorerViewasRequest
+	*/
+	PostAdminExplorerViewas(ctx context.Context) ApiPostAdminExplorerViewasRequest
+
+	// PostAdminExplorerViewasExecute executes the request
+	//  @return map[string]interface{}
+	PostAdminExplorerViewasExecute(r ApiPostAdminExplorerViewasRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostAdminExplorerViewasStop Stop the view-as-client session (BMC-admin)
+
+	Ends the admin's active impersonation session and lands
+its audited end row. Idempotent.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPostAdminExplorerViewasStopRequest
+	*/
+	PostAdminExplorerViewasStop(ctx context.Context) ApiPostAdminExplorerViewasStopRequest
+
+	// PostAdminExplorerViewasStopExecute executes the request
+	//  @return map[string]interface{}
+	PostAdminExplorerViewasStopExecute(r ApiPostAdminExplorerViewasStopRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostAdminFeatureGates Flip a feature gate (BMC-admin)
+
+	Set one feature's gate per (org, project). The state row and the audit row commit as one transaction; an unchanged flip is a silent no-op that still lands an audit row; a reason is required.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPostAdminFeatureGatesRequest
+	*/
+	PostAdminFeatureGates(ctx context.Context) ApiPostAdminFeatureGatesRequest
+
+	// PostAdminFeatureGatesExecute executes the request
+	//  @return HandlersFeatureGateFlipResponse
+	PostAdminFeatureGatesExecute(r ApiPostAdminFeatureGatesRequest) (*HandlersFeatureGateFlipResponse, *http.Response, error)
+
+	/*
+	PostAdminRunnerReservations Grant a hosted-runner reservation (BMC-admin)
+
+	Provision N org-dedicated VMs for the paid fast-lane: instant dispatch, wiped between jobs.
+Reserved-VM-seconds meter from the grant; a grant is at most 64 VMs.
+The audit row commits BEFORE the action and fails closed. A duplicate grant refuses 409; a reason is required.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPostAdminRunnerReservationsRequest
+	*/
+	PostAdminRunnerReservations(ctx context.Context) ApiPostAdminRunnerReservationsRequest
+
+	// PostAdminRunnerReservationsExecute executes the request
+	//  @return HandlersRunnerReservationResponse
+	PostAdminRunnerReservationsExecute(r ApiPostAdminRunnerReservationsRequest) (*HandlersRunnerReservationResponse, *http.Response, error)
+
+	/*
+	PostAdminRunnerReservationsOrgIdRevoke Revoke a hosted-runner reservation (BMC-admin)
+
+	Start the drain lifecycle: the running job finishes, no new dispatch lands on the reserved VMs.
+The VMs are destroyed after the last job.
+The VMs are destroyed after their last job; reserved-VM-seconds metering stops at each destroy.
+An org without a reservation refuses 404; the audit row commits BEFORE the action and fails closed.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId The org id
+	@return ApiPostAdminRunnerReservationsOrgIdRevokeRequest
+	*/
+	PostAdminRunnerReservationsOrgIdRevoke(ctx context.Context, orgId int32) ApiPostAdminRunnerReservationsOrgIdRevokeRequest
+
+	// PostAdminRunnerReservationsOrgIdRevokeExecute executes the request
+	//  @return HandlersRunnerReservationResponse
+	PostAdminRunnerReservationsOrgIdRevokeExecute(r ApiPostAdminRunnerReservationsOrgIdRevokeRequest) (*HandlersRunnerReservationResponse, *http.Response, error)
+
+	/*
+	PostApiV1AdminAgentsIdForceDelete Force-delete an agent (platform admin) — revoke + archive
+
+	The dashboard force-delete: runs the 1:1 pinned-pair unwind
+(degrades every replication pair holding the agent, releases
+its PENDING transfer jobs) BEFORE delegating to the revoke
+kill-switch core. There is NO row hard delete: status=revoked
+is terminal and the row stays as audit trail; reinstalling a
+force-deleted agent means fresh enrollment as a NEW record.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Agent DB id
+	@return ApiPostApiV1AdminAgentsIdForceDeleteRequest
+	*/
+	PostApiV1AdminAgentsIdForceDelete(ctx context.Context, id int32) ApiPostApiV1AdminAgentsIdForceDeleteRequest
+
+	// PostApiV1AdminAgentsIdForceDeleteExecute executes the request
+	//  @return map[string]interface{}
+	PostApiV1AdminAgentsIdForceDeleteExecute(r ApiPostApiV1AdminAgentsIdForceDeleteRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
 	PostApiV1AdminUsersIdMfaDisable Admin force-disable user MFA
 
 	Force-disable MFA for a user. Requires admin role. No TOTP code needed.
@@ -37,10 +467,3678 @@ type AdminAPI interface {
 	// PostApiV1AdminUsersIdMfaDisableExecute executes the request
 	//  @return HandlersMFADisableResponse
 	PostApiV1AdminUsersIdMfaDisableExecute(r ApiPostApiV1AdminUsersIdMfaDisableRequest) (*HandlersMFADisableResponse, *http.Response, error)
+
+	/*
+	PutApiV1AdminBackupOrgsOrgIdEntitlement Set or clear an org's backup entitlement (admin)
+
+	The admin set-path over the per-org backup entitlement
+(issue #4028): active=true allows the org's backup jobs to
+start (the backup rental seam's authorization gate answers
+from this row), active=false clears it. Admin-set AND
+admin-cleared only; every transition writes a
+platform_audit_events row (who, whom, when).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest
+	*/
+	PutApiV1AdminBackupOrgsOrgIdEntitlement(ctx context.Context, orgId int32) ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest
+
+	// PutApiV1AdminBackupOrgsOrgIdEntitlementExecute executes the request
+	//  @return map[string]interface{}
+	PutApiV1AdminBackupOrgsOrgIdEntitlementExecute(r ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PutApiV1AdminMonitoringOrgsOrgIdExemption Set or clear an org's enforcement exemption (admin)
+
+	The boundary-based grandfathering mechanics (story AC4,
+round-3 fold 7): the flag is admin-set AND admin-cleared
+only; every change writes a platform_audit_events row
+(who, whom, when). Clearing is the plan-change/renewal
+boundary — enforced tiers apply from it.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest
+	*/
+	PutApiV1AdminMonitoringOrgsOrgIdExemption(ctx context.Context, orgId int32) ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest
+
+	// PutApiV1AdminMonitoringOrgsOrgIdExemptionExecute executes the request
+	//  @return map[string]interface{}
+	PutApiV1AdminMonitoringOrgsOrgIdExemptionExecute(r ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PutApiV1AdminMonitoringOrgsOrgIdLimits Set an org's monitoring limits (admin set-path)
+
+	Upserts the org's monitoring_subjects and
+metrics_retention_days quota rows (the SetClusterLimit
+precedent, org-row shape project_id=0). subjects must be a
+positive count; unlimited is the ABSENCE of a row.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest
+	*/
+	PutApiV1AdminMonitoringOrgsOrgIdLimits(ctx context.Context, orgId int32) ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest
+
+	// PutApiV1AdminMonitoringOrgsOrgIdLimitsExecute executes the request
+	//  @return map[string]interface{}
+	PutApiV1AdminMonitoringOrgsOrgIdLimitsExecute(r ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest) (map[string]interface{}, *http.Response, error)
 }
 
 // AdminAPIService AdminAPI service
 type AdminAPIService service
+
+type ApiGetAdminExplorerRequestsRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	status *string
+}
+
+// pending (default) | requested | active | expired | revoked | denied | all
+func (r ApiGetAdminExplorerRequestsRequest) Status(status string) ApiGetAdminExplorerRequestsRequest {
+	r.status = &status
+	return r
+}
+
+func (r ApiGetAdminExplorerRequestsRequest) Execute() ([]HandlersExplorerGrantView, *http.Response, error) {
+	return r.ApiService.GetAdminExplorerRequestsExecute(r)
+}
+
+/*
+GetAdminExplorerRequests List explorer access requests (BMC-admin queue)
+
+The explorer grants ledger's queue snapshot for the
+approver tier: open requests + live grants by default;
+?status= filters (all, requested, active, expired,
+revoked, denied).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetAdminExplorerRequestsRequest
+*/
+func (a *AdminAPIService) GetAdminExplorerRequests(ctx context.Context) ApiGetAdminExplorerRequestsRequest {
+	return ApiGetAdminExplorerRequestsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return []HandlersExplorerGrantView
+func (a *AdminAPIService) GetAdminExplorerRequestsExecute(r ApiGetAdminExplorerRequestsRequest) ([]HandlersExplorerGrantView, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []HandlersExplorerGrantView
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetAdminExplorerRequests")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/explorer/requests"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.status != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "status", r.status, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetAdminExplorerViewasRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+}
+
+func (r ApiGetAdminExplorerViewasRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetAdminExplorerViewasExecute(r)
+}
+
+/*
+GetAdminExplorerViewas View-as session status (BMC-admin)
+
+The active impersonation session's identity, cluster,
+and expiry — the impersonation banner renders from this.
+A lapsed session reports active=false with expired=true.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetAdminExplorerViewasRequest
+*/
+func (a *AdminAPIService) GetAdminExplorerViewas(ctx context.Context) ApiGetAdminExplorerViewasRequest {
+	return ApiGetAdminExplorerViewasRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetAdminExplorerViewasExecute(r ApiGetAdminExplorerViewasRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetAdminExplorerViewas")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/explorer/viewas"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminAgentsRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	page *int32
+	limit *int32
+	status *string
+	search *string
+}
+
+// 1-based page (default 1)
+func (r ApiGetApiV1AdminAgentsRequest) Page(page int32) ApiGetApiV1AdminAgentsRequest {
+	r.page = &page
+	return r
+}
+
+// Page size (default 50, max 200)
+func (r ApiGetApiV1AdminAgentsRequest) Limit(limit int32) ApiGetApiV1AdminAgentsRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter by one lifecycle state
+func (r ApiGetApiV1AdminAgentsRequest) Status(status string) ApiGetApiV1AdminAgentsRequest {
+	r.status = &status
+	return r
+}
+
+// Match org name, VM name, routing key, or agent id
+func (r ApiGetApiV1AdminAgentsRequest) Search(search string) ApiGetApiV1AdminAgentsRequest {
+	r.search = &search
+	return r
+}
+
+func (r ApiGetApiV1AdminAgentsRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminAgentsExecute(r)
+}
+
+/*
+GetApiV1AdminAgents List the agent fleet (platform admin)
+
+The DB-4 fleet read: every agent with org+VM linkage, the
+lifecycle status (all nine model states), and a heartbeat
+reading with explicit provenance — the live Redis connection
+registry first, then agents.last_heartbeat, then unknown.
+A registry TTL-miss is never conflated with unreachable.
+Ordered attention-first: revoked / key_rotation_pending /
+paused lead, then stalest-known-heartbeat first.
+Agent-update epic story 4 additions: each row carries an
+outdated marker (reported version below the signed rail's
+latest, semver compare in Go) and the last update outcome
+(from the audit trail); the envelope carries latest_version
+(absent when the rail is unavailable).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminAgentsRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminAgents(ctx context.Context) ApiGetApiV1AdminAgentsRequest {
+	return ApiGetApiV1AdminAgentsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminAgentsExecute(r ApiGetApiV1AdminAgentsRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminAgents")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/agents"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.page != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "page", r.page, "", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	if r.status != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "status", r.status, "", "")
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminAgentsIdRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	id int32
+}
+
+func (r ApiGetApiV1AdminAgentsIdRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminAgentsIdExecute(r)
+}
+
+/*
+GetApiV1AdminAgentsId One agent's fleet detail (platform admin)
+
+The Screen-D drill-in: the agent row (same shape as the
+fleet list), the key history (agent_key_history — fingerprints,
+never raw key bytes), and the tunnel routing state (the
+resolved orchestrator routing key plus the live registry
+entry when one exists).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Agent id
+ @return ApiGetApiV1AdminAgentsIdRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminAgentsId(ctx context.Context, id int32) ApiGetApiV1AdminAgentsIdRequest {
+	return ApiGetApiV1AdminAgentsIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminAgentsIdExecute(r ApiGetApiV1AdminAgentsIdRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminAgentsId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/agents/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminAuditEventsRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	actorUserId *int32
+	action *string
+	resourceType *string
+	outcome *string
+	subjectOrgId *int32
+	subjectUserId *int32
+	reason *string
+	from *string
+	to *string
+	cursor *string
+	limit *int32
+}
+
+// Filter by actor user id (both queries)
+func (r ApiGetApiV1AdminAuditEventsRequest) ActorUserId(actorUserId int32) ApiGetApiV1AdminAuditEventsRequest {
+	r.actorUserId = &actorUserId
+	return r
+}
+
+// Filter by action
+func (r ApiGetApiV1AdminAuditEventsRequest) Action(action string) ApiGetApiV1AdminAuditEventsRequest {
+	r.action = &action
+	return r
+}
+
+// Filter by resource_type
+func (r ApiGetApiV1AdminAuditEventsRequest) ResourceType(resourceType string) ApiGetApiV1AdminAuditEventsRequest {
+	r.resourceType = &resourceType
+	return r
+}
+
+// Filter by outcome (success|error|denied|unconfirmed)
+func (r ApiGetApiV1AdminAuditEventsRequest) Outcome(outcome string) ApiGetApiV1AdminAuditEventsRequest {
+	r.outcome = &outcome
+	return r
+}
+
+// Filter by subject org (platform rows)
+func (r ApiGetApiV1AdminAuditEventsRequest) SubjectOrgId(subjectOrgId int32) ApiGetApiV1AdminAuditEventsRequest {
+	r.subjectOrgId = &subjectOrgId
+	return r
+}
+
+// Filter by impersonated subject (impersonated rows)
+func (r ApiGetApiV1AdminAuditEventsRequest) SubjectUserId(subjectUserId int32) ApiGetApiV1AdminAuditEventsRequest {
+	r.subjectUserId = &subjectUserId
+	return r
+}
+
+// Substring match on the impersonated reason
+func (r ApiGetApiV1AdminAuditEventsRequest) Reason(reason string) ApiGetApiV1AdminAuditEventsRequest {
+	r.reason = &reason
+	return r
+}
+
+// Inclusive lower bound (RFC3339)
+func (r ApiGetApiV1AdminAuditEventsRequest) From(from string) ApiGetApiV1AdminAuditEventsRequest {
+	r.from = &from
+	return r
+}
+
+// Inclusive upper bound (RFC3339)
+func (r ApiGetApiV1AdminAuditEventsRequest) To(to string) ApiGetApiV1AdminAuditEventsRequest {
+	r.to = &to
+	return r
+}
+
+// Opaque pagination cursor (platform query)
+func (r ApiGetApiV1AdminAuditEventsRequest) Cursor(cursor string) ApiGetApiV1AdminAuditEventsRequest {
+	r.cursor = &cursor
+	return r
+}
+
+// Page size (default 50, max 200)
+func (r ApiGetApiV1AdminAuditEventsRequest) Limit(limit int32) ApiGetApiV1AdminAuditEventsRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetApiV1AdminAuditEventsRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminAuditEventsExecute(r)
+}
+
+/*
+GetApiV1AdminAuditEvents List platform audit events (platform admin)
+
+The platform audit home, plus the impersonated rows of the org
+audit store across orgs (reason visible — platform-admin only).
+Filters: actor_user_id, action, resource_type, outcome,
+subject_org_id, from, to (RFC3339), cursor, limit; and for the
+impersonated query: subject_user_id and reason (substring).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminAuditEventsRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminAuditEvents(ctx context.Context) ApiGetApiV1AdminAuditEventsRequest {
+	return ApiGetApiV1AdminAuditEventsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminAuditEventsExecute(r ApiGetApiV1AdminAuditEventsRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminAuditEvents")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/audit-events"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.actorUserId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "actor_user_id", r.actorUserId, "", "")
+	}
+	if r.action != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "action", r.action, "", "")
+	}
+	if r.resourceType != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "resource_type", r.resourceType, "", "")
+	}
+	if r.outcome != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "outcome", r.outcome, "", "")
+	}
+	if r.subjectOrgId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "subject_org_id", r.subjectOrgId, "", "")
+	}
+	if r.subjectUserId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "subject_user_id", r.subjectUserId, "", "")
+	}
+	if r.reason != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "reason", r.reason, "", "")
+	}
+	if r.from != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "from", r.from, "", "")
+	}
+	if r.to != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "to", r.to, "", "")
+	}
+	if r.cursor != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "cursor", r.cursor, "", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	orgId int32
+}
+
+func (r ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminBackupOrgsOrgIdEntitlementExecute(r)
+}
+
+/*
+GetApiV1AdminBackupOrgsOrgIdEntitlement Get an org's backup entitlement (admin)
+
+Reads the org's backup entitlement state. Absence of a row is
+the normal state and the FAIL-CLOSED default: row_present=false
+means the org's backup jobs refuse to start until the
+entitlement is enabled.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminBackupOrgsOrgIdEntitlement(ctx context.Context, orgId int32) ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest {
+	return ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminBackupOrgsOrgIdEntitlementExecute(r ApiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminBackupOrgsOrgIdEntitlement")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/backup/orgs/{org_id}/entitlement"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminDeployTriageRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	limit *int32
+}
+
+// Page size (default 100, max 500)
+func (r ApiGetApiV1AdminDeployTriageRequest) Limit(limit int32) ApiGetApiV1AdminDeployTriageRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetApiV1AdminDeployTriageRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminDeployTriageExecute(r)
+}
+
+/*
+GetApiV1AdminDeployTriage Cross-org failed-deploy triage list (platform admin)
+
+The failure queue across orgs with attribution (discovery
+DB-7/AN-3): failed jobs from job history, failed deploykit
+install records, and their three optional join legs (job
+history, Temporal visibility, install record) each carrying
+an explicit present/missing/retention_expired badge — rows
+are never dropped for a missing leg. Failed deploys rank
+first; live Temporal legs carry the read-only link to
+/admin/jobs/temporal/{workflow_id}.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminDeployTriageRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminDeployTriage(ctx context.Context) ApiGetApiV1AdminDeployTriageRequest {
+	return ApiGetApiV1AdminDeployTriageRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminDeployTriageExecute(r ApiGetApiV1AdminDeployTriageRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminDeployTriage")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/deploy-triage"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminDeployTriageJobsJobIdRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	jobId string
+}
+
+func (r ApiGetApiV1AdminDeployTriageJobsJobIdRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminDeployTriageJobsJobIdExecute(r)
+}
+
+/*
+GetApiV1AdminDeployTriageJobsJobId Job debugger by id across orgs (platform admin)
+
+One job's status, per-step state, and the per-attempt retry
+timeline with payload and error text, from the TimescaleDB
+step and attempt stores (discovery DB-1). The lookup is by
+id across orgs; the response carries the workflow leg's
+badge and the steps leg's retention badge.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param jobId Job id (UUID)
+ @return ApiGetApiV1AdminDeployTriageJobsJobIdRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminDeployTriageJobsJobId(ctx context.Context, jobId string) ApiGetApiV1AdminDeployTriageJobsJobIdRequest {
+	return ApiGetApiV1AdminDeployTriageJobsJobIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		jobId: jobId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminDeployTriageJobsJobIdExecute(r ApiGetApiV1AdminDeployTriageJobsJobIdRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminDeployTriageJobsJobId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/deploy-triage/jobs/{job_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"job_id"+"}", url.PathEscape(parameterValueToString(r.jobId, "jobId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	orgId int32
+}
+
+func (r ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminMonitoringOrgsOrgIdEntitlementExecute(r)
+}
+
+/*
+GetApiV1AdminMonitoringOrgsOrgIdEntitlement Get an org's effective monitoring entitlement (admin)
+
+Resolves the org's effective subject limit, retention window,
+and grandfather state through the full precedence law
+(explicit rows, the exempt flag, the mode's defaults).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminMonitoringOrgsOrgIdEntitlement(ctx context.Context, orgId int32) ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest {
+	return ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminMonitoringOrgsOrgIdEntitlementExecute(r ApiGetApiV1AdminMonitoringOrgsOrgIdEntitlementRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminMonitoringOrgsOrgIdEntitlement")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/monitoring/orgs/{org_id}/entitlement"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminOrgsRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	search *string
+	cursor *string
+	limit *int32
+}
+
+// Substring search (org name, org slug, member email)
+func (r ApiGetApiV1AdminOrgsRequest) Search(search string) ApiGetApiV1AdminOrgsRequest {
+	r.search = &search
+	return r
+}
+
+// Opaque keyset cursor
+func (r ApiGetApiV1AdminOrgsRequest) Cursor(cursor string) ApiGetApiV1AdminOrgsRequest {
+	r.cursor = &cursor
+	return r
+}
+
+// Page size (default 50, max 200)
+func (r ApiGetApiV1AdminOrgsRequest) Limit(limit int32) ApiGetApiV1AdminOrgsRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetApiV1AdminOrgsRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminOrgsExecute(r)
+}
+
+/*
+GetApiV1AdminOrgs List organizations across orgs (platform admin)
+
+The Customers explorer org page (mockup Screen B). Searchable
+by org name, organizations.slug, and member user email (all
+indexed); the account's slug is displayed per row but is not a
+search path. Per org: account slug, vault_enabled,
+sudo_window_seconds, member count, cluster and VM footprint
+counts, and the MFA enrolled count. Keyset pagination:
+default page 50, max 200.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminOrgsRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminOrgs(ctx context.Context) ApiGetApiV1AdminOrgsRequest {
+	return ApiGetApiV1AdminOrgsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminOrgsExecute(r ApiGetApiV1AdminOrgsRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminOrgs")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/orgs"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "", "")
+	}
+	if r.cursor != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "cursor", r.cursor, "", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminOverviewFleetRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+}
+
+func (r ApiGetApiV1AdminOverviewFleetRequest) Execute() (*GetApiV1AdminOverviewFleet200Response, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminOverviewFleetExecute(r)
+}
+
+/*
+GetApiV1AdminOverviewFleet Admin Overview fleet counters (platform admin)
+
+One counters payload: organizations, users (+ MFA-enrolled subset), clusters, virtual machines (+ unreachable subset), registered vs connected agents. Routine read: no platform audit row.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminOverviewFleetRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminOverviewFleet(ctx context.Context) ApiGetApiV1AdminOverviewFleetRequest {
+	return ApiGetApiV1AdminOverviewFleetRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return GetApiV1AdminOverviewFleet200Response
+func (a *AdminAPIService) GetApiV1AdminOverviewFleetExecute(r ApiGetApiV1AdminOverviewFleetRequest) (*GetApiV1AdminOverviewFleet200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetApiV1AdminOverviewFleet200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminOverviewFleet")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/overview/fleet"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminOverviewHealthRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+}
+
+func (r ApiGetApiV1AdminOverviewHealthRequest) Execute() (*GetApiV1AdminOverviewHealth200Response, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminOverviewHealthExecute(r)
+}
+
+/*
+GetApiV1AdminOverviewHealth Admin Overview health strip (platform admin)
+
+One aggregation payload covering PostgreSQL, Redis Sentinel, Temporal, Headscale, agent-service, the workers process, and the Cloudflare edge — every leg always present, degrading loudly. Routine read: no platform audit row.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminOverviewHealthRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminOverviewHealth(ctx context.Context) ApiGetApiV1AdminOverviewHealthRequest {
+	return ApiGetApiV1AdminOverviewHealthRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return GetApiV1AdminOverviewHealth200Response
+func (a *AdminAPIService) GetApiV1AdminOverviewHealthExecute(r ApiGetApiV1AdminOverviewHealthRequest) (*GetApiV1AdminOverviewHealth200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetApiV1AdminOverviewHealth200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminOverviewHealth")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/overview/health"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminOverviewSensorsRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+}
+
+func (r ApiGetApiV1AdminOverviewSensorsRequest) Execute() (*GetApiV1AdminOverviewSensors200Response, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminOverviewSensorsExecute(r)
+}
+
+/*
+GetApiV1AdminOverviewSensors Admin Overview sensors row (platform admin)
+
+The full platform_sensors read plus watchdog staleness, VM-watchdog bell counts, metrics-collector freshness, and the dead-man candidate count. Routine read: no platform audit row.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminOverviewSensorsRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminOverviewSensors(ctx context.Context) ApiGetApiV1AdminOverviewSensorsRequest {
+	return ApiGetApiV1AdminOverviewSensorsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return GetApiV1AdminOverviewSensors200Response
+func (a *AdminAPIService) GetApiV1AdminOverviewSensorsExecute(r ApiGetApiV1AdminOverviewSensorsRequest) (*GetApiV1AdminOverviewSensors200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetApiV1AdminOverviewSensors200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminOverviewSensors")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/overview/sensors"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminOverviewWorkRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+}
+
+func (r ApiGetApiV1AdminOverviewWorkRequest) Execute() (*GetApiV1AdminOverviewWork200Response, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminOverviewWorkExecute(r)
+}
+
+/*
+GetApiV1AdminOverviewWork Admin Overview work-in-flight board (platform admin)
+
+Asynq per-queue state (deep-linking /admin/jobs), Temporal open workflow counts per task queue, and the dead-man sweep's stuck-transition candidates. Routine read: no platform audit row.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminOverviewWorkRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminOverviewWork(ctx context.Context) ApiGetApiV1AdminOverviewWorkRequest {
+	return ApiGetApiV1AdminOverviewWorkRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return GetApiV1AdminOverviewWork200Response
+func (a *AdminAPIService) GetApiV1AdminOverviewWorkExecute(r ApiGetApiV1AdminOverviewWorkRequest) (*GetApiV1AdminOverviewWork200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *GetApiV1AdminOverviewWork200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminOverviewWork")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/overview/work"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminPlatformRunnerImagesRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+}
+
+func (r ApiGetApiV1AdminPlatformRunnerImagesRequest) Execute() (*HandlersRunnerImagesResponse, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminPlatformRunnerImagesExecute(r)
+}
+
+/*
+GetApiV1AdminPlatformRunnerImages List the base image catalogue (platform admin)
+
+The platform's bootable OS image catalogue, image_id ASC: id, version,
+arch, digest (empty is legal in v1 and reported honestly), the preinstalled
+software as an array, and releaseState (available|archived) derived from the
+row's archived flag. Platform data on the admin platform surface — no org
+scoping exists on the catalogue.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminPlatformRunnerImagesRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminPlatformRunnerImages(ctx context.Context) ApiGetApiV1AdminPlatformRunnerImagesRequest {
+	return ApiGetApiV1AdminPlatformRunnerImagesRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersRunnerImagesResponse
+func (a *AdminAPIService) GetApiV1AdminPlatformRunnerImagesExecute(r ApiGetApiV1AdminPlatformRunnerImagesRequest) (*HandlersRunnerImagesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersRunnerImagesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminPlatformRunnerImages")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/platform/runner-images"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetApiV1AdminUsersRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	search *string
+	cursor *string
+	limit *int32
+}
+
+// Substring search on user email
+func (r ApiGetApiV1AdminUsersRequest) Search(search string) ApiGetApiV1AdminUsersRequest {
+	r.search = &search
+	return r
+}
+
+// Opaque keyset cursor
+func (r ApiGetApiV1AdminUsersRequest) Cursor(cursor string) ApiGetApiV1AdminUsersRequest {
+	r.cursor = &cursor
+	return r
+}
+
+// Page size (default 50, max 200)
+func (r ApiGetApiV1AdminUsersRequest) Limit(limit int32) ApiGetApiV1AdminUsersRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetApiV1AdminUsersRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetApiV1AdminUsersExecute(r)
+}
+
+/*
+GetApiV1AdminUsers List users across orgs (platform admin)
+
+The Customers explorer user list. Status is the derived set
+that exists on the model — verified, mfa_enrolled, system (no
+locked/disabled flag is invented). Per user: org memberships
+with role, and last login derived from the newest refresh
+token. Search matches users.email (indexed) only. Keyset
+pagination: default page 50, max 200.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AdminUsersRequest
+*/
+func (a *AdminAPIService) GetApiV1AdminUsers(ctx context.Context) ApiGetApiV1AdminUsersRequest {
+	return ApiGetApiV1AdminUsersRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) GetApiV1AdminUsersExecute(r ApiGetApiV1AdminUsersRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.GetApiV1AdminUsers")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/users"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "", "")
+	}
+	if r.cursor != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "cursor", r.cursor, "", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminExplorerGrantsIdApproveRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	id int32
+	body *map[string]interface{}
+}
+
+// {\\
+func (r ApiPostAdminExplorerGrantsIdApproveRequest) Body(body map[string]interface{}) ApiPostAdminExplorerGrantsIdApproveRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostAdminExplorerGrantsIdApproveRequest) Execute() (*HandlersExplorerGrantView, *http.Response, error) {
+	return r.ApiService.PostAdminExplorerGrantsIdApproveExecute(r)
+}
+
+/*
+PostAdminExplorerGrantsIdApprove Approve an explorer access request (BMC-admin)
+
+Activates the pending request as a 24h ad-hoc grant.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Grant ID
+ @return ApiPostAdminExplorerGrantsIdApproveRequest
+*/
+func (a *AdminAPIService) PostAdminExplorerGrantsIdApprove(ctx context.Context, id int32) ApiPostAdminExplorerGrantsIdApproveRequest {
+	return ApiPostAdminExplorerGrantsIdApproveRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersExplorerGrantView
+func (a *AdminAPIService) PostAdminExplorerGrantsIdApproveExecute(r ApiPostAdminExplorerGrantsIdApproveRequest) (*HandlersExplorerGrantView, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersExplorerGrantView
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminExplorerGrantsIdApprove")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/explorer/grants/{id}/approve"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminExplorerGrantsIdDenyRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	id int32
+	body *map[string]interface{}
+}
+
+// {\\
+func (r ApiPostAdminExplorerGrantsIdDenyRequest) Body(body map[string]interface{}) ApiPostAdminExplorerGrantsIdDenyRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostAdminExplorerGrantsIdDenyRequest) Execute() (*HandlersExplorerGrantView, *http.Response, error) {
+	return r.ApiService.PostAdminExplorerGrantsIdDenyExecute(r)
+}
+
+/*
+PostAdminExplorerGrantsIdDeny Deny an explorer access request (BMC-admin)
+
+Terminals the pending request as denied (re-requestable).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Grant ID
+ @return ApiPostAdminExplorerGrantsIdDenyRequest
+*/
+func (a *AdminAPIService) PostAdminExplorerGrantsIdDeny(ctx context.Context, id int32) ApiPostAdminExplorerGrantsIdDenyRequest {
+	return ApiPostAdminExplorerGrantsIdDenyRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersExplorerGrantView
+func (a *AdminAPIService) PostAdminExplorerGrantsIdDenyExecute(r ApiPostAdminExplorerGrantsIdDenyRequest) (*HandlersExplorerGrantView, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersExplorerGrantView
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminExplorerGrantsIdDeny")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/explorer/grants/{id}/deny"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminExplorerGrantsIdRevokeRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	id int32
+	body *map[string]interface{}
+}
+
+// {\\
+func (r ApiPostAdminExplorerGrantsIdRevokeRequest) Body(body map[string]interface{}) ApiPostAdminExplorerGrantsIdRevokeRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostAdminExplorerGrantsIdRevokeRequest) Execute() (*HandlersExplorerGrantView, *http.Response, error) {
+	return r.ApiService.PostAdminExplorerGrantsIdRevokeExecute(r)
+}
+
+/*
+PostAdminExplorerGrantsIdRevoke Revoke an active explorer grant (BMC-admin)
+
+Terminals an ACTIVE grant as revoked; the watch gate
+refuses the user's next connection.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Grant ID
+ @return ApiPostAdminExplorerGrantsIdRevokeRequest
+*/
+func (a *AdminAPIService) PostAdminExplorerGrantsIdRevoke(ctx context.Context, id int32) ApiPostAdminExplorerGrantsIdRevokeRequest {
+	return ApiPostAdminExplorerGrantsIdRevokeRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersExplorerGrantView
+func (a *AdminAPIService) PostAdminExplorerGrantsIdRevokeExecute(r ApiPostAdminExplorerGrantsIdRevokeRequest) (*HandlersExplorerGrantView, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersExplorerGrantView
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminExplorerGrantsIdRevoke")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/explorer/grants/{id}/revoke"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminExplorerViewasRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	body *map[string]interface{}
+}
+
+// {\\
+func (r ApiPostAdminExplorerViewasRequest) Body(body map[string]interface{}) ApiPostAdminExplorerViewasRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostAdminExplorerViewasRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostAdminExplorerViewasExecute(r)
+}
+
+/*
+PostAdminExplorerViewas Start a view-as-client session (BMC-admin)
+
+Starts a time-boxed impersonation session over the K8s
+View: the admin's explorer data plane resolves
+authorization AS the impersonated org/user (never more).
+A reason is required; a previous session is superseded
+with its own audited end.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostAdminExplorerViewasRequest
+*/
+func (a *AdminAPIService) PostAdminExplorerViewas(ctx context.Context) ApiPostAdminExplorerViewasRequest {
+	return ApiPostAdminExplorerViewasRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) PostAdminExplorerViewasExecute(r ApiPostAdminExplorerViewasRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminExplorerViewas")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/explorer/viewas"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminExplorerViewasStopRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+}
+
+func (r ApiPostAdminExplorerViewasStopRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostAdminExplorerViewasStopExecute(r)
+}
+
+/*
+PostAdminExplorerViewasStop Stop the view-as-client session (BMC-admin)
+
+Ends the admin's active impersonation session and lands
+its audited end row. Idempotent.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostAdminExplorerViewasStopRequest
+*/
+func (a *AdminAPIService) PostAdminExplorerViewasStop(ctx context.Context) ApiPostAdminExplorerViewasStopRequest {
+	return ApiPostAdminExplorerViewasStopRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) PostAdminExplorerViewasStopExecute(r ApiPostAdminExplorerViewasStopRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminExplorerViewasStop")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/explorer/viewas/stop"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminFeatureGatesRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	body *HandlersFeatureGateFlipRequest
+}
+
+// The flip
+func (r ApiPostAdminFeatureGatesRequest) Body(body HandlersFeatureGateFlipRequest) ApiPostAdminFeatureGatesRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostAdminFeatureGatesRequest) Execute() (*HandlersFeatureGateFlipResponse, *http.Response, error) {
+	return r.ApiService.PostAdminFeatureGatesExecute(r)
+}
+
+/*
+PostAdminFeatureGates Flip a feature gate (BMC-admin)
+
+Set one feature's gate per (org, project). The state row and the audit row commit as one transaction; an unchanged flip is a silent no-op that still lands an audit row; a reason is required.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostAdminFeatureGatesRequest
+*/
+func (a *AdminAPIService) PostAdminFeatureGates(ctx context.Context) ApiPostAdminFeatureGatesRequest {
+	return ApiPostAdminFeatureGatesRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersFeatureGateFlipResponse
+func (a *AdminAPIService) PostAdminFeatureGatesExecute(r ApiPostAdminFeatureGatesRequest) (*HandlersFeatureGateFlipResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersFeatureGateFlipResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminFeatureGates")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/feature-gates"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminRunnerReservationsRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	body *HandlersRunnerReservationGrantRequest
+}
+
+// The grant
+func (r ApiPostAdminRunnerReservationsRequest) Body(body HandlersRunnerReservationGrantRequest) ApiPostAdminRunnerReservationsRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostAdminRunnerReservationsRequest) Execute() (*HandlersRunnerReservationResponse, *http.Response, error) {
+	return r.ApiService.PostAdminRunnerReservationsExecute(r)
+}
+
+/*
+PostAdminRunnerReservations Grant a hosted-runner reservation (BMC-admin)
+
+Provision N org-dedicated VMs for the paid fast-lane: instant dispatch, wiped between jobs.
+Reserved-VM-seconds meter from the grant; a grant is at most 64 VMs.
+The audit row commits BEFORE the action and fails closed. A duplicate grant refuses 409; a reason is required.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostAdminRunnerReservationsRequest
+*/
+func (a *AdminAPIService) PostAdminRunnerReservations(ctx context.Context) ApiPostAdminRunnerReservationsRequest {
+	return ApiPostAdminRunnerReservationsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersRunnerReservationResponse
+func (a *AdminAPIService) PostAdminRunnerReservationsExecute(r ApiPostAdminRunnerReservationsRequest) (*HandlersRunnerReservationResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersRunnerReservationResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminRunnerReservations")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/runner/reservations"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAdminRunnerReservationsOrgIdRevokeRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	orgId int32
+	body *HandlersRunnerReservationRevokeRequest
+}
+
+// The revoke
+func (r ApiPostAdminRunnerReservationsOrgIdRevokeRequest) Body(body HandlersRunnerReservationRevokeRequest) ApiPostAdminRunnerReservationsOrgIdRevokeRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostAdminRunnerReservationsOrgIdRevokeRequest) Execute() (*HandlersRunnerReservationResponse, *http.Response, error) {
+	return r.ApiService.PostAdminRunnerReservationsOrgIdRevokeExecute(r)
+}
+
+/*
+PostAdminRunnerReservationsOrgIdRevoke Revoke a hosted-runner reservation (BMC-admin)
+
+Start the drain lifecycle: the running job finishes, no new dispatch lands on the reserved VMs.
+The VMs are destroyed after the last job.
+The VMs are destroyed after their last job; reserved-VM-seconds metering stops at each destroy.
+An org without a reservation refuses 404; the audit row commits BEFORE the action and fails closed.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId The org id
+ @return ApiPostAdminRunnerReservationsOrgIdRevokeRequest
+*/
+func (a *AdminAPIService) PostAdminRunnerReservationsOrgIdRevoke(ctx context.Context, orgId int32) ApiPostAdminRunnerReservationsOrgIdRevokeRequest {
+	return ApiPostAdminRunnerReservationsOrgIdRevokeRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersRunnerReservationResponse
+func (a *AdminAPIService) PostAdminRunnerReservationsOrgIdRevokeExecute(r ApiPostAdminRunnerReservationsOrgIdRevokeRequest) (*HandlersRunnerReservationResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersRunnerReservationResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostAdminRunnerReservationsOrgIdRevoke")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/admin/runner/reservations/{org_id}/revoke"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostApiV1AdminAgentsIdForceDeleteRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	id int32
+	body *map[string]interface{}
+}
+
+// { \\
+func (r ApiPostApiV1AdminAgentsIdForceDeleteRequest) Body(body map[string]interface{}) ApiPostApiV1AdminAgentsIdForceDeleteRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostApiV1AdminAgentsIdForceDeleteRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostApiV1AdminAgentsIdForceDeleteExecute(r)
+}
+
+/*
+PostApiV1AdminAgentsIdForceDelete Force-delete an agent (platform admin) — revoke + archive
+
+The dashboard force-delete: runs the 1:1 pinned-pair unwind
+(degrades every replication pair holding the agent, releases
+its PENDING transfer jobs) BEFORE delegating to the revoke
+kill-switch core. There is NO row hard delete: status=revoked
+is terminal and the row stays as audit trail; reinstalling a
+force-deleted agent means fresh enrollment as a NEW record.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Agent DB id
+ @return ApiPostApiV1AdminAgentsIdForceDeleteRequest
+*/
+func (a *AdminAPIService) PostApiV1AdminAgentsIdForceDelete(ctx context.Context, id int32) ApiPostApiV1AdminAgentsIdForceDeleteRequest {
+	return ApiPostApiV1AdminAgentsIdForceDeleteRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) PostApiV1AdminAgentsIdForceDeleteExecute(r ApiPostApiV1AdminAgentsIdForceDeleteRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PostApiV1AdminAgentsIdForceDelete")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/agents/{id}/force-delete"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiPostApiV1AdminUsersIdMfaDisableRequest struct {
 	ctx context.Context
@@ -165,6 +4263,468 @@ func (a *AdminAPIService) PostApiV1AdminUsersIdMfaDisableExecute(r ApiPostApiV1A
 		}
 		if localVarHTTPResponse.StatusCode == 503 {
 			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	orgId int32
+	request *HandlersSetBackupEntitlementRequest
+}
+
+// Entitlement
+func (r ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest) Request(request HandlersSetBackupEntitlementRequest) ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PutApiV1AdminBackupOrgsOrgIdEntitlementExecute(r)
+}
+
+/*
+PutApiV1AdminBackupOrgsOrgIdEntitlement Set or clear an org's backup entitlement (admin)
+
+The admin set-path over the per-org backup entitlement
+(issue #4028): active=true allows the org's backup jobs to
+start (the backup rental seam's authorization gate answers
+from this row), active=false clears it. Admin-set AND
+admin-cleared only; every transition writes a
+platform_audit_events row (who, whom, when).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest
+*/
+func (a *AdminAPIService) PutApiV1AdminBackupOrgsOrgIdEntitlement(ctx context.Context, orgId int32) ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest {
+	return ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) PutApiV1AdminBackupOrgsOrgIdEntitlementExecute(r ApiPutApiV1AdminBackupOrgsOrgIdEntitlementRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PutApiV1AdminBackupOrgsOrgIdEntitlement")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/backup/orgs/{org_id}/entitlement"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	orgId int32
+	request *HandlersSetExemptionRequest
+}
+
+// Exemption
+func (r ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest) Request(request HandlersSetExemptionRequest) ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PutApiV1AdminMonitoringOrgsOrgIdExemptionExecute(r)
+}
+
+/*
+PutApiV1AdminMonitoringOrgsOrgIdExemption Set or clear an org's enforcement exemption (admin)
+
+The boundary-based grandfathering mechanics (story AC4,
+round-3 fold 7): the flag is admin-set AND admin-cleared
+only; every change writes a platform_audit_events row
+(who, whom, when). Clearing is the plan-change/renewal
+boundary — enforced tiers apply from it.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest
+*/
+func (a *AdminAPIService) PutApiV1AdminMonitoringOrgsOrgIdExemption(ctx context.Context, orgId int32) ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest {
+	return ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) PutApiV1AdminMonitoringOrgsOrgIdExemptionExecute(r ApiPutApiV1AdminMonitoringOrgsOrgIdExemptionRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PutApiV1AdminMonitoringOrgsOrgIdExemption")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/monitoring/orgs/{org_id}/exemption"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest struct {
+	ctx context.Context
+	ApiService AdminAPI
+	orgId int32
+	request *HandlersSetMonitoringLimitsRequest
+}
+
+// Limits
+func (r ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest) Request(request HandlersSetMonitoringLimitsRequest) ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PutApiV1AdminMonitoringOrgsOrgIdLimitsExecute(r)
+}
+
+/*
+PutApiV1AdminMonitoringOrgsOrgIdLimits Set an org's monitoring limits (admin set-path)
+
+Upserts the org's monitoring_subjects and
+metrics_retention_days quota rows (the SetClusterLimit
+precedent, org-row shape project_id=0). subjects must be a
+positive count; unlimited is the ABSENCE of a row.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest
+*/
+func (a *AdminAPIService) PutApiV1AdminMonitoringOrgsOrgIdLimits(ctx context.Context, orgId int32) ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest {
+	return ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AdminAPIService) PutApiV1AdminMonitoringOrgsOrgIdLimitsExecute(r ApiPutApiV1AdminMonitoringOrgsOrgIdLimitsRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AdminAPIService.PutApiV1AdminMonitoringOrgsOrgIdLimits")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/admin/monitoring/orgs/{org_id}/limits"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

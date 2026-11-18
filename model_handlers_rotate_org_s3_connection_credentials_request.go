@@ -13,8 +13,6 @@ package bmc
 
 import (
 	"encoding/json"
-	"bytes"
-	"fmt"
 )
 
 // checks if the HandlersRotateOrgS3ConnectionCredentialsRequest type satisfies the MappedNullable interface at compile time
@@ -22,21 +20,18 @@ var _ MappedNullable = &HandlersRotateOrgS3ConnectionCredentialsRequest{}
 
 // HandlersRotateOrgS3ConnectionCredentialsRequest struct for HandlersRotateOrgS3ConnectionCredentialsRequest
 type HandlersRotateOrgS3ConnectionCredentialsRequest struct {
-	AccessKeyId string `json:"access_key_id"`
+	AccessKeyId *string `json:"access_key_id,omitempty"`
 	Region *string `json:"region,omitempty"`
-	SecretAccessKey string `json:"secret_access_key"`
+	SecretAccessKey *string `json:"secret_access_key,omitempty"`
+	ServiceAccountJson *string `json:"service_account_json,omitempty"`
 }
-
-type _HandlersRotateOrgS3ConnectionCredentialsRequest HandlersRotateOrgS3ConnectionCredentialsRequest
 
 // NewHandlersRotateOrgS3ConnectionCredentialsRequest instantiates a new HandlersRotateOrgS3ConnectionCredentialsRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewHandlersRotateOrgS3ConnectionCredentialsRequest(accessKeyId string, secretAccessKey string) *HandlersRotateOrgS3ConnectionCredentialsRequest {
+func NewHandlersRotateOrgS3ConnectionCredentialsRequest() *HandlersRotateOrgS3ConnectionCredentialsRequest {
 	this := HandlersRotateOrgS3ConnectionCredentialsRequest{}
-	this.AccessKeyId = accessKeyId
-	this.SecretAccessKey = secretAccessKey
 	return &this
 }
 
@@ -48,28 +43,36 @@ func NewHandlersRotateOrgS3ConnectionCredentialsRequestWithDefaults() *HandlersR
 	return &this
 }
 
-// GetAccessKeyId returns the AccessKeyId field value
+// GetAccessKeyId returns the AccessKeyId field value if set, zero value otherwise.
 func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetAccessKeyId() string {
-	if o == nil {
+	if o == nil || IsNil(o.AccessKeyId) {
 		var ret string
 		return ret
 	}
-
-	return o.AccessKeyId
+	return *o.AccessKeyId
 }
 
-// GetAccessKeyIdOk returns a tuple with the AccessKeyId field value
+// GetAccessKeyIdOk returns a tuple with the AccessKeyId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetAccessKeyIdOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.AccessKeyId) {
 		return nil, false
 	}
-	return &o.AccessKeyId, true
+	return o.AccessKeyId, true
 }
 
-// SetAccessKeyId sets field value
+// HasAccessKeyId returns a boolean if a field has been set.
+func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) HasAccessKeyId() bool {
+	if o != nil && !IsNil(o.AccessKeyId) {
+		return true
+	}
+
+	return false
+}
+
+// SetAccessKeyId gets a reference to the given string and assigns it to the AccessKeyId field.
 func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) SetAccessKeyId(v string) {
-	o.AccessKeyId = v
+	o.AccessKeyId = &v
 }
 
 // GetRegion returns the Region field value if set, zero value otherwise.
@@ -104,28 +107,68 @@ func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) SetRegion(v string) {
 	o.Region = &v
 }
 
-// GetSecretAccessKey returns the SecretAccessKey field value
+// GetSecretAccessKey returns the SecretAccessKey field value if set, zero value otherwise.
 func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetSecretAccessKey() string {
-	if o == nil {
+	if o == nil || IsNil(o.SecretAccessKey) {
 		var ret string
 		return ret
 	}
-
-	return o.SecretAccessKey
+	return *o.SecretAccessKey
 }
 
-// GetSecretAccessKeyOk returns a tuple with the SecretAccessKey field value
+// GetSecretAccessKeyOk returns a tuple with the SecretAccessKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetSecretAccessKeyOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.SecretAccessKey) {
 		return nil, false
 	}
-	return &o.SecretAccessKey, true
+	return o.SecretAccessKey, true
 }
 
-// SetSecretAccessKey sets field value
+// HasSecretAccessKey returns a boolean if a field has been set.
+func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) HasSecretAccessKey() bool {
+	if o != nil && !IsNil(o.SecretAccessKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetSecretAccessKey gets a reference to the given string and assigns it to the SecretAccessKey field.
 func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) SetSecretAccessKey(v string) {
-	o.SecretAccessKey = v
+	o.SecretAccessKey = &v
+}
+
+// GetServiceAccountJson returns the ServiceAccountJson field value if set, zero value otherwise.
+func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetServiceAccountJson() string {
+	if o == nil || IsNil(o.ServiceAccountJson) {
+		var ret string
+		return ret
+	}
+	return *o.ServiceAccountJson
+}
+
+// GetServiceAccountJsonOk returns a tuple with the ServiceAccountJson field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetServiceAccountJsonOk() (*string, bool) {
+	if o == nil || IsNil(o.ServiceAccountJson) {
+		return nil, false
+	}
+	return o.ServiceAccountJson, true
+}
+
+// HasServiceAccountJson returns a boolean if a field has been set.
+func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) HasServiceAccountJson() bool {
+	if o != nil && !IsNil(o.ServiceAccountJson) {
+		return true
+	}
+
+	return false
+}
+
+// SetServiceAccountJson gets a reference to the given string and assigns it to the ServiceAccountJson field.
+func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) SetServiceAccountJson(v string) {
+	o.ServiceAccountJson = &v
 }
 
 func (o HandlersRotateOrgS3ConnectionCredentialsRequest) MarshalJSON() ([]byte, error) {
@@ -138,50 +181,19 @@ func (o HandlersRotateOrgS3ConnectionCredentialsRequest) MarshalJSON() ([]byte, 
 
 func (o HandlersRotateOrgS3ConnectionCredentialsRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["access_key_id"] = o.AccessKeyId
+	if !IsNil(o.AccessKeyId) {
+		toSerialize["access_key_id"] = o.AccessKeyId
+	}
 	if !IsNil(o.Region) {
 		toSerialize["region"] = o.Region
 	}
-	toSerialize["secret_access_key"] = o.SecretAccessKey
+	if !IsNil(o.SecretAccessKey) {
+		toSerialize["secret_access_key"] = o.SecretAccessKey
+	}
+	if !IsNil(o.ServiceAccountJson) {
+		toSerialize["service_account_json"] = o.ServiceAccountJson
+	}
 	return toSerialize, nil
-}
-
-func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) UnmarshalJSON(data []byte) (err error) {
-	// This validates that all required properties are included in the JSON object
-	// by unmarshalling the object into a generic map with string keys and checking
-	// that every required field exists as a key in the generic map.
-	requiredProperties := []string{
-		"access_key_id",
-		"secret_access_key",
-	}
-
-	allProperties := make(map[string]interface{})
-
-	err = json.Unmarshal(data, &allProperties)
-
-	if err != nil {
-		return err;
-	}
-
-	for _, requiredProperty := range(requiredProperties) {
-		if _, exists := allProperties[requiredProperty]; !exists {
-			return fmt.Errorf("no value given for required property %v", requiredProperty)
-		}
-	}
-
-	varHandlersRotateOrgS3ConnectionCredentialsRequest := _HandlersRotateOrgS3ConnectionCredentialsRequest{}
-
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varHandlersRotateOrgS3ConnectionCredentialsRequest)
-
-	if err != nil {
-		return err
-	}
-
-	*o = HandlersRotateOrgS3ConnectionCredentialsRequest(varHandlersRotateOrgS3ConnectionCredentialsRequest)
-
-	return err
 }
 
 type NullableHandlersRotateOrgS3ConnectionCredentialsRequest struct {

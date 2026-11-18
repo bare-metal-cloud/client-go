@@ -6,7 +6,6 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteS3ConnectionsId**](S3ConnectionsAPI.md#DeleteS3ConnectionsId) | **Delete** /s3-connections/{id} | Delete an S3 connection
 [**DeleteS3ConnectionsIdBucketsBucketObjectsKey**](S3ConnectionsAPI.md#DeleteS3ConnectionsIdBucketsBucketObjectsKey) | **Delete** /s3-connections/{id}/buckets/{bucket}/objects/{key} | Delete an S3 object (nested path)
-[**DeleteS3ConnectionsIdObjects**](S3ConnectionsAPI.md#DeleteS3ConnectionsIdObjects) | **Delete** /s3-connections/{id}/objects | Delete an S3 object
 [**GetS3Connections**](S3ConnectionsAPI.md#GetS3Connections) | **Get** /s3-connections | List all S3 connections
 [**GetS3ConnectionsIdBuckets**](S3ConnectionsAPI.md#GetS3ConnectionsIdBuckets) | **Get** /s3-connections/{id}/buckets | List buckets for an S3 connection
 [**GetS3ConnectionsIdObjects**](S3ConnectionsAPI.md#GetS3ConnectionsIdObjects) | **Get** /s3-connections/{id}/objects | List objects in a bucket
@@ -14,13 +13,13 @@ Method | HTTP request | Description
 [**GetS3ConnectionsProviderInfo**](S3ConnectionsAPI.md#GetS3ConnectionsProviderInfo) | **Get** /s3-connections/provider-info | Get S3 provider information
 [**PostS3Connections**](S3ConnectionsAPI.md#PostS3Connections) | **Post** /s3-connections | Create a new S3 connection
 [**PostS3ConnectionsTest**](S3ConnectionsAPI.md#PostS3ConnectionsTest) | **Post** /s3-connections/test | Test an S3 connection before saving
-[**PutS3ConnectionsIdBucketsBucketObjectsKey**](S3ConnectionsAPI.md#PutS3ConnectionsIdBucketsBucketObjectsKey) | **Put** /s3-connections/{id}/buckets/{bucket}/objects/{key} | Upload an S3 object (nested path)
+[**PutS3ConnectionsIdBucketsBucketObjectsKey**](S3ConnectionsAPI.md#PutS3ConnectionsIdBucketsBucketObjectsKey) | **Put** /s3-connections/{id}/buckets/{bucket}/objects/{key} | Upload an S3 object (nested path, streamed multipart)
 
 
 
 ## DeleteS3ConnectionsId
 
-> DeleteS3ConnectionsId(ctx, id).Execute()
+> DeleteS3ConnectionsId(ctx, id).Force(force).Execute()
 
 Delete an S3 connection
 
@@ -38,10 +37,11 @@ import (
 
 func main() {
 	id := "id_example" // string | S3 Connection ID
+	force := true // bool | Force the delete past the reference guard (admin/owner only) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.S3ConnectionsAPI.DeleteS3ConnectionsId(context.Background(), id).Execute()
+	r, err := apiClient.S3ConnectionsAPI.DeleteS3ConnectionsId(context.Background(), id).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `S3ConnectionsAPI.DeleteS3ConnectionsId``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -65,6 +65,7 @@ Other parameters are passed through a pointer to a apiDeleteS3ConnectionsIdReque
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force the delete past the reference guard (admin/owner only) | 
 
 ### Return type
 
@@ -139,78 +140,6 @@ Name | Type | Description  | Notes
 
 
 
-
-### Return type
-
- (empty response body)
-
-### Authorization
-
-[CookieAuth](../README.md#CookieAuth)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: */*
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## DeleteS3ConnectionsIdObjects
-
-> DeleteS3ConnectionsIdObjects(ctx, id).Bucket(bucket).Key(key).Execute()
-
-Delete an S3 object
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
-)
-
-func main() {
-	id := int32(56) // int32 | S3 Connection ID
-	bucket := "bucket_example" // string | Bucket name
-	key := "key_example" // string | Object key
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.S3ConnectionsAPI.DeleteS3ConnectionsIdObjects(context.Background(), id).Bucket(bucket).Key(key).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `S3ConnectionsAPI.DeleteS3ConnectionsIdObjects``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**id** | **int32** | S3 Connection ID | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiDeleteS3ConnectionsIdObjectsRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
- **bucket** | **string** | Bucket name | 
- **key** | **string** | Object key | 
 
 ### Return type
 
@@ -596,7 +525,7 @@ import (
 )
 
 func main() {
-	request := *openapiclient.NewHandlersCreateS3ConnectionRequest("AccessKeyId_example", "Endpoint_example", "Name_example", "Provider_example", "SecretAccessKey_example") // HandlersCreateS3ConnectionRequest | S3 connection details
+	request := *openapiclient.NewHandlersCreateS3ConnectionRequest("Name_example", "Provider_example") // HandlersCreateS3ConnectionRequest | S3 connection details
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -647,6 +576,8 @@ Name | Type | Description  | Notes
 
 Test an S3 connection before saving
 
+
+
 ### Example
 
 ```go
@@ -660,7 +591,7 @@ import (
 )
 
 func main() {
-	request := *openapiclient.NewHandlersTestS3ConnectionRequest("AccessKeyId_example", "Endpoint_example", "Provider_example", "SecretAccessKey_example") // HandlersTestS3ConnectionRequest | S3 connection test details
+	request := *openapiclient.NewHandlersTestS3ConnectionRequest("Provider_example") // HandlersTestS3ConnectionRequest | S3 connection test details
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -709,7 +640,7 @@ Name | Type | Description  | Notes
 
 > ServicesS3UploadResult PutS3ConnectionsIdBucketsBucketObjectsKey(ctx, id, bucket, key).Body(body).Execute()
 
-Upload an S3 object (nested path)
+Upload an S3 object (nested path, streamed multipart)
 
 
 
@@ -729,7 +660,7 @@ func main() {
 	id := int32(56) // int32 | S3 Connection ID
 	bucket := "bucket_example" // string | Bucket name
 	key := "key_example" // string | Object key (may contain '/')
-	body := []int32{int32(123)} // []int32 | Object bytes (≤32 MiB)
+	body := []int32{int32(123)} // []int32 | Object bytes (≤5 GiB)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -763,7 +694,7 @@ Name | Type | Description  | Notes
 
 
 
- **body** | **[]int32** | Object bytes (≤32 MiB) | 
+ **body** | **[]int32** | Object bytes (≤5 GiB) | 
 
 ### Return type
 

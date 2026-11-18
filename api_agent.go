@@ -25,7 +25,7 @@ type AgentAPI interface {
 	/*
 	GetAgentInstallSh Get agent installation script
 
-	Returns a dynamically generated bash script for installing the BMC agent. Token is validated but NOT consumed — agent consumes it during registration.
+	Returns a dynamically generated bash script for installing the BMC agent. Without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetAgentInstallShRequest
@@ -60,7 +60,7 @@ type ApiGetAgentInstallShRequest struct {
 	token *string
 }
 
-// Agent registration token (short token)
+// Agent registration token (short token) — omit for the runtime-prompt script
 func (r ApiGetAgentInstallShRequest) Token(token string) ApiGetAgentInstallShRequest {
 	r.token = &token
 	return r
@@ -73,7 +73,7 @@ func (r ApiGetAgentInstallShRequest) Execute() (string, *http.Response, error) {
 /*
 GetAgentInstallSh Get agent installation script
 
-Returns a dynamically generated bash script for installing the BMC agent. Token is validated but NOT consumed — agent consumes it during registration.
+Returns a dynamically generated bash script for installing the BMC agent. Without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGetAgentInstallShRequest
@@ -105,11 +105,10 @@ func (a *AgentAPIService) GetAgentInstallShExecute(r ApiGetAgentInstallShRequest
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.token == nil {
-		return localVarReturnValue, nil, reportError("token is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "", "")
+	if r.token != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -169,6 +168,17 @@ func (a *AgentAPIService) GetAgentInstallShExecute(r ApiGetAgentInstallShRequest
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -212,7 +222,7 @@ func (r ApiGetAgentManifestsRequest) Namespace(namespace string) ApiGetAgentMani
 	return r
 }
 
-// Agent image tag (default: latest)
+// Agent image tag (default: the platform&#39;s configured released tag, AGENT_K8S_IMAGE_TAG; &#39;latest&#39; stays available as an explicit override)
 func (r ApiGetAgentManifestsRequest) ImageTag(imageTag string) ApiGetAgentManifestsRequest {
 	r.imageTag = &imageTag
 	return r
@@ -333,6 +343,17 @@ func (a *AgentAPIService) GetAgentManifestsExecute(r ApiGetAgentManifestsRequest
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

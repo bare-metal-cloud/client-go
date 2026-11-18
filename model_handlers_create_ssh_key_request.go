@@ -22,7 +22,9 @@ var _ MappedNullable = &HandlersCreateSSHKeyRequest{}
 
 // HandlersCreateSSHKeyRequest struct for HandlersCreateSSHKeyRequest
 type HandlersCreateSSHKeyRequest struct {
-	Key string `json:"key"`
+	ClientEnvelope *HandlersClientEnvelopeDTO `json:"client_envelope,omitempty"`
+	Fingerprint *string `json:"fingerprint,omitempty"`
+	Key *string `json:"key,omitempty"`
 	Scope *string `json:"scope,omitempty"`
 	Title string `json:"title"`
 }
@@ -33,9 +35,8 @@ type _HandlersCreateSSHKeyRequest HandlersCreateSSHKeyRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewHandlersCreateSSHKeyRequest(key string, title string) *HandlersCreateSSHKeyRequest {
+func NewHandlersCreateSSHKeyRequest(title string) *HandlersCreateSSHKeyRequest {
 	this := HandlersCreateSSHKeyRequest{}
-	this.Key = key
 	this.Title = title
 	return &this
 }
@@ -48,28 +49,100 @@ func NewHandlersCreateSSHKeyRequestWithDefaults() *HandlersCreateSSHKeyRequest {
 	return &this
 }
 
-// GetKey returns the Key field value
-func (o *HandlersCreateSSHKeyRequest) GetKey() string {
-	if o == nil {
+// GetClientEnvelope returns the ClientEnvelope field value if set, zero value otherwise.
+func (o *HandlersCreateSSHKeyRequest) GetClientEnvelope() HandlersClientEnvelopeDTO {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		var ret HandlersClientEnvelopeDTO
+		return ret
+	}
+	return *o.ClientEnvelope
+}
+
+// GetClientEnvelopeOk returns a tuple with the ClientEnvelope field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateSSHKeyRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool) {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		return nil, false
+	}
+	return o.ClientEnvelope, true
+}
+
+// HasClientEnvelope returns a boolean if a field has been set.
+func (o *HandlersCreateSSHKeyRequest) HasClientEnvelope() bool {
+	if o != nil && !IsNil(o.ClientEnvelope) {
+		return true
+	}
+
+	return false
+}
+
+// SetClientEnvelope gets a reference to the given HandlersClientEnvelopeDTO and assigns it to the ClientEnvelope field.
+func (o *HandlersCreateSSHKeyRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO) {
+	o.ClientEnvelope = &v
+}
+
+// GetFingerprint returns the Fingerprint field value if set, zero value otherwise.
+func (o *HandlersCreateSSHKeyRequest) GetFingerprint() string {
+	if o == nil || IsNil(o.Fingerprint) {
 		var ret string
 		return ret
 	}
-
-	return o.Key
+	return *o.Fingerprint
 }
 
-// GetKeyOk returns a tuple with the Key field value
+// GetFingerprintOk returns a tuple with the Fingerprint field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *HandlersCreateSSHKeyRequest) GetKeyOk() (*string, bool) {
-	if o == nil {
+func (o *HandlersCreateSSHKeyRequest) GetFingerprintOk() (*string, bool) {
+	if o == nil || IsNil(o.Fingerprint) {
 		return nil, false
 	}
-	return &o.Key, true
+	return o.Fingerprint, true
 }
 
-// SetKey sets field value
+// HasFingerprint returns a boolean if a field has been set.
+func (o *HandlersCreateSSHKeyRequest) HasFingerprint() bool {
+	if o != nil && !IsNil(o.Fingerprint) {
+		return true
+	}
+
+	return false
+}
+
+// SetFingerprint gets a reference to the given string and assigns it to the Fingerprint field.
+func (o *HandlersCreateSSHKeyRequest) SetFingerprint(v string) {
+	o.Fingerprint = &v
+}
+
+// GetKey returns the Key field value if set, zero value otherwise.
+func (o *HandlersCreateSSHKeyRequest) GetKey() string {
+	if o == nil || IsNil(o.Key) {
+		var ret string
+		return ret
+	}
+	return *o.Key
+}
+
+// GetKeyOk returns a tuple with the Key field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateSSHKeyRequest) GetKeyOk() (*string, bool) {
+	if o == nil || IsNil(o.Key) {
+		return nil, false
+	}
+	return o.Key, true
+}
+
+// HasKey returns a boolean if a field has been set.
+func (o *HandlersCreateSSHKeyRequest) HasKey() bool {
+	if o != nil && !IsNil(o.Key) {
+		return true
+	}
+
+	return false
+}
+
+// SetKey gets a reference to the given string and assigns it to the Key field.
 func (o *HandlersCreateSSHKeyRequest) SetKey(v string) {
-	o.Key = v
+	o.Key = &v
 }
 
 // GetScope returns the Scope field value if set, zero value otherwise.
@@ -138,7 +211,15 @@ func (o HandlersCreateSSHKeyRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersCreateSSHKeyRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["key"] = o.Key
+	if !IsNil(o.ClientEnvelope) {
+		toSerialize["client_envelope"] = o.ClientEnvelope
+	}
+	if !IsNil(o.Fingerprint) {
+		toSerialize["fingerprint"] = o.Fingerprint
+	}
+	if !IsNil(o.Key) {
+		toSerialize["key"] = o.Key
+	}
 	if !IsNil(o.Scope) {
 		toSerialize["scope"] = o.Scope
 	}
@@ -151,7 +232,6 @@ func (o *HandlersCreateSSHKeyRequest) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"key",
 		"title",
 	}
 

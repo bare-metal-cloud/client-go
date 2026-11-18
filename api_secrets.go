@@ -24,9 +24,39 @@ import (
 type SecretsAPI interface {
 
 	/*
+	GetSecrets List all secrets in the unified secrets hub
+
+	Returns the org's secret-bearing rows across the 5 source types (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection) as metadata only — never secret material, no decrypt path. Each item also carries the keyring projection the Secrets console draws (provider, variant, linked_via, affordances, pickup, uses, discovered). Keyset-paginated on (name, type, id); the envelope carries items plus next_cursor (null on the last page), and freshness_available=false when the freshness aggregate could not be computed. Org-scoped via the tenant list scope (X-Project-Id header or ?project_id= selects the project filter). The ?scope= query is accepted for compatibility but no longer filters (ADR-067).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetSecretsRequest
+	*/
+	GetSecrets(ctx context.Context) ApiGetSecretsRequest
+
+	// GetSecretsExecute executes the request
+	//  @return map[string]interface{}
+	GetSecretsExecute(r ApiGetSecretsRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetSecretsTypeId Get one keyring secret's detail bundle
+
+	Returns everything the Secrets detail page renders in one fetch: the secret section (labels, linked_via, affordances, definition rows, the storage card for s3_connection), the rotation advisory (null while no window is open), the consumers register (the same staleness contract the usage surface serves), and the version register (current / window / retired). Org-scoped and project-filtered like the hub list. Metadata only — never decrypts; masked_preview is always null and values exist only behind GET /secrets/:type/:id/value.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)
+	@param id Numeric secret id
+	@return ApiGetSecretsTypeIdRequest
+	*/
+	GetSecretsTypeId(ctx context.Context, type_ string, id int32) ApiGetSecretsTypeIdRequest
+
+	// GetSecretsTypeIdExecute executes the request
+	//  @return HandlersKeyringDetailResponse
+	GetSecretsTypeIdExecute(r ApiGetSecretsTypeIdRequest) (*HandlersKeyringDetailResponse, *http.Response, error)
+
+	/*
 	GetSecretsTypeIdUsage List active usages for a secret
 
-	Returns active secret_references for one hub secret (resource_type, resource_id, created_at). Org-scoped; no secret material. Available to all roles that can view secrets metadata (including Guest).
+	Returns active secret_references for one hub secret (resource_type, resource_id, created_at) with the per-consumer pickup freshness (Epic 163 story 3): consumer_class, last_pickup_at, last_version_number, staleness (fresh | stale | unknown), and the rotation window state. Org-scoped; no secret material. Available to all roles that can view secrets metadata (including Guest).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)
@@ -38,6 +68,22 @@ type SecretsAPI interface {
 	// GetSecretsTypeIdUsageExecute executes the request
 	//  @return map[string]interface{}
 	GetSecretsTypeIdUsageExecute(r ApiGetSecretsTypeIdUsageRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetSecretsTypeIdValue Reveal one keyring secret's value material (zero-peek exception)
+
+	The ONLY route that carries value material — and since issue #4025 it is CIPHERTEXT ONLY: the server resolves the version server-side (current first, open-window rotation predecessors, then the legacy FK row) and returns that version's envelope {format, version, wrapped_dek, ciphertext} — the org-KEK-wrapped row DEK plus the row-DEK-encrypted value, both base64 AES-256-GCM blobs. The browser decrypts locally with its Argon2id-derived vault key; no response ever carries plaintext, and since issue #4027 no unlock gate stands in front of it (the server cannot read what it serves; a locked browser simply cannot open the envelope). 409 Conflict code no_own_keys for a linked connection that stores no keys of its own. Org-scoped and project-filtered like the hub list.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)
+	@param id Numeric secret id
+	@return ApiGetSecretsTypeIdValueRequest
+	*/
+	GetSecretsTypeIdValue(ctx context.Context, type_ string, id int32) ApiGetSecretsTypeIdValueRequest
+
+	// GetSecretsTypeIdValueExecute executes the request
+	//  @return HandlersSecretValueEnvelope
+	GetSecretsTypeIdValueExecute(r ApiGetSecretsTypeIdValueRequest) (*HandlersSecretValueEnvelope, *http.Response, error)
 
 	/*
 	GetSecretsTypeIdVersions List secret ciphertext versions
@@ -56,9 +102,25 @@ type SecretsAPI interface {
 	GetSecretsTypeIdVersionsExecute(r ApiGetSecretsTypeIdVersionsRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
+	PostSecretsTypeIdTestConnection Test a secret's connection
+
+	Runs the per-type server-side credential check for one keyring secret (s3_connection: ListBuckets probe, azblob rows: ListContainers; image_registry: registry live-validate; cloud_credential: the provider's own API call; ssh_key/ssh_connection: key decrypt + parse + fingerprint; code_connection: forge token validation). Records the verdict in the last-verified ledger and answers verdict metadata only — never secret material. Vault-gated: 423 with X-Org-Vault-Required while the org vault is locked.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param type_ Secret type
+	@param id Secret ID
+	@return ApiPostSecretsTypeIdTestConnectionRequest
+	*/
+	PostSecretsTypeIdTestConnection(ctx context.Context, type_ string, id int32) ApiPostSecretsTypeIdTestConnectionRequest
+
+	// PostSecretsTypeIdTestConnectionExecute executes the request
+	//  @return HandlersSecretTestConnectionResponse
+	PostSecretsTypeIdTestConnectionExecute(r ApiPostSecretsTypeIdTestConnectionRequest) (*HandlersSecretTestConnectionResponse, *http.Response, error)
+
+	/*
 	PostSecretsTypeIdVersionsVersionNumberRollback Roll back secret to a prior version (copy-forward)
 
-	Owner/Admin only. HITL option B: inserts version N+1 pointing at target ciphertext after live-validate. Prior rows stay immutable; no plaintext returned.
+	Owner/Admin only. HITL option B: inserts version N+1 pointing at target ciphertext after live-validate. cloud_credential, image_registry and s3_connection (key mode) are live-checked and the response has validated=true. ssh_key and ssh_connection copy forward without a check: validated=false, reason=no_live_target. Prior rows stay immutable; no plaintext returned.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)
@@ -76,6 +138,386 @@ type SecretsAPI interface {
 // SecretsAPIService SecretsAPI service
 type SecretsAPIService service
 
+type ApiGetSecretsRequest struct {
+	ctx context.Context
+	ApiService SecretsAPI
+	xProjectId *string
+	projectId *string
+	limit *int32
+	cursor *string
+	scope *string
+}
+
+// Project selector: a project id (single-project mode) or the value all (every accessible project in the active org); defaults to the session&#39;s resolved project
+func (r ApiGetSecretsRequest) XProjectId(xProjectId string) ApiGetSecretsRequest {
+	r.xProjectId = &xProjectId
+	return r
+}
+
+// Query-string mirror of the X-Project-Id header
+func (r ApiGetSecretsRequest) ProjectId(projectId string) ApiGetSecretsRequest {
+	r.projectId = &projectId
+	return r
+}
+
+// Page size (default 50, capped at 200)
+func (r ApiGetSecretsRequest) Limit(limit int32) ApiGetSecretsRequest {
+	r.limit = &limit
+	return r
+}
+
+// Opaque keyset cursor from a previous page
+func (r ApiGetSecretsRequest) Cursor(cursor string) ApiGetSecretsRequest {
+	r.cursor = &cursor
+	return r
+}
+
+// Legacy scope filter; accepted but no longer applied
+func (r ApiGetSecretsRequest) Scope(scope string) ApiGetSecretsRequest {
+	r.scope = &scope
+	return r
+}
+
+func (r ApiGetSecretsRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetSecretsExecute(r)
+}
+
+/*
+GetSecrets List all secrets in the unified secrets hub
+
+Returns the org's secret-bearing rows across the 5 source types (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection) as metadata only — never secret material, no decrypt path. Each item also carries the keyring projection the Secrets console draws (provider, variant, linked_via, affordances, pickup, uses, discovered). Keyset-paginated on (name, type, id); the envelope carries items plus next_cursor (null on the last page), and freshness_available=false when the freshness aggregate could not be computed. Org-scoped via the tenant list scope (X-Project-Id header or ?project_id= selects the project filter). The ?scope= query is accepted for compatibility but no longer filters (ADR-067).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetSecretsRequest
+*/
+func (a *SecretsAPIService) GetSecrets(ctx context.Context) ApiGetSecretsRequest {
+	return ApiGetSecretsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *SecretsAPIService) GetSecretsExecute(r ApiGetSecretsRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsAPIService.GetSecrets")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/secrets"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.projectId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "project_id", r.projectId, "", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	if r.cursor != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "cursor", r.cursor, "", "")
+	}
+	if r.scope != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "scope", r.scope, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xProjectId != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Project-Id", r.xProjectId, "", "")
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 428 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetSecretsTypeIdRequest struct {
+	ctx context.Context
+	ApiService SecretsAPI
+	type_ string
+	id int32
+	xProjectId *string
+}
+
+// Project selector (the hub list&#39;s scope)
+func (r ApiGetSecretsTypeIdRequest) XProjectId(xProjectId string) ApiGetSecretsTypeIdRequest {
+	r.xProjectId = &xProjectId
+	return r
+}
+
+func (r ApiGetSecretsTypeIdRequest) Execute() (*HandlersKeyringDetailResponse, *http.Response, error) {
+	return r.ApiService.GetSecretsTypeIdExecute(r)
+}
+
+/*
+GetSecretsTypeId Get one keyring secret's detail bundle
+
+Returns everything the Secrets detail page renders in one fetch: the secret section (labels, linked_via, affordances, definition rows, the storage card for s3_connection), the rotation advisory (null while no window is open), the consumers register (the same staleness contract the usage surface serves), and the version register (current / window / retired). Org-scoped and project-filtered like the hub list. Metadata only — never decrypts; masked_preview is always null and values exist only behind GET /secrets/:type/:id/value.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)
+ @param id Numeric secret id
+ @return ApiGetSecretsTypeIdRequest
+*/
+func (a *SecretsAPIService) GetSecretsTypeId(ctx context.Context, type_ string, id int32) ApiGetSecretsTypeIdRequest {
+	return ApiGetSecretsTypeIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		type_: type_,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersKeyringDetailResponse
+func (a *SecretsAPIService) GetSecretsTypeIdExecute(r ApiGetSecretsTypeIdRequest) (*HandlersKeyringDetailResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersKeyringDetailResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsAPIService.GetSecretsTypeId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/secrets/{type}/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"type"+"}", url.PathEscape(parameterValueToString(r.type_, "type_")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xProjectId != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Project-Id", r.xProjectId, "", "")
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 428 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiGetSecretsTypeIdUsageRequest struct {
 	ctx context.Context
 	ApiService SecretsAPI
@@ -90,7 +532,7 @@ func (r ApiGetSecretsTypeIdUsageRequest) Execute() (map[string]interface{}, *htt
 /*
 GetSecretsTypeIdUsage List active usages for a secret
 
-Returns active secret_references for one hub secret (resource_type, resource_id, created_at). Org-scoped; no secret material. Available to all roles that can view secrets metadata (including Guest).
+Returns active secret_references for one hub secret (resource_type, resource_id, created_at) with the per-consumer pickup freshness (Epic 163 story 3): consumer_class, last_pickup_at, last_version_number, staleness (fresh | stale | unknown), and the rotation window state. Org-scoped; no secret material. Available to all roles that can view secrets metadata (including Guest).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)
@@ -194,6 +636,180 @@ func (a *SecretsAPIService) GetSecretsTypeIdUsageExecute(r ApiGetSecretsTypeIdUs
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetSecretsTypeIdValueRequest struct {
+	ctx context.Context
+	ApiService SecretsAPI
+	type_ string
+	id int32
+	version *int32
+}
+
+// A specific version_number to serve (default: the server-resolved current version)
+func (r ApiGetSecretsTypeIdValueRequest) Version(version int32) ApiGetSecretsTypeIdValueRequest {
+	r.version = &version
+	return r
+}
+
+func (r ApiGetSecretsTypeIdValueRequest) Execute() (*HandlersSecretValueEnvelope, *http.Response, error) {
+	return r.ApiService.GetSecretsTypeIdValueExecute(r)
+}
+
+/*
+GetSecretsTypeIdValue Reveal one keyring secret's value material (zero-peek exception)
+
+The ONLY route that carries value material — and since issue #4025 it is CIPHERTEXT ONLY: the server resolves the version server-side (current first, open-window rotation predecessors, then the legacy FK row) and returns that version's envelope {format, version, wrapped_dek, ciphertext} — the org-KEK-wrapped row DEK plus the row-DEK-encrypted value, both base64 AES-256-GCM blobs. The browser decrypts locally with its Argon2id-derived vault key; no response ever carries plaintext, and since issue #4027 no unlock gate stands in front of it (the server cannot read what it serves; a locked browser simply cannot open the envelope). 409 Conflict code no_own_keys for a linked connection that stores no keys of its own. Org-scoped and project-filtered like the hub list.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)
+ @param id Numeric secret id
+ @return ApiGetSecretsTypeIdValueRequest
+*/
+func (a *SecretsAPIService) GetSecretsTypeIdValue(ctx context.Context, type_ string, id int32) ApiGetSecretsTypeIdValueRequest {
+	return ApiGetSecretsTypeIdValueRequest{
+		ApiService: a,
+		ctx: ctx,
+		type_: type_,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersSecretValueEnvelope
+func (a *SecretsAPIService) GetSecretsTypeIdValueExecute(r ApiGetSecretsTypeIdValueRequest) (*HandlersSecretValueEnvelope, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersSecretValueEnvelope
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsAPIService.GetSecretsTypeIdValue")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/secrets/{type}/{id}/value"
+	localVarPath = strings.Replace(localVarPath, "{"+"type"+"}", url.PathEscape(parameterValueToString(r.type_, "type_")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.version != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "version", r.version, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -390,6 +1006,148 @@ func (a *SecretsAPIService) GetSecretsTypeIdVersionsExecute(r ApiGetSecretsTypeI
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiPostSecretsTypeIdTestConnectionRequest struct {
+	ctx context.Context
+	ApiService SecretsAPI
+	type_ string
+	id int32
+}
+
+func (r ApiPostSecretsTypeIdTestConnectionRequest) Execute() (*HandlersSecretTestConnectionResponse, *http.Response, error) {
+	return r.ApiService.PostSecretsTypeIdTestConnectionExecute(r)
+}
+
+/*
+PostSecretsTypeIdTestConnection Test a secret's connection
+
+Runs the per-type server-side credential check for one keyring secret (s3_connection: ListBuckets probe, azblob rows: ListContainers; image_registry: registry live-validate; cloud_credential: the provider's own API call; ssh_key/ssh_connection: key decrypt + parse + fingerprint; code_connection: forge token validation). Records the verdict in the last-verified ledger and answers verdict metadata only — never secret material. Vault-gated: 423 with X-Org-Vault-Required while the org vault is locked.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param type_ Secret type
+ @param id Secret ID
+ @return ApiPostSecretsTypeIdTestConnectionRequest
+*/
+func (a *SecretsAPIService) PostSecretsTypeIdTestConnection(ctx context.Context, type_ string, id int32) ApiPostSecretsTypeIdTestConnectionRequest {
+	return ApiPostSecretsTypeIdTestConnectionRequest{
+		ApiService: a,
+		ctx: ctx,
+		type_: type_,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersSecretTestConnectionResponse
+func (a *SecretsAPIService) PostSecretsTypeIdTestConnectionExecute(r ApiPostSecretsTypeIdTestConnectionRequest) (*HandlersSecretTestConnectionResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersSecretTestConnectionResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsAPIService.PostSecretsTypeIdTestConnection")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/secrets/{type}/{id}/test-connection"
+	localVarPath = strings.Replace(localVarPath, "{"+"type"+"}", url.PathEscape(parameterValueToString(r.type_, "type_")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"*/*"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 423 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPostSecretsTypeIdVersionsVersionNumberRollbackRequest struct {
 	ctx context.Context
 	ApiService SecretsAPI
@@ -405,7 +1163,7 @@ func (r ApiPostSecretsTypeIdVersionsVersionNumberRollbackRequest) Execute() (map
 /*
 PostSecretsTypeIdVersionsVersionNumberRollback Roll back secret to a prior version (copy-forward)
 
-Owner/Admin only. HITL option B: inserts version N+1 pointing at target ciphertext after live-validate. Prior rows stay immutable; no plaintext returned.
+Owner/Admin only. HITL option B: inserts version N+1 pointing at target ciphertext after live-validate. cloud_credential, image_registry and s3_connection (key mode) are live-checked and the response has validated=true. ssh_key and ssh_connection copy forward without a check: validated=false, reason=no_live_target. Prior rows stay immutable; no plaintext returned.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param type_ Secret type (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection)

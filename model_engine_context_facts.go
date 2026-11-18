@@ -20,14 +20,22 @@ var _ MappedNullable = &EngineContextFacts{}
 
 // EngineContextFacts struct for EngineContextFacts
 type EngineContextFacts struct {
+	// ActivityBudget is the restore-activity budget pair (the dk64 ledger, R7 — the member's schema is Story A's, its production and transport the backend plumbing's): Budget is the workflow activity budget the gate's budgeted phases price against, ApplyAllowance is the backend's apply-time allowance for the unbudgeted seconds-scale phases. EITHER figure absent, unparseable, negative, or zero refuses at compile (a negative allowance under-counts the gate's budget sum). Nil on facts collected before dk64 Story A; omitempty keeps pre-dk64 facts byte-identical.
+	ActivityBudget *EngineActivityBudgetFact `json:"activity_budget,omitempty"`
 	// Arch is the node architecture: amd64 | arm64.
 	Arch *string `json:"arch,omitempty"`
+	// Arrivals are the cluster's installed ingress arrival addons (epic 154, §4.2 — the additive growth after Gateway, following the ClaimedHosts/Datastore precedent): one entry per arrival addon instance, naming the arrival kind, its instance id, the address traffic arrives at (the full tunnel CNAME for cloudflare; a provider-native endpoint for the other shapes), and its health. The Gateway field above stays THE PLATFORM ENTRY — arrival-aware consumers (the plan-time binding resolution, the WAF gate, the backend's appurls classifier) read both, never one instead of the other. A route bound to an arrival this list does not show installed AND healthy refuses at plan (ErrArrivalNotHealthy — intent vs facts). omitempty keeps pre-154 facts byte-identical.
+	Arrivals []EngineArrivalFact `json:"arrivals,omitempty"`
 	// ClaimedHosts are the route hostnames other installs on this cluster already claim — the fact the hostname-uniqueness preflight (EDGE.md §4 rule 1) checks route hosts against; a collision refuses naming the conflicting install. The HOST keeps this registry authoritative (record on provision, release on uninstall); omitempty keeps legacy facts byte-identical.
 	ClaimedHosts []EngineHostClaim `json:"claimed_hosts,omitempty"`
+	// ClassCapacities are the per-class free-capacity facts the platform's node agents assembled (the dk64 ledger, R12 — free-space facts: `df` plus thin-pool free via lvs/vgs): per-node classes carry one free figure per eligible node, network-backed classes one system figure. Capacity facts reach the restore compile through this member; ClassCapacity.Validate enforces the R12 shape at every consume point — a malformed or missing fact refuses by name, never a vacuous minimum. omitempty keeps pre-dk64 facts byte-identical.
+	ClassCapacities []EngineClassCapacity `json:"class_capacities,omitempty"`
 	// ClusterSize is the node count.
 	ClusterSize *int32 `json:"cluster_size,omitempty"`
 	// DataDiskFS is the host data-disk filesystem (the frozen DataDiskFS vocabulary). Continuous FILE sync requires a CoW snapshot layer — on plain ext4 the resolve-time check refuses it (STORAGE.md §3).
 	DataDiskFs *EngineDataDiskFS `json:"data_disk_fs,omitempty"`
+	// Datastore is the cluster's k3s datastore fact (story 132.5, STORAGE.md §10.3 addition 3 — cluster facts as plan inputs): the datastore kind (sqlite | etcd), the server members, and the normalized server flag set. The etcd-conversion plan refuses without it (the planner never plans on hope) and its quorum + flag-match preflights read it. Nil on every cluster that has not recorded the fact yet; omitempty keeps pre-132.5 facts byte-identical.
+	Datastore *EngineDatastoreFact `json:"datastore,omitempty"`
 	// Destinations are the backup destinations the platform's destination registry offers as viable for this install (user's buckets, probed reachable). A durability.destination outside this set is refused at resolve (ErrCapabilityUnavailable).
 	Destinations []string `json:"destinations,omitempty"`
 	// Domains are the manageable zones for env_local hostnames.
@@ -36,6 +44,10 @@ type EngineContextFacts struct {
 	Gateway *EngineGatewayFact `json:"gateway,omitempty"`
 	// NodeTier is the node's memory tier (the frozen NodeTier vocabulary). The 1gb tier narrows durability to off/scheduled only (STORAGE.md §7).
 	NodeTier *EngineNodeTier `json:"node_tier,omitempty"`
+	// Provides are the target context's OFFER-SIDE facts (story 135-5, GH #2957 — the move-time re-resolution surface the v1 deferral named): one entry per provider the target offers an incoming binding — an install exposing a runtime context or a registered shared endpoint — with the offered type, version, and free capacity. The archived bindings' re-resolution (unpark/move/import) consumes these offers: a descriptor's linked binding re-resolves against the TARGET's offers, never the origin's records (a move purges the origin long before the restore runs), and a declared requires fact the offers cannot answer refuses at resolve with the named gap — never a half-import. omitempty keeps pre-135-5 facts byte-identical (the Arrivals pattern).
+	Provides []EngineProvideFact `json:"provides,omitempty"`
+	// StorageClassDefaults is the cluster's default-StorageClass pair (the dk64 ledger, R11's schema home): Observed is the class the cluster's k8s default-storage-class annotation named at collection — the CLUSTER-OBSERVED default — and Declared is the platform's own declaration (empty = the platform declares nothing, and the observed default governs). The restore compile renders the observed default into the payload and refuses a disagreement between the two naming both. Nil on facts collected before dk64 Story A; omitempty keeps pre-dk64 facts byte-identical.
+	StorageClassDefaults *EngineStorageClassDefaults `json:"storage_class_defaults,omitempty"`
 	// StorageClasses are the storage classes the platform declared on this cluster (STORAGE.md §7 tiering is compiled FROM these). A storage.class value outside this set is refused at resolve (ErrCapabilityUnavailable).
 	StorageClasses []EngineStorageClassFact `json:"storage_classes,omitempty"`
 }
@@ -55,6 +67,38 @@ func NewEngineContextFacts() *EngineContextFacts {
 func NewEngineContextFactsWithDefaults() *EngineContextFacts {
 	this := EngineContextFacts{}
 	return &this
+}
+
+// GetActivityBudget returns the ActivityBudget field value if set, zero value otherwise.
+func (o *EngineContextFacts) GetActivityBudget() EngineActivityBudgetFact {
+	if o == nil || IsNil(o.ActivityBudget) {
+		var ret EngineActivityBudgetFact
+		return ret
+	}
+	return *o.ActivityBudget
+}
+
+// GetActivityBudgetOk returns a tuple with the ActivityBudget field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineContextFacts) GetActivityBudgetOk() (*EngineActivityBudgetFact, bool) {
+	if o == nil || IsNil(o.ActivityBudget) {
+		return nil, false
+	}
+	return o.ActivityBudget, true
+}
+
+// HasActivityBudget returns a boolean if a field has been set.
+func (o *EngineContextFacts) HasActivityBudget() bool {
+	if o != nil && !IsNil(o.ActivityBudget) {
+		return true
+	}
+
+	return false
+}
+
+// SetActivityBudget gets a reference to the given EngineActivityBudgetFact and assigns it to the ActivityBudget field.
+func (o *EngineContextFacts) SetActivityBudget(v EngineActivityBudgetFact) {
+	o.ActivityBudget = &v
 }
 
 // GetArch returns the Arch field value if set, zero value otherwise.
@@ -89,6 +133,38 @@ func (o *EngineContextFacts) SetArch(v string) {
 	o.Arch = &v
 }
 
+// GetArrivals returns the Arrivals field value if set, zero value otherwise.
+func (o *EngineContextFacts) GetArrivals() []EngineArrivalFact {
+	if o == nil || IsNil(o.Arrivals) {
+		var ret []EngineArrivalFact
+		return ret
+	}
+	return o.Arrivals
+}
+
+// GetArrivalsOk returns a tuple with the Arrivals field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineContextFacts) GetArrivalsOk() ([]EngineArrivalFact, bool) {
+	if o == nil || IsNil(o.Arrivals) {
+		return nil, false
+	}
+	return o.Arrivals, true
+}
+
+// HasArrivals returns a boolean if a field has been set.
+func (o *EngineContextFacts) HasArrivals() bool {
+	if o != nil && !IsNil(o.Arrivals) {
+		return true
+	}
+
+	return false
+}
+
+// SetArrivals gets a reference to the given []EngineArrivalFact and assigns it to the Arrivals field.
+func (o *EngineContextFacts) SetArrivals(v []EngineArrivalFact) {
+	o.Arrivals = v
+}
+
 // GetClaimedHosts returns the ClaimedHosts field value if set, zero value otherwise.
 func (o *EngineContextFacts) GetClaimedHosts() []EngineHostClaim {
 	if o == nil || IsNil(o.ClaimedHosts) {
@@ -119,6 +195,38 @@ func (o *EngineContextFacts) HasClaimedHosts() bool {
 // SetClaimedHosts gets a reference to the given []EngineHostClaim and assigns it to the ClaimedHosts field.
 func (o *EngineContextFacts) SetClaimedHosts(v []EngineHostClaim) {
 	o.ClaimedHosts = v
+}
+
+// GetClassCapacities returns the ClassCapacities field value if set, zero value otherwise.
+func (o *EngineContextFacts) GetClassCapacities() []EngineClassCapacity {
+	if o == nil || IsNil(o.ClassCapacities) {
+		var ret []EngineClassCapacity
+		return ret
+	}
+	return o.ClassCapacities
+}
+
+// GetClassCapacitiesOk returns a tuple with the ClassCapacities field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineContextFacts) GetClassCapacitiesOk() ([]EngineClassCapacity, bool) {
+	if o == nil || IsNil(o.ClassCapacities) {
+		return nil, false
+	}
+	return o.ClassCapacities, true
+}
+
+// HasClassCapacities returns a boolean if a field has been set.
+func (o *EngineContextFacts) HasClassCapacities() bool {
+	if o != nil && !IsNil(o.ClassCapacities) {
+		return true
+	}
+
+	return false
+}
+
+// SetClassCapacities gets a reference to the given []EngineClassCapacity and assigns it to the ClassCapacities field.
+func (o *EngineContextFacts) SetClassCapacities(v []EngineClassCapacity) {
+	o.ClassCapacities = v
 }
 
 // GetClusterSize returns the ClusterSize field value if set, zero value otherwise.
@@ -183,6 +291,38 @@ func (o *EngineContextFacts) HasDataDiskFs() bool {
 // SetDataDiskFs gets a reference to the given EngineDataDiskFS and assigns it to the DataDiskFs field.
 func (o *EngineContextFacts) SetDataDiskFs(v EngineDataDiskFS) {
 	o.DataDiskFs = &v
+}
+
+// GetDatastore returns the Datastore field value if set, zero value otherwise.
+func (o *EngineContextFacts) GetDatastore() EngineDatastoreFact {
+	if o == nil || IsNil(o.Datastore) {
+		var ret EngineDatastoreFact
+		return ret
+	}
+	return *o.Datastore
+}
+
+// GetDatastoreOk returns a tuple with the Datastore field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineContextFacts) GetDatastoreOk() (*EngineDatastoreFact, bool) {
+	if o == nil || IsNil(o.Datastore) {
+		return nil, false
+	}
+	return o.Datastore, true
+}
+
+// HasDatastore returns a boolean if a field has been set.
+func (o *EngineContextFacts) HasDatastore() bool {
+	if o != nil && !IsNil(o.Datastore) {
+		return true
+	}
+
+	return false
+}
+
+// SetDatastore gets a reference to the given EngineDatastoreFact and assigns it to the Datastore field.
+func (o *EngineContextFacts) SetDatastore(v EngineDatastoreFact) {
+	o.Datastore = &v
 }
 
 // GetDestinations returns the Destinations field value if set, zero value otherwise.
@@ -313,6 +453,70 @@ func (o *EngineContextFacts) SetNodeTier(v EngineNodeTier) {
 	o.NodeTier = &v
 }
 
+// GetProvides returns the Provides field value if set, zero value otherwise.
+func (o *EngineContextFacts) GetProvides() []EngineProvideFact {
+	if o == nil || IsNil(o.Provides) {
+		var ret []EngineProvideFact
+		return ret
+	}
+	return o.Provides
+}
+
+// GetProvidesOk returns a tuple with the Provides field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineContextFacts) GetProvidesOk() ([]EngineProvideFact, bool) {
+	if o == nil || IsNil(o.Provides) {
+		return nil, false
+	}
+	return o.Provides, true
+}
+
+// HasProvides returns a boolean if a field has been set.
+func (o *EngineContextFacts) HasProvides() bool {
+	if o != nil && !IsNil(o.Provides) {
+		return true
+	}
+
+	return false
+}
+
+// SetProvides gets a reference to the given []EngineProvideFact and assigns it to the Provides field.
+func (o *EngineContextFacts) SetProvides(v []EngineProvideFact) {
+	o.Provides = v
+}
+
+// GetStorageClassDefaults returns the StorageClassDefaults field value if set, zero value otherwise.
+func (o *EngineContextFacts) GetStorageClassDefaults() EngineStorageClassDefaults {
+	if o == nil || IsNil(o.StorageClassDefaults) {
+		var ret EngineStorageClassDefaults
+		return ret
+	}
+	return *o.StorageClassDefaults
+}
+
+// GetStorageClassDefaultsOk returns a tuple with the StorageClassDefaults field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineContextFacts) GetStorageClassDefaultsOk() (*EngineStorageClassDefaults, bool) {
+	if o == nil || IsNil(o.StorageClassDefaults) {
+		return nil, false
+	}
+	return o.StorageClassDefaults, true
+}
+
+// HasStorageClassDefaults returns a boolean if a field has been set.
+func (o *EngineContextFacts) HasStorageClassDefaults() bool {
+	if o != nil && !IsNil(o.StorageClassDefaults) {
+		return true
+	}
+
+	return false
+}
+
+// SetStorageClassDefaults gets a reference to the given EngineStorageClassDefaults and assigns it to the StorageClassDefaults field.
+func (o *EngineContextFacts) SetStorageClassDefaults(v EngineStorageClassDefaults) {
+	o.StorageClassDefaults = &v
+}
+
 // GetStorageClasses returns the StorageClasses field value if set, zero value otherwise.
 func (o *EngineContextFacts) GetStorageClasses() []EngineStorageClassFact {
 	if o == nil || IsNil(o.StorageClasses) {
@@ -355,17 +559,29 @@ func (o EngineContextFacts) MarshalJSON() ([]byte, error) {
 
 func (o EngineContextFacts) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.ActivityBudget) {
+		toSerialize["activity_budget"] = o.ActivityBudget
+	}
 	if !IsNil(o.Arch) {
 		toSerialize["arch"] = o.Arch
 	}
+	if !IsNil(o.Arrivals) {
+		toSerialize["arrivals"] = o.Arrivals
+	}
 	if !IsNil(o.ClaimedHosts) {
 		toSerialize["claimed_hosts"] = o.ClaimedHosts
+	}
+	if !IsNil(o.ClassCapacities) {
+		toSerialize["class_capacities"] = o.ClassCapacities
 	}
 	if !IsNil(o.ClusterSize) {
 		toSerialize["cluster_size"] = o.ClusterSize
 	}
 	if !IsNil(o.DataDiskFs) {
 		toSerialize["data_disk_fs"] = o.DataDiskFs
+	}
+	if !IsNil(o.Datastore) {
+		toSerialize["datastore"] = o.Datastore
 	}
 	if !IsNil(o.Destinations) {
 		toSerialize["destinations"] = o.Destinations
@@ -378,6 +594,12 @@ func (o EngineContextFacts) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.NodeTier) {
 		toSerialize["node_tier"] = o.NodeTier
+	}
+	if !IsNil(o.Provides) {
+		toSerialize["provides"] = o.Provides
+	}
+	if !IsNil(o.StorageClassDefaults) {
+		toSerialize["storage_class_defaults"] = o.StorageClassDefaults
 	}
 	if !IsNil(o.StorageClasses) {
 		toSerialize["storage_classes"] = o.StorageClasses

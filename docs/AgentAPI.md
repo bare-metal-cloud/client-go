@@ -30,7 +30,7 @@ import (
 )
 
 func main() {
-	token := "token_example" // string | Agent registration token (short token)
+	token := "token_example" // string | Agent registration token (short token) — omit for the runtime-prompt script (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -55,7 +55,7 @@ Other parameters are passed through a pointer to a apiGetAgentInstallShRequest s
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **token** | **string** | Agent registration token (short token) | 
+ **token** | **string** | Agent registration token (short token) — omit for the runtime-prompt script | 
 
 ### Return type
 
@@ -99,7 +99,7 @@ func main() {
 	token := "token_example" // string | Agent registration token (short token)
 	name := "name_example" // string | Cluster name (optional)
 	namespace := "namespace_example" // string | Namespace (default: bare-metal-agent) (optional)
-	imageTag := "imageTag_example" // string | Agent image tag (default: latest) (optional)
+	imageTag := "imageTag_example" // string | Agent image tag (default: the platform's configured released tag, AGENT_K8S_IMAGE_TAG; 'latest' stays available as an explicit override) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -127,7 +127,7 @@ Name | Type | Description  | Notes
  **token** | **string** | Agent registration token (short token) | 
  **name** | **string** | Cluster name | 
  **namespace** | **string** | Namespace (default: bare-metal-agent) | 
- **imageTag** | **string** | Agent image tag (default: latest) | 
+ **imageTag** | **string** | Agent image tag (default: the platform&#39;s configured released tag, AGENT_K8S_IMAGE_TAG; &#39;latest&#39; stays available as an explicit override) | 
 
 ### Return type
 

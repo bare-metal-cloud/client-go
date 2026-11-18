@@ -24,6 +24,8 @@ type ModelsUser struct {
 	CreatedAt *string `json:"created_at,omitempty"`
 	Email *string `json:"email,omitempty"`
 	Id *int32 `json:"id,omitempty"`
+	// LocalEchoEnabled is the per-user terminal local-echo preference (issue #774, Category AH). Default OFF everywhere: a user who never toggled gets false, so console/SSH keystroke behavior is byte-identical to the pre-#774 round-trip behavior until the user opts in. GORM auto-migrate adds the column per house convention.
+	LocalEchoEnabled *bool `json:"local_echo_enabled,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Networks []ModelsNetwork `json:"networks,omitempty"`
 	OauthAccounts []ModelsOAuthAccount `json:"oauth_accounts,omitempty"`
@@ -175,6 +177,38 @@ func (o *ModelsUser) HasId() bool {
 // SetId gets a reference to the given int32 and assigns it to the Id field.
 func (o *ModelsUser) SetId(v int32) {
 	o.Id = &v
+}
+
+// GetLocalEchoEnabled returns the LocalEchoEnabled field value if set, zero value otherwise.
+func (o *ModelsUser) GetLocalEchoEnabled() bool {
+	if o == nil || IsNil(o.LocalEchoEnabled) {
+		var ret bool
+		return ret
+	}
+	return *o.LocalEchoEnabled
+}
+
+// GetLocalEchoEnabledOk returns a tuple with the LocalEchoEnabled field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsUser) GetLocalEchoEnabledOk() (*bool, bool) {
+	if o == nil || IsNil(o.LocalEchoEnabled) {
+		return nil, false
+	}
+	return o.LocalEchoEnabled, true
+}
+
+// HasLocalEchoEnabled returns a boolean if a field has been set.
+func (o *ModelsUser) HasLocalEchoEnabled() bool {
+	if o != nil && !IsNil(o.LocalEchoEnabled) {
+		return true
+	}
+
+	return false
+}
+
+// SetLocalEchoEnabled gets a reference to the given bool and assigns it to the LocalEchoEnabled field.
+func (o *ModelsUser) SetLocalEchoEnabled(v bool) {
+	o.LocalEchoEnabled = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -390,6 +424,9 @@ func (o ModelsUser) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
+	}
+	if !IsNil(o.LocalEchoEnabled) {
+		toSerialize["local_echo_enabled"] = o.LocalEchoEnabled
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name

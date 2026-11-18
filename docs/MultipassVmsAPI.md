@@ -4,17 +4,17 @@ All URIs are relative to *http://localhost:3001/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetApiV1MultipassVmsId**](MultipassVmsAPI.md#GetApiV1MultipassVmsId) | **Get** /api/v1/multipass-vms/{id} | Get Multipass VM
-[**GetApiV1MultipassVmsIdHost**](MultipassVmsAPI.md#GetApiV1MultipassVmsIdHost) | **Get** /api/v1/multipass-vms/{id}/host | Get Multipass VM Host
-[**GetApiV1VirtualMachinesHostVmIdMultipassVms**](MultipassVmsAPI.md#GetApiV1VirtualMachinesHostVmIdMultipassVms) | **Get** /api/v1/virtual-machines/{host_vm_id}/multipass-vms | List Multipass VMs
+[**GetMultipassVmsId**](MultipassVmsAPI.md#GetMultipassVmsId) | **Get** /multipass-vms/{id} | Get Multipass VM
+[**GetMultipassVmsIdHost**](MultipassVmsAPI.md#GetMultipassVmsIdHost) | **Get** /multipass-vms/{id}/host | Get Multipass VM Host
+[**GetVirtualMachinesHostVmIdMultipassVms**](MultipassVmsAPI.md#GetVirtualMachinesHostVmIdMultipassVms) | **Get** /virtual-machines/{host_vm_id}/multipass-vms | List Multipass VMs
 [**PostApiV1MultipassVmsDelete**](MultipassVmsAPI.md#PostApiV1MultipassVmsDelete) | **Post** /api/v1/multipass-vms/delete | Handle Multipass Delete Request
 [**PostApiV1MultipassVmsSync**](MultipassVmsAPI.md#PostApiV1MultipassVmsSync) | **Post** /api/v1/multipass-vms/sync | Handle Multipass Sync Message
 
 
 
-## GetApiV1MultipassVmsId
+## GetMultipassVmsId
 
-> ModelsMultipassVM GetApiV1MultipassVmsId(ctx, id).Execute()
+> ModelsMultipassVM GetMultipassVmsId(ctx, id).Execute()
 
 Get Multipass VM
 
@@ -37,13 +37,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.MultipassVmsAPI.GetApiV1MultipassVmsId(context.Background(), id).Execute()
+	resp, r, err := apiClient.MultipassVmsAPI.GetMultipassVmsId(context.Background(), id).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `MultipassVmsAPI.GetApiV1MultipassVmsId``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `MultipassVmsAPI.GetMultipassVmsId``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetApiV1MultipassVmsId`: ModelsMultipassVM
-	fmt.Fprintf(os.Stdout, "Response from `MultipassVmsAPI.GetApiV1MultipassVmsId`: %v\n", resp)
+	// response from `GetMultipassVmsId`: ModelsMultipassVM
+	fmt.Fprintf(os.Stdout, "Response from `MultipassVmsAPI.GetMultipassVmsId`: %v\n", resp)
 }
 ```
 
@@ -57,7 +57,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetApiV1MultipassVmsIdRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetMultipassVmsIdRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -70,7 +70,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -82,9 +82,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## GetApiV1MultipassVmsIdHost
+## GetMultipassVmsIdHost
 
-> ModelsVirtualMachine GetApiV1MultipassVmsIdHost(ctx, id).Execute()
+> ModelsVirtualMachine GetMultipassVmsIdHost(ctx, id).Execute()
 
 Get Multipass VM Host
 
@@ -107,13 +107,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.MultipassVmsAPI.GetApiV1MultipassVmsIdHost(context.Background(), id).Execute()
+	resp, r, err := apiClient.MultipassVmsAPI.GetMultipassVmsIdHost(context.Background(), id).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `MultipassVmsAPI.GetApiV1MultipassVmsIdHost``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `MultipassVmsAPI.GetMultipassVmsIdHost``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetApiV1MultipassVmsIdHost`: ModelsVirtualMachine
-	fmt.Fprintf(os.Stdout, "Response from `MultipassVmsAPI.GetApiV1MultipassVmsIdHost`: %v\n", resp)
+	// response from `GetMultipassVmsIdHost`: ModelsVirtualMachine
+	fmt.Fprintf(os.Stdout, "Response from `MultipassVmsAPI.GetMultipassVmsIdHost`: %v\n", resp)
 }
 ```
 
@@ -127,7 +127,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetApiV1MultipassVmsIdHostRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetMultipassVmsIdHostRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -140,7 +140,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -152,9 +152,9 @@ No authorization required
 [[Back to README]](../README.md)
 
 
-## GetApiV1VirtualMachinesHostVmIdMultipassVms
+## GetVirtualMachinesHostVmIdMultipassVms
 
-> []ModelsMultipassVM GetApiV1VirtualMachinesHostVmIdMultipassVms(ctx, hostVmId).Execute()
+> []ModelsMultipassVM GetVirtualMachinesHostVmIdMultipassVms(ctx, hostVmId).Execute()
 
 List Multipass VMs
 
@@ -177,13 +177,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.MultipassVmsAPI.GetApiV1VirtualMachinesHostVmIdMultipassVms(context.Background(), hostVmId).Execute()
+	resp, r, err := apiClient.MultipassVmsAPI.GetVirtualMachinesHostVmIdMultipassVms(context.Background(), hostVmId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `MultipassVmsAPI.GetApiV1VirtualMachinesHostVmIdMultipassVms``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `MultipassVmsAPI.GetVirtualMachinesHostVmIdMultipassVms``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetApiV1VirtualMachinesHostVmIdMultipassVms`: []ModelsMultipassVM
-	fmt.Fprintf(os.Stdout, "Response from `MultipassVmsAPI.GetApiV1VirtualMachinesHostVmIdMultipassVms`: %v\n", resp)
+	// response from `GetVirtualMachinesHostVmIdMultipassVms`: []ModelsMultipassVM
+	fmt.Fprintf(os.Stdout, "Response from `MultipassVmsAPI.GetVirtualMachinesHostVmIdMultipassVms`: %v\n", resp)
 }
 ```
 
@@ -197,7 +197,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetVirtualMachinesHostVmIdMultipassVmsRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -210,7 +210,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

@@ -29,6 +29,8 @@ type NetworkbackendNetwork struct {
 	// Draft intent (story 124.17 AC7): 'cluster-create' when the wizard created this network as a draft for the cluster named by DraftName. Surfaces the Networks-page resume banner / \"Prepared for a cluster\" chip without a per-row join-status call.
 	Purpose *ModelsNetworkPurpose `json:"purpose,omitempty"`
 	Status *ModelsNetworkStatus `json:"status,omitempty"`
+	// StatusReason carries the visible failure reason for the failed / delete_failed states (#2359, #2362); empty on healthy rows. The FE renders it under the status chip.
+	StatusReason *string `json:"status_reason,omitempty"`
 	UpdatedAt *string `json:"updated_at,omitempty"`
 }
 
@@ -305,6 +307,38 @@ func (o *NetworkbackendNetwork) SetStatus(v ModelsNetworkStatus) {
 	o.Status = &v
 }
 
+// GetStatusReason returns the StatusReason field value if set, zero value otherwise.
+func (o *NetworkbackendNetwork) GetStatusReason() string {
+	if o == nil || IsNil(o.StatusReason) {
+		var ret string
+		return ret
+	}
+	return *o.StatusReason
+}
+
+// GetStatusReasonOk returns a tuple with the StatusReason field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *NetworkbackendNetwork) GetStatusReasonOk() (*string, bool) {
+	if o == nil || IsNil(o.StatusReason) {
+		return nil, false
+	}
+	return o.StatusReason, true
+}
+
+// HasStatusReason returns a boolean if a field has been set.
+func (o *NetworkbackendNetwork) HasStatusReason() bool {
+	if o != nil && !IsNil(o.StatusReason) {
+		return true
+	}
+
+	return false
+}
+
+// SetStatusReason gets a reference to the given string and assigns it to the StatusReason field.
+func (o *NetworkbackendNetwork) SetStatusReason(v string) {
+	o.StatusReason = &v
+}
+
 // GetUpdatedAt returns the UpdatedAt field value if set, zero value otherwise.
 func (o *NetworkbackendNetwork) GetUpdatedAt() string {
 	if o == nil || IsNil(o.UpdatedAt) {
@@ -370,6 +404,9 @@ func (o NetworkbackendNetwork) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status
+	}
+	if !IsNil(o.StatusReason) {
+		toSerialize["status_reason"] = o.StatusReason
 	}
 	if !IsNil(o.UpdatedAt) {
 		toSerialize["updated_at"] = o.UpdatedAt

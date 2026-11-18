@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **AwsRegion** | Pointer to **string** |  | [optional] 
 **AzureCredentialId** | Pointer to **int32** |  | [optional] 
 **CaCertificate** | Pointer to **string** | For private registries | [optional] 
+**ClientEnvelope** | Pointer to [**HandlersClientEnvelopeDTO**](HandlersClientEnvelopeDTO.md) | ClientEnvelope is the browser-sealed stored copy of the credentials JSON ({username, password, login_server, ca_certificate} — the keys present in the request). Required whenever the request carries any of those fields (issue #4424, B5): the server stores the bytes and never encrypts. The plaintext fields still ride the request for the one live check (registry design RC5, create half). | [optional] 
 **EcrRegion** | Pointer to **string** | legacy alias | [optional] 
 **GcpCredentialId** | Pointer to **int32** |  | [optional] 
 **LoginServer** | Pointer to **string** | For ACR username/password auth | [optional] 
@@ -16,14 +17,14 @@ Name | Type | Description | Notes
 **Password** | Pointer to **string** |  | [optional] 
 **Scope** | Pointer to **string** |  | [optional] 
 **Type** | **string** |  | 
-**Url** | **string** |  | 
+**Url** | Pointer to **string** | URL is enforced in the handler, not here: docker-hub-public creates may omit it (issue #3577 — the endpoint auto-fills to the Hub API URL), while every other type still requires it. | [optional] 
 **Username** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewHandlersCreateImageRegistryRequest
 
-`func NewHandlersCreateImageRegistryRequest(name string, type_ string, url string, ) *HandlersCreateImageRegistryRequest`
+`func NewHandlersCreateImageRegistryRequest(name string, type_ string, ) *HandlersCreateImageRegistryRequest`
 
 NewHandlersCreateImageRegistryRequest instantiates a new HandlersCreateImageRegistryRequest object
 This constructor will assign default values to properties that have it defined,
@@ -162,6 +163,31 @@ SetCaCertificate sets CaCertificate field to given value.
 `func (o *HandlersCreateImageRegistryRequest) HasCaCertificate() bool`
 
 HasCaCertificate returns a boolean if a field has been set.
+
+### GetClientEnvelope
+
+`func (o *HandlersCreateImageRegistryRequest) GetClientEnvelope() HandlersClientEnvelopeDTO`
+
+GetClientEnvelope returns the ClientEnvelope field if non-nil, zero value otherwise.
+
+### GetClientEnvelopeOk
+
+`func (o *HandlersCreateImageRegistryRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool)`
+
+GetClientEnvelopeOk returns a tuple with the ClientEnvelope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClientEnvelope
+
+`func (o *HandlersCreateImageRegistryRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO)`
+
+SetClientEnvelope sets ClientEnvelope field to given value.
+
+### HasClientEnvelope
+
+`func (o *HandlersCreateImageRegistryRequest) HasClientEnvelope() bool`
+
+HasClientEnvelope returns a boolean if a field has been set.
 
 ### GetEcrRegion
 
@@ -347,6 +373,11 @@ and a boolean to check if the value has been set.
 
 SetUrl sets Url field to given value.
 
+### HasUrl
+
+`func (o *HandlersCreateImageRegistryRequest) HasUrl() bool`
+
+HasUrl returns a boolean if a field has been set.
 
 ### GetUsername
 

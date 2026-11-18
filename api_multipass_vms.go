@@ -24,49 +24,49 @@ import (
 type MultipassVmsAPI interface {
 
 	/*
-	GetApiV1MultipassVmsId Get Multipass VM
+	GetMultipassVmsId Get Multipass VM
 
 	Get a single Multipass VM by ID
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id VM ID
-	@return ApiGetApiV1MultipassVmsIdRequest
+	@return ApiGetMultipassVmsIdRequest
 	*/
-	GetApiV1MultipassVmsId(ctx context.Context, id int32) ApiGetApiV1MultipassVmsIdRequest
+	GetMultipassVmsId(ctx context.Context, id int32) ApiGetMultipassVmsIdRequest
 
-	// GetApiV1MultipassVmsIdExecute executes the request
+	// GetMultipassVmsIdExecute executes the request
 	//  @return ModelsMultipassVM
-	GetApiV1MultipassVmsIdExecute(r ApiGetApiV1MultipassVmsIdRequest) (*ModelsMultipassVM, *http.Response, error)
+	GetMultipassVmsIdExecute(r ApiGetMultipassVmsIdRequest) (*ModelsMultipassVM, *http.Response, error)
 
 	/*
-	GetApiV1MultipassVmsIdHost Get Multipass VM Host
+	GetMultipassVmsIdHost Get Multipass VM Host
 
 	Get the host VM for a specific Multipass VM
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id VM ID
-	@return ApiGetApiV1MultipassVmsIdHostRequest
+	@return ApiGetMultipassVmsIdHostRequest
 	*/
-	GetApiV1MultipassVmsIdHost(ctx context.Context, id int32) ApiGetApiV1MultipassVmsIdHostRequest
+	GetMultipassVmsIdHost(ctx context.Context, id int32) ApiGetMultipassVmsIdHostRequest
 
-	// GetApiV1MultipassVmsIdHostExecute executes the request
+	// GetMultipassVmsIdHostExecute executes the request
 	//  @return ModelsVirtualMachine
-	GetApiV1MultipassVmsIdHostExecute(r ApiGetApiV1MultipassVmsIdHostRequest) (*ModelsVirtualMachine, *http.Response, error)
+	GetMultipassVmsIdHostExecute(r ApiGetMultipassVmsIdHostRequest) (*ModelsVirtualMachine, *http.Response, error)
 
 	/*
-	GetApiV1VirtualMachinesHostVmIdMultipassVms List Multipass VMs
+	GetVirtualMachinesHostVmIdMultipassVms List Multipass VMs
 
 	Get all Multipass VMs for a specific host VM
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param hostVmId Host VM ID
-	@return ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest
+	@return ApiGetVirtualMachinesHostVmIdMultipassVmsRequest
 	*/
-	GetApiV1VirtualMachinesHostVmIdMultipassVms(ctx context.Context, hostVmId int32) ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest
+	GetVirtualMachinesHostVmIdMultipassVms(ctx context.Context, hostVmId int32) ApiGetVirtualMachinesHostVmIdMultipassVmsRequest
 
-	// GetApiV1VirtualMachinesHostVmIdMultipassVmsExecute executes the request
+	// GetVirtualMachinesHostVmIdMultipassVmsExecute executes the request
 	//  @return []ModelsMultipassVM
-	GetApiV1VirtualMachinesHostVmIdMultipassVmsExecute(r ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest) ([]ModelsMultipassVM, *http.Response, error)
+	GetVirtualMachinesHostVmIdMultipassVmsExecute(r ApiGetVirtualMachinesHostVmIdMultipassVmsRequest) ([]ModelsMultipassVM, *http.Response, error)
 
 	/*
 	PostApiV1MultipassVmsDelete Handle Multipass Delete Request
@@ -100,27 +100,27 @@ type MultipassVmsAPI interface {
 // MultipassVmsAPIService MultipassVmsAPI service
 type MultipassVmsAPIService service
 
-type ApiGetApiV1MultipassVmsIdRequest struct {
+type ApiGetMultipassVmsIdRequest struct {
 	ctx context.Context
 	ApiService MultipassVmsAPI
 	id int32
 }
 
-func (r ApiGetApiV1MultipassVmsIdRequest) Execute() (*ModelsMultipassVM, *http.Response, error) {
-	return r.ApiService.GetApiV1MultipassVmsIdExecute(r)
+func (r ApiGetMultipassVmsIdRequest) Execute() (*ModelsMultipassVM, *http.Response, error) {
+	return r.ApiService.GetMultipassVmsIdExecute(r)
 }
 
 /*
-GetApiV1MultipassVmsId Get Multipass VM
+GetMultipassVmsId Get Multipass VM
 
 Get a single Multipass VM by ID
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id VM ID
- @return ApiGetApiV1MultipassVmsIdRequest
+ @return ApiGetMultipassVmsIdRequest
 */
-func (a *MultipassVmsAPIService) GetApiV1MultipassVmsId(ctx context.Context, id int32) ApiGetApiV1MultipassVmsIdRequest {
-	return ApiGetApiV1MultipassVmsIdRequest{
+func (a *MultipassVmsAPIService) GetMultipassVmsId(ctx context.Context, id int32) ApiGetMultipassVmsIdRequest {
+	return ApiGetMultipassVmsIdRequest{
 		ApiService: a,
 		ctx: ctx,
 		id: id,
@@ -129,7 +129,7 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsId(ctx context.Context, id 
 
 // Execute executes the request
 //  @return ModelsMultipassVM
-func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdExecute(r ApiGetApiV1MultipassVmsIdRequest) (*ModelsMultipassVM, *http.Response, error) {
+func (a *MultipassVmsAPIService) GetMultipassVmsIdExecute(r ApiGetMultipassVmsIdRequest) (*ModelsMultipassVM, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -137,12 +137,12 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdExecute(r ApiGetApiV1Mult
 		localVarReturnValue  *ModelsMultipassVM
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MultipassVmsAPIService.GetApiV1MultipassVmsId")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MultipassVmsAPIService.GetMultipassVmsId")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/multipass-vms/{id}"
+	localVarPath := localBasePath + "/multipass-vms/{id}"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -165,6 +165,34 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdExecute(r ApiGetApiV1Mult
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -235,27 +263,27 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdExecute(r ApiGetApiV1Mult
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetApiV1MultipassVmsIdHostRequest struct {
+type ApiGetMultipassVmsIdHostRequest struct {
 	ctx context.Context
 	ApiService MultipassVmsAPI
 	id int32
 }
 
-func (r ApiGetApiV1MultipassVmsIdHostRequest) Execute() (*ModelsVirtualMachine, *http.Response, error) {
-	return r.ApiService.GetApiV1MultipassVmsIdHostExecute(r)
+func (r ApiGetMultipassVmsIdHostRequest) Execute() (*ModelsVirtualMachine, *http.Response, error) {
+	return r.ApiService.GetMultipassVmsIdHostExecute(r)
 }
 
 /*
-GetApiV1MultipassVmsIdHost Get Multipass VM Host
+GetMultipassVmsIdHost Get Multipass VM Host
 
 Get the host VM for a specific Multipass VM
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id VM ID
- @return ApiGetApiV1MultipassVmsIdHostRequest
+ @return ApiGetMultipassVmsIdHostRequest
 */
-func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdHost(ctx context.Context, id int32) ApiGetApiV1MultipassVmsIdHostRequest {
-	return ApiGetApiV1MultipassVmsIdHostRequest{
+func (a *MultipassVmsAPIService) GetMultipassVmsIdHost(ctx context.Context, id int32) ApiGetMultipassVmsIdHostRequest {
+	return ApiGetMultipassVmsIdHostRequest{
 		ApiService: a,
 		ctx: ctx,
 		id: id,
@@ -264,7 +292,7 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdHost(ctx context.Context,
 
 // Execute executes the request
 //  @return ModelsVirtualMachine
-func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdHostExecute(r ApiGetApiV1MultipassVmsIdHostRequest) (*ModelsVirtualMachine, *http.Response, error) {
+func (a *MultipassVmsAPIService) GetMultipassVmsIdHostExecute(r ApiGetMultipassVmsIdHostRequest) (*ModelsVirtualMachine, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -272,12 +300,12 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdHostExecute(r ApiGetApiV1
 		localVarReturnValue  *ModelsVirtualMachine
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MultipassVmsAPIService.GetApiV1MultipassVmsIdHost")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MultipassVmsAPIService.GetMultipassVmsIdHost")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/multipass-vms/{id}/host"
+	localVarPath := localBasePath + "/multipass-vms/{id}/host"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -300,6 +328,34 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdHostExecute(r ApiGetApiV1
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
@@ -370,27 +426,27 @@ func (a *MultipassVmsAPIService) GetApiV1MultipassVmsIdHostExecute(r ApiGetApiV1
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest struct {
+type ApiGetVirtualMachinesHostVmIdMultipassVmsRequest struct {
 	ctx context.Context
 	ApiService MultipassVmsAPI
 	hostVmId int32
 }
 
-func (r ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest) Execute() ([]ModelsMultipassVM, *http.Response, error) {
-	return r.ApiService.GetApiV1VirtualMachinesHostVmIdMultipassVmsExecute(r)
+func (r ApiGetVirtualMachinesHostVmIdMultipassVmsRequest) Execute() ([]ModelsMultipassVM, *http.Response, error) {
+	return r.ApiService.GetVirtualMachinesHostVmIdMultipassVmsExecute(r)
 }
 
 /*
-GetApiV1VirtualMachinesHostVmIdMultipassVms List Multipass VMs
+GetVirtualMachinesHostVmIdMultipassVms List Multipass VMs
 
 Get all Multipass VMs for a specific host VM
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param hostVmId Host VM ID
- @return ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest
+ @return ApiGetVirtualMachinesHostVmIdMultipassVmsRequest
 */
-func (a *MultipassVmsAPIService) GetApiV1VirtualMachinesHostVmIdMultipassVms(ctx context.Context, hostVmId int32) ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest {
-	return ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest{
+func (a *MultipassVmsAPIService) GetVirtualMachinesHostVmIdMultipassVms(ctx context.Context, hostVmId int32) ApiGetVirtualMachinesHostVmIdMultipassVmsRequest {
+	return ApiGetVirtualMachinesHostVmIdMultipassVmsRequest{
 		ApiService: a,
 		ctx: ctx,
 		hostVmId: hostVmId,
@@ -399,7 +455,7 @@ func (a *MultipassVmsAPIService) GetApiV1VirtualMachinesHostVmIdMultipassVms(ctx
 
 // Execute executes the request
 //  @return []ModelsMultipassVM
-func (a *MultipassVmsAPIService) GetApiV1VirtualMachinesHostVmIdMultipassVmsExecute(r ApiGetApiV1VirtualMachinesHostVmIdMultipassVmsRequest) ([]ModelsMultipassVM, *http.Response, error) {
+func (a *MultipassVmsAPIService) GetVirtualMachinesHostVmIdMultipassVmsExecute(r ApiGetVirtualMachinesHostVmIdMultipassVmsRequest) ([]ModelsMultipassVM, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
@@ -407,12 +463,12 @@ func (a *MultipassVmsAPIService) GetApiV1VirtualMachinesHostVmIdMultipassVmsExec
 		localVarReturnValue  []ModelsMultipassVM
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MultipassVmsAPIService.GetApiV1VirtualMachinesHostVmIdMultipassVms")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "MultipassVmsAPIService.GetVirtualMachinesHostVmIdMultipassVms")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/virtual-machines/{host_vm_id}/multipass-vms"
+	localVarPath := localBasePath + "/virtual-machines/{host_vm_id}/multipass-vms"
 	localVarPath = strings.Replace(localVarPath, "{"+"host_vm_id"+"}", url.PathEscape(parameterValueToString(r.hostVmId, "hostVmId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -435,6 +491,34 @@ func (a *MultipassVmsAPIService) GetApiV1VirtualMachinesHostVmIdMultipassVmsExec
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {

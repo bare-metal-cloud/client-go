@@ -22,13 +22,13 @@ func Test_bmc_ScheduledAccessAPIService(t *testing.T) {
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
-	t.Run("Test ScheduledAccessAPIService PostApiV1ServiceAccountsSaIdSealSecret", func(t *testing.T) {
+	t.Run("Test ScheduledAccessAPIService PostServiceAccountsSaIdSealSecret", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		var saId int32
 
-		resp, httpRes, err := apiClient.ScheduledAccessAPI.PostApiV1ServiceAccountsSaIdSealSecret(context.Background(), saId).Execute()
+		resp, httpRes, err := apiClient.ScheduledAccessAPI.PostServiceAccountsSaIdSealSecret(context.Background(), saId).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

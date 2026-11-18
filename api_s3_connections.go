@@ -53,20 +53,6 @@ type S3ConnectionsAPI interface {
 	DeleteS3ConnectionsIdBucketsBucketObjectsKeyExecute(r ApiDeleteS3ConnectionsIdBucketsBucketObjectsKeyRequest) (*http.Response, error)
 
 	/*
-	DeleteS3ConnectionsIdObjects Delete an S3 object
-
-	Deletes one object via the stored connection (SSRF-locked). Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials. Compatibility alias for the canonical nested DELETE under /buckets/:bucket/objects/*key (Story 88.2).
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id S3 Connection ID
-	@return ApiDeleteS3ConnectionsIdObjectsRequest
-	*/
-	DeleteS3ConnectionsIdObjects(ctx context.Context, id int32) ApiDeleteS3ConnectionsIdObjectsRequest
-
-	// DeleteS3ConnectionsIdObjectsExecute executes the request
-	DeleteS3ConnectionsIdObjectsExecute(r ApiDeleteS3ConnectionsIdObjectsRequest) (*http.Response, error)
-
-	/*
 	GetS3Connections List all S3 connections
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -80,7 +66,7 @@ type S3ConnectionsAPI interface {
 	/*
 	GetS3ConnectionsIdBuckets List buckets for an S3 connection
 
-	Proxies ListBuckets for one saved S3 connection. Query q filters names (case-insensitive). Guest denied by Casbin (viewer+). Vault unlock required.
+	Proxies ListBuckets for one saved S3 connection. Query q filters names (case-insensitive). Casbin admits Viewer and above; Guest is denied. Owner/Admin always pass. Maintainer needs an active org vault grant (JIT approval or admin pre-grant, time-boxed); Viewer needs an admin pre-grant only (no self-service request). Otherwise 423.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id S3 Connection ID
@@ -95,7 +81,7 @@ type S3ConnectionsAPI interface {
 	/*
 	GetS3ConnectionsIdObjects List objects in a bucket
 
-	Proxies ListObjectsV2. Requires bucket=. Optional prefix, continuation_token, q (key substring on current page), delimiter.
+	Proxies ListObjectsV2. Requires bucket=. Optional prefix, continuation_token, q (key substring on current page), delimiter. Same access as bucket listing: Viewer and above by Casbin, Guest denied; Maintainer needs a vault grant (JIT or pre-grant), Viewer an admin pre-grant only.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id S3 Connection ID
@@ -110,7 +96,7 @@ type S3ConnectionsAPI interface {
 	/*
 	GetS3ConnectionsIdObjectsDownload Download an S3 object
 
-	Streams object bytes for one saved S3 connection (SSRF-locked to stored endpoint). Size/time capped. Guest denied by Casbin (viewer+). Vault unlock required. Never returns credentials.
+	Streams object bytes for one saved S3 connection (SSRF-locked to stored endpoint). Size/time capped. Casbin admits Viewer and above; Guest is denied. Owner/Admin always pass. Maintainer needs an active org vault grant (JIT approval or admin pre-grant, time-boxed); Viewer needs an admin pre-grant only (no self-service request). Otherwise 423. Never returns credentials.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id S3 Connection ID
@@ -148,6 +134,8 @@ type S3ConnectionsAPI interface {
 	/*
 	PostS3ConnectionsTest Test an S3 connection before saving
 
+	Verifies a storage connection before create. Raw-key requests use the keys in the body; a linked_credential_id request resolves the org-scoped cloud credential through the vault and probes with its secret (vault-gated: 423 with X-Org-Vault-Required while locked). azblob runs a ListContainers check, the S3 family a ListBuckets check.
+
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiPostS3ConnectionsTestRequest
 	*/
@@ -158,9 +146,9 @@ type S3ConnectionsAPI interface {
 	PostS3ConnectionsTestExecute(r ApiPostS3ConnectionsTestRequest) (*ServicesTestConnectionResponse, *http.Response, error)
 
 	/*
-	PutS3ConnectionsIdBucketsBucketObjectsKey Upload an S3 object (nested path)
+	PutS3ConnectionsIdBucketsBucketObjectsKey Upload an S3 object (nested path, streamed multipart)
 
-	Streams one PUT body into the stored connection (SSRF-locked). Enforces 32 MiB max → 413 when exceeded. Rails-like nested path — object key may contain "/". Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials.
+	Streams one PUT body into the stored connection (SSRF-locked). Bodies at or under one uploader part (5 MiB) are sent as a single PUT; larger bodies stream to S3 multipart, so resident memory stays bounded regardless of object size. Enforces the 5 GiB upload bound → 413 when exceeded. An explicit Content-Type is stored as sent; an omitted one is stored as binary/octet-stream on S3 and as Google's inferred type on a native GCS connection. Rails-like nested path — object key may contain "/". Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id S3 Connection ID
@@ -182,6 +170,13 @@ type ApiDeleteS3ConnectionsIdRequest struct {
 	ctx context.Context
 	ApiService S3ConnectionsAPI
 	id string
+	force *bool
+}
+
+// Force the delete past the reference guard (admin/owner only)
+func (r ApiDeleteS3ConnectionsIdRequest) Force(force bool) ApiDeleteS3ConnectionsIdRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteS3ConnectionsIdRequest) Execute() (*http.Response, error) {
@@ -223,6 +218,9 @@ func (a *S3ConnectionsAPIService) DeleteS3ConnectionsIdExecute(r ApiDeleteS3Conn
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -288,6 +286,17 @@ func (a *S3ConnectionsAPIService) DeleteS3ConnectionsIdExecute(r ApiDeleteS3Conn
 			return localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -477,178 +486,7 @@ func (a *S3ConnectionsAPIService) DeleteS3ConnectionsIdBucketsBucketObjectsKeyEx
 					newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 502 {
-			var v map[string]interface{}
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
-}
-
-type ApiDeleteS3ConnectionsIdObjectsRequest struct {
-	ctx context.Context
-	ApiService S3ConnectionsAPI
-	id int32
-	bucket *string
-	key *string
-}
-
-// Bucket name
-func (r ApiDeleteS3ConnectionsIdObjectsRequest) Bucket(bucket string) ApiDeleteS3ConnectionsIdObjectsRequest {
-	r.bucket = &bucket
-	return r
-}
-
-// Object key
-func (r ApiDeleteS3ConnectionsIdObjectsRequest) Key(key string) ApiDeleteS3ConnectionsIdObjectsRequest {
-	r.key = &key
-	return r
-}
-
-func (r ApiDeleteS3ConnectionsIdObjectsRequest) Execute() (*http.Response, error) {
-	return r.ApiService.DeleteS3ConnectionsIdObjectsExecute(r)
-}
-
-/*
-DeleteS3ConnectionsIdObjects Delete an S3 object
-
-Deletes one object via the stored connection (SSRF-locked). Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials. Compatibility alias for the canonical nested DELETE under /buckets/:bucket/objects/*key (Story 88.2).
-
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param id S3 Connection ID
- @return ApiDeleteS3ConnectionsIdObjectsRequest
-*/
-func (a *S3ConnectionsAPIService) DeleteS3ConnectionsIdObjects(ctx context.Context, id int32) ApiDeleteS3ConnectionsIdObjectsRequest {
-	return ApiDeleteS3ConnectionsIdObjectsRequest{
-		ApiService: a,
-		ctx: ctx,
-		id: id,
-	}
-}
-
-// Execute executes the request
-func (a *S3ConnectionsAPIService) DeleteS3ConnectionsIdObjectsExecute(r ApiDeleteS3ConnectionsIdObjectsRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod   = http.MethodDelete
-		localVarPostBody     interface{}
-		formFiles            []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "S3ConnectionsAPIService.DeleteS3ConnectionsIdObjects")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/s3-connections/{id}/objects"
-	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.bucket == nil {
-		return nil, reportError("bucket is required and must be specified")
-	}
-	if r.key == nil {
-		return nil, reportError("key is required and must be specified")
-	}
-
-	parameterAddToHeaderOrQuery(localVarQueryParams, "bucket", r.bucket, "", "")
-	parameterAddToHeaderOrQuery(localVarQueryParams, "key", r.key, "", "")
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["CookieAuth"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Cookie"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v map[string]interface{}
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 401 {
-			var v map[string]interface{}
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 403 {
-			var v map[string]interface{}
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
-			return localVarHTTPResponse, newErr
-		}
-		if localVarHTTPResponse.StatusCode == 404 {
+		if localVarHTTPResponse.StatusCode == 429 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -795,7 +633,7 @@ func (r ApiGetS3ConnectionsIdBucketsRequest) Execute() (*ServicesS3BucketListRes
 /*
 GetS3ConnectionsIdBuckets List buckets for an S3 connection
 
-Proxies ListBuckets for one saved S3 connection. Query q filters names (case-insensitive). Guest denied by Casbin (viewer+). Vault unlock required.
+Proxies ListBuckets for one saved S3 connection. Query q filters names (case-insensitive). Casbin admits Viewer and above; Guest is denied. Owner/Admin always pass. Maintainer needs an active org vault grant (JIT approval or admin pre-grant, time-boxed); Viewer needs an admin pre-grant only (no self-service request). Otherwise 423.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id S3 Connection ID
@@ -931,6 +769,17 @@ func (a *S3ConnectionsAPIService) GetS3ConnectionsIdBucketsExecute(r ApiGetS3Con
 					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 502 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
@@ -1011,7 +860,7 @@ func (r ApiGetS3ConnectionsIdObjectsRequest) Execute() (*ServicesS3ObjectListRes
 /*
 GetS3ConnectionsIdObjects List objects in a bucket
 
-Proxies ListObjectsV2. Requires bucket=. Optional prefix, continuation_token, q (key substring on current page), delimiter.
+Proxies ListObjectsV2. Requires bucket=. Optional prefix, continuation_token, q (key substring on current page), delimiter. Same access as bucket listing: Viewer and above by Casbin, Guest denied; Maintainer needs a vault grant (JIT or pre-grant), Viewer an admin pre-grant only.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id S3 Connection ID
@@ -1163,6 +1012,17 @@ func (a *S3ConnectionsAPIService) GetS3ConnectionsIdObjectsExecute(r ApiGetS3Con
 					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 502 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
@@ -1215,7 +1075,7 @@ func (r ApiGetS3ConnectionsIdObjectsDownloadRequest) Execute() (*os.File, *http.
 /*
 GetS3ConnectionsIdObjectsDownload Download an S3 object
 
-Streams object bytes for one saved S3 connection (SSRF-locked to stored endpoint). Size/time capped. Guest denied by Casbin (viewer+). Vault unlock required. Never returns credentials.
+Streams object bytes for one saved S3 connection (SSRF-locked to stored endpoint). Size/time capped. Casbin admits Viewer and above; Guest is denied. Owner/Admin always pass. Maintainer needs an active org vault grant (JIT approval or admin pre-grant, time-boxed); Viewer needs an admin pre-grant only (no self-service request). Otherwise 423. Never returns credentials.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id S3 Connection ID
@@ -1357,6 +1217,17 @@ func (a *S3ConnectionsAPIService) GetS3ConnectionsIdObjectsDownloadExecute(r Api
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 413 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -1702,6 +1573,8 @@ func (r ApiPostS3ConnectionsTestRequest) Execute() (*ServicesTestConnectionRespo
 /*
 PostS3ConnectionsTest Test an S3 connection before saving
 
+Verifies a storage connection before create. Raw-key requests use the keys in the body; a linked_credential_id request resolves the org-scoped cloud credential through the vault and probes with its secret (vault-gated: 423 with X-Org-Vault-Required while locked). azblob runs a ListContainers check, the S3 family a ListBuckets check.
+
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostS3ConnectionsTestRequest
 */
@@ -1800,6 +1673,17 @@ func (a *S3ConnectionsAPIService) PostS3ConnectionsTestExecute(r ApiPostS3Connec
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 423 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -1825,7 +1709,7 @@ type ApiPutS3ConnectionsIdBucketsBucketObjectsKeyRequest struct {
 	body *[]int32
 }
 
-// Object bytes (≤32 MiB)
+// Object bytes (≤5 GiB)
 func (r ApiPutS3ConnectionsIdBucketsBucketObjectsKeyRequest) Body(body []int32) ApiPutS3ConnectionsIdBucketsBucketObjectsKeyRequest {
 	r.body = &body
 	return r
@@ -1836,9 +1720,9 @@ func (r ApiPutS3ConnectionsIdBucketsBucketObjectsKeyRequest) Execute() (*Service
 }
 
 /*
-PutS3ConnectionsIdBucketsBucketObjectsKey Upload an S3 object (nested path)
+PutS3ConnectionsIdBucketsBucketObjectsKey Upload an S3 object (nested path, streamed multipart)
 
-Streams one PUT body into the stored connection (SSRF-locked). Enforces 32 MiB max → 413 when exceeded. Rails-like nested path — object key may contain "/". Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials.
+Streams one PUT body into the stored connection (SSRF-locked). Bodies at or under one uploader part (5 MiB) are sent as a single PUT; larger bodies stream to S3 multipart, so resident memory stays bounded regardless of object size. Enforces the 5 GiB upload bound → 413 when exceeded. An explicit Content-Type is stored as sent; an omitted one is stored as binary/octet-stream on S3 and as Google's inferred type on a native GCS connection. Rails-like nested path — object key may contain "/". Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id S3 Connection ID
@@ -1983,6 +1867,17 @@ func (a *S3ConnectionsAPIService) PutS3ConnectionsIdBucketsBucketObjectsKeyExecu
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 413 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

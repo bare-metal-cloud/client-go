@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **CreatedAt** | Pointer to **string** |  | [optional] 
 **Email** | Pointer to **string** |  | [optional] 
 **Id** | Pointer to **int32** |  | [optional] 
+**LocalEchoEnabled** | Pointer to **bool** | LocalEchoEnabled is the per-user terminal local-echo preference (issue #774, Category AH). Default OFF everywhere: a user who never toggled gets false, so console/SSH keystroke behavior is byte-identical to the pre-#774 round-trip behavior until the user opts in. GORM auto-migrate adds the column per house convention. | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Networks** | Pointer to [**[]ModelsNetwork**](ModelsNetwork.md) |  | [optional] 
 **OauthAccounts** | Pointer to [**[]ModelsOAuthAccount**](ModelsOAuthAccount.md) |  | [optional] 
@@ -133,6 +134,31 @@ SetId sets Id field to given value.
 `func (o *ModelsUser) HasId() bool`
 
 HasId returns a boolean if a field has been set.
+
+### GetLocalEchoEnabled
+
+`func (o *ModelsUser) GetLocalEchoEnabled() bool`
+
+GetLocalEchoEnabled returns the LocalEchoEnabled field if non-nil, zero value otherwise.
+
+### GetLocalEchoEnabledOk
+
+`func (o *ModelsUser) GetLocalEchoEnabledOk() (*bool, bool)`
+
+GetLocalEchoEnabledOk returns a tuple with the LocalEchoEnabled field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLocalEchoEnabled
+
+`func (o *ModelsUser) SetLocalEchoEnabled(v bool)`
+
+SetLocalEchoEnabled sets LocalEchoEnabled field to given value.
+
+### HasLocalEchoEnabled
+
+`func (o *ModelsUser) HasLocalEchoEnabled() bool`
+
+HasLocalEchoEnabled returns a boolean if a field has been set.
 
 ### GetName
 

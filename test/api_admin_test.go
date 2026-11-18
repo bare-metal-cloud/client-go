@@ -22,6 +22,324 @@ func Test_bmc_AdminAPIService(t *testing.T) {
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
+	t.Run("Test AdminAPIService GetAdminExplorerRequests", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetAdminExplorerRequests(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetAdminExplorerViewas", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetAdminExplorerViewas(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminAgents", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminAgents(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminAgentsId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminAgentsId(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminAuditEvents", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminAuditEvents(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminBackupOrgsOrgIdEntitlement", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminBackupOrgsOrgIdEntitlement(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminDeployTriage", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminDeployTriage(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminDeployTriageJobsJobId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var jobId string
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminDeployTriageJobsJobId(context.Background(), jobId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminMonitoringOrgsOrgIdEntitlement", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminMonitoringOrgsOrgIdEntitlement(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminOrgs", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminOrgs(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminOverviewFleet", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminOverviewFleet(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminOverviewHealth", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminOverviewHealth(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminOverviewSensors", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminOverviewSensors(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminOverviewWork", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminOverviewWork(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminPlatformRunnerImages", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminPlatformRunnerImages(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminUsers", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminUsers(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminExplorerGrantsIdApprove", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminExplorerGrantsIdApprove(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminExplorerGrantsIdDeny", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminExplorerGrantsIdDeny(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminExplorerGrantsIdRevoke", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminExplorerGrantsIdRevoke(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminExplorerViewas", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminExplorerViewas(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminExplorerViewasStop", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminExplorerViewasStop(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminFeatureGates", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminFeatureGates(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminRunnerReservations", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminRunnerReservations(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostAdminRunnerReservationsOrgIdRevoke", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PostAdminRunnerReservationsOrgIdRevoke(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PostApiV1AdminAgentsIdForceDelete", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PostApiV1AdminAgentsIdForceDelete(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test AdminAPIService PostApiV1AdminUsersIdMfaDisable", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -29,6 +347,48 @@ func Test_bmc_AdminAPIService(t *testing.T) {
 		var id int32
 
 		resp, httpRes, err := apiClient.AdminAPI.PostApiV1AdminUsersIdMfaDisable(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PutApiV1AdminBackupOrgsOrgIdEntitlement", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PutApiV1AdminBackupOrgsOrgIdEntitlement(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PutApiV1AdminMonitoringOrgsOrgIdExemption", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PutApiV1AdminMonitoringOrgsOrgIdExemption(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService PutApiV1AdminMonitoringOrgsOrgIdLimits", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.AdminAPI.PutApiV1AdminMonitoringOrgsOrgIdLimits(context.Background(), orgId).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

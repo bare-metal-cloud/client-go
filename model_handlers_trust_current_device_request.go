@@ -13,8 +13,6 @@ package bmc
 
 import (
 	"encoding/json"
-	"bytes"
-	"fmt"
 )
 
 // checks if the HandlersTrustCurrentDeviceRequest type satisfies the MappedNullable interface at compile time
@@ -24,18 +22,16 @@ var _ MappedNullable = &HandlersTrustCurrentDeviceRequest{}
 type HandlersTrustCurrentDeviceRequest struct {
 	// Optional: update device name
 	DeviceName *string `json:"device_name,omitempty"`
-	EncryptionKey string `json:"encryption_key"`
+	// EncryptionKey is accepted for caller compatibility and ignored: the trust proof is the device.trust rental's vault-key payload.
+	EncryptionKey *string `json:"encryption_key,omitempty"`
 }
-
-type _HandlersTrustCurrentDeviceRequest HandlersTrustCurrentDeviceRequest
 
 // NewHandlersTrustCurrentDeviceRequest instantiates a new HandlersTrustCurrentDeviceRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewHandlersTrustCurrentDeviceRequest(encryptionKey string) *HandlersTrustCurrentDeviceRequest {
+func NewHandlersTrustCurrentDeviceRequest() *HandlersTrustCurrentDeviceRequest {
 	this := HandlersTrustCurrentDeviceRequest{}
-	this.EncryptionKey = encryptionKey
 	return &this
 }
 
@@ -79,28 +75,36 @@ func (o *HandlersTrustCurrentDeviceRequest) SetDeviceName(v string) {
 	o.DeviceName = &v
 }
 
-// GetEncryptionKey returns the EncryptionKey field value
+// GetEncryptionKey returns the EncryptionKey field value if set, zero value otherwise.
 func (o *HandlersTrustCurrentDeviceRequest) GetEncryptionKey() string {
-	if o == nil {
+	if o == nil || IsNil(o.EncryptionKey) {
 		var ret string
 		return ret
 	}
-
-	return o.EncryptionKey
+	return *o.EncryptionKey
 }
 
-// GetEncryptionKeyOk returns a tuple with the EncryptionKey field value
+// GetEncryptionKeyOk returns a tuple with the EncryptionKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HandlersTrustCurrentDeviceRequest) GetEncryptionKeyOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.EncryptionKey) {
 		return nil, false
 	}
-	return &o.EncryptionKey, true
+	return o.EncryptionKey, true
 }
 
-// SetEncryptionKey sets field value
+// HasEncryptionKey returns a boolean if a field has been set.
+func (o *HandlersTrustCurrentDeviceRequest) HasEncryptionKey() bool {
+	if o != nil && !IsNil(o.EncryptionKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetEncryptionKey gets a reference to the given string and assigns it to the EncryptionKey field.
 func (o *HandlersTrustCurrentDeviceRequest) SetEncryptionKey(v string) {
-	o.EncryptionKey = v
+	o.EncryptionKey = &v
 }
 
 func (o HandlersTrustCurrentDeviceRequest) MarshalJSON() ([]byte, error) {
@@ -116,45 +120,10 @@ func (o HandlersTrustCurrentDeviceRequest) ToMap() (map[string]interface{}, erro
 	if !IsNil(o.DeviceName) {
 		toSerialize["device_name"] = o.DeviceName
 	}
-	toSerialize["encryption_key"] = o.EncryptionKey
+	if !IsNil(o.EncryptionKey) {
+		toSerialize["encryption_key"] = o.EncryptionKey
+	}
 	return toSerialize, nil
-}
-
-func (o *HandlersTrustCurrentDeviceRequest) UnmarshalJSON(data []byte) (err error) {
-	// This validates that all required properties are included in the JSON object
-	// by unmarshalling the object into a generic map with string keys and checking
-	// that every required field exists as a key in the generic map.
-	requiredProperties := []string{
-		"encryption_key",
-	}
-
-	allProperties := make(map[string]interface{})
-
-	err = json.Unmarshal(data, &allProperties)
-
-	if err != nil {
-		return err;
-	}
-
-	for _, requiredProperty := range(requiredProperties) {
-		if _, exists := allProperties[requiredProperty]; !exists {
-			return fmt.Errorf("no value given for required property %v", requiredProperty)
-		}
-	}
-
-	varHandlersTrustCurrentDeviceRequest := _HandlersTrustCurrentDeviceRequest{}
-
-	decoder := json.NewDecoder(bytes.NewReader(data))
-	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varHandlersTrustCurrentDeviceRequest)
-
-	if err != nil {
-		return err
-	}
-
-	*o = HandlersTrustCurrentDeviceRequest(varHandlersTrustCurrentDeviceRequest)
-
-	return err
 }
 
 type NullableHandlersTrustCurrentDeviceRequest struct {

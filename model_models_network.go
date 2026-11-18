@@ -38,6 +38,8 @@ type ModelsNetwork struct {
 	// ReconcileAttempts is incremented by the Story 101-12 Temporal reconciler every time it retries a stuck row. When it reaches MaxReconcileAttempts (10) the row flips to NetworkStatusErrorPermanent. GORM AutoMigrate (dev-stage policy) adds the column on next boot.
 	ReconcileAttempts *int32 `json:"reconcile_attempts,omitempty"`
 	Status *ModelsNetworkStatus `json:"status,omitempty"`
+	// StatusReason carries the human-readable failure reason for the visible failed / delete_failed states (#2359, #2362). Empty on healthy rows.
+	StatusReason *string `json:"status_reason,omitempty"`
 	Type *ModelsNetworkType `json:"type,omitempty"`
 	UpdatedAt *string `json:"updated_at,omitempty"`
 	// Relations
@@ -509,6 +511,38 @@ func (o *ModelsNetwork) SetStatus(v ModelsNetworkStatus) {
 	o.Status = &v
 }
 
+// GetStatusReason returns the StatusReason field value if set, zero value otherwise.
+func (o *ModelsNetwork) GetStatusReason() string {
+	if o == nil || IsNil(o.StatusReason) {
+		var ret string
+		return ret
+	}
+	return *o.StatusReason
+}
+
+// GetStatusReasonOk returns a tuple with the StatusReason field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsNetwork) GetStatusReasonOk() (*string, bool) {
+	if o == nil || IsNil(o.StatusReason) {
+		return nil, false
+	}
+	return o.StatusReason, true
+}
+
+// HasStatusReason returns a boolean if a field has been set.
+func (o *ModelsNetwork) HasStatusReason() bool {
+	if o != nil && !IsNil(o.StatusReason) {
+		return true
+	}
+
+	return false
+}
+
+// SetStatusReason gets a reference to the given string and assigns it to the StatusReason field.
+func (o *ModelsNetwork) SetStatusReason(v string) {
+	o.StatusReason = &v
+}
+
 // GetType returns the Type field value if set, zero value otherwise.
 func (o *ModelsNetwork) GetType() ModelsNetworkType {
 	if o == nil || IsNil(o.Type) {
@@ -656,6 +690,9 @@ func (o ModelsNetwork) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status
+	}
+	if !IsNil(o.StatusReason) {
+		toSerialize["status_reason"] = o.StatusReason
 	}
 	if !IsNil(o.Type) {
 		toSerialize["type"] = o.Type

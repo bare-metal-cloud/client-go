@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**OrgSessionToken** | Pointer to **string** |  | [optional] 
 **Rotated** | Pointer to **bool** |  | [optional] 
 
 ## Methods
@@ -25,31 +24,6 @@ will change when the set of required properties is changed
 NewHandlersOrgVaultRotatePasswordResponseWithDefaults instantiates a new HandlersOrgVaultRotatePasswordResponse object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetOrgSessionToken
-
-`func (o *HandlersOrgVaultRotatePasswordResponse) GetOrgSessionToken() string`
-
-GetOrgSessionToken returns the OrgSessionToken field if non-nil, zero value otherwise.
-
-### GetOrgSessionTokenOk
-
-`func (o *HandlersOrgVaultRotatePasswordResponse) GetOrgSessionTokenOk() (*string, bool)`
-
-GetOrgSessionTokenOk returns a tuple with the OrgSessionToken field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetOrgSessionToken
-
-`func (o *HandlersOrgVaultRotatePasswordResponse) SetOrgSessionToken(v string)`
-
-SetOrgSessionToken sets OrgSessionToken field to given value.
-
-### HasOrgSessionToken
-
-`func (o *HandlersOrgVaultRotatePasswordResponse) HasOrgSessionToken() bool`
-
-HasOrgSessionToken returns a boolean if a field has been set.
 
 ### GetRotated
 

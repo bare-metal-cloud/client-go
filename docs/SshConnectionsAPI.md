@@ -12,7 +12,7 @@ Method | HTTP request | Description
 
 ## DeleteSshConnectionsId
 
-> DeleteSshConnectionsId(ctx, id).Execute()
+> DeleteSshConnectionsId(ctx, id).Force(force).Execute()
 
 Delete an SSH connection
 
@@ -32,10 +32,11 @@ import (
 
 func main() {
 	id := "id_example" // string | Connection ID
+	force := true // bool | Force the delete past the reference guard (admin/owner only) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.SshConnectionsAPI.DeleteSshConnectionsId(context.Background(), id).Execute()
+	r, err := apiClient.SshConnectionsAPI.DeleteSshConnectionsId(context.Background(), id).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `SshConnectionsAPI.DeleteSshConnectionsId``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -59,6 +60,7 @@ Other parameters are passed through a pointer to a apiDeleteSshConnectionsIdRequ
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force the delete past the reference guard (admin/owner only) | 
 
 ### Return type
 

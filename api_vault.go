@@ -24,6 +24,78 @@ import (
 type VaultAPI interface {
 
 	/*
+	DeleteAccessGrantsGrantId Revoke a service-account access grant now
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param grantId Access grant ID
+	@return ApiDeleteAccessGrantsGrantIdRequest
+	*/
+	DeleteAccessGrantsGrantId(ctx context.Context, grantId int32) ApiDeleteAccessGrantsGrantIdRequest
+
+	// DeleteAccessGrantsGrantIdExecute executes the request
+	//  @return map[string]string
+	DeleteAccessGrantsGrantIdExecute(r ApiDeleteAccessGrantsGrantIdRequest) (map[string]string, *http.Response, error)
+
+	/*
+	DeleteOrgsOrgIdVaultAccessGrantsId Revoke an org vault access grant now
+
+	Admin or owner only.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@param id Access grant ID
+	@return ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest
+	*/
+	DeleteOrgsOrgIdVaultAccessGrantsId(ctx context.Context, orgId int32, id int32) ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest
+
+	// DeleteOrgsOrgIdVaultAccessGrantsIdExecute executes the request
+	//  @return map[string]string
+	DeleteOrgsOrgIdVaultAccessGrantsIdExecute(r ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest) (map[string]string, *http.Response, error)
+
+	/*
+	DeleteOrgsOrgIdVaultRentalsId Revoke a vault rental (issue #4027)
+
+	Deletes the rental and its operation index immediately — the active counterpart of the mandatory TTL. A revoked rental cannot be consumed; a revoke is audited like a mint.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Org ID
+	@param id Rental ID
+	@return ApiDeleteOrgsOrgIdVaultRentalsIdRequest
+	*/
+	DeleteOrgsOrgIdVaultRentalsId(ctx context.Context, orgId int32, id string) ApiDeleteOrgsOrgIdVaultRentalsIdRequest
+
+	// DeleteOrgsOrgIdVaultRentalsIdExecute executes the request
+	DeleteOrgsOrgIdVaultRentalsIdExecute(r ApiDeleteOrgsOrgIdVaultRentalsIdRequest) (*http.Response, error)
+
+	/*
+	DeleteOrgsOrgIdVaultSharesShareId End a share I sent
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@param shareId Share ID
+	@return ApiDeleteOrgsOrgIdVaultSharesShareIdRequest
+	*/
+	DeleteOrgsOrgIdVaultSharesShareId(ctx context.Context, orgId int32, shareId string) ApiDeleteOrgsOrgIdVaultSharesShareIdRequest
+
+	// DeleteOrgsOrgIdVaultSharesShareIdExecute executes the request
+	//  @return HandlersSecretShareView
+	DeleteOrgsOrgIdVaultSharesShareIdExecute(r ApiDeleteOrgsOrgIdVaultSharesShareIdRequest) (*HandlersSecretShareView, *http.Response, error)
+
+	/*
+	GetAccessGrants List active access grants in my org
+
+	Admin or owner only. Lists JIT and pre-granted service-account and org grants that are active now.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAccessGrantsRequest
+	*/
+	GetAccessGrants(ctx context.Context) ApiGetAccessGrantsRequest
+
+	// GetAccessGrantsExecute executes the request
+	//  @return []HandlersActiveGrantItem
+	GetAccessGrantsExecute(r ApiGetAccessGrantsRequest) ([]HandlersActiveGrantItem, *http.Response, error)
+
+	/*
 	GetApiV1VaultJitRequests List JIT requests (admin)
 
 	Admin approval-queue snapshot: pending + recently resolved JIT requests
@@ -51,6 +123,162 @@ type VaultAPI interface {
 	// GetApiV1VaultJitStatusRequestTokenExecute executes the request
 	//  @return map[string]interface{}
 	GetApiV1VaultJitStatusRequestTokenExecute(r ApiGetApiV1VaultJitStatusRequestTokenRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultAccessGrants List org vault access grants
+
+	Admin or owner only.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiGetOrgsOrgIdVaultAccessGrantsRequest
+	*/
+	GetOrgsOrgIdVaultAccessGrants(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultAccessGrantsRequest
+
+	// GetOrgsOrgIdVaultAccessGrantsExecute executes the request
+	//  @return []HandlersGrantWithStatus
+	GetOrgsOrgIdVaultAccessGrantsExecute(r ApiGetOrgsOrgIdVaultAccessGrantsRequest) ([]HandlersGrantWithStatus, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultAccessGrantsMe Check my org vault access
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiGetOrgsOrgIdVaultAccessGrantsMeRequest
+	*/
+	GetOrgsOrgIdVaultAccessGrantsMe(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultAccessGrantsMeRequest
+
+	// GetOrgsOrgIdVaultAccessGrantsMeExecute executes the request
+	//  @return map[string]interface{}
+	GetOrgsOrgIdVaultAccessGrantsMeExecute(r ApiGetOrgsOrgIdVaultAccessGrantsMeRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultDeliveries Read the org vault's delivery ledger (issue #4030, A7)
+
+	The Secret deliveries card's read: every recorded delivery inside the look-back window (default 7 days, hard ceiling 30 — a wider ask is refused, never clamped), newest first. Each row: when, secret (identity + display label), machine, mode (wired = sealed into an install payload; rented = an operation-scoped release), and who authorized it. Values never appear on this surface.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Org ID
+	@return ApiGetOrgsOrgIdVaultDeliveriesRequest
+	*/
+	GetOrgsOrgIdVaultDeliveries(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultDeliveriesRequest
+
+	// GetOrgsOrgIdVaultDeliveriesExecute executes the request
+	//  @return HandlersOrgVaultDeliveriesResponse
+	GetOrgsOrgIdVaultDeliveriesExecute(r ApiGetOrgsOrgIdVaultDeliveriesRequest) (*HandlersOrgVaultDeliveriesResponse, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultKeys Read the org vault's dual key slots (issue #4026)
+
+	Returns the org's two vault-key slot blobs (password slot + recovery slot, opaque client-wrapped bytes), the Argon2id salts both derivations need, and the recovery key's fingerprint + created-at metadata (never the recovery key or the vault key). The browser unwraps the vault key LOCALLY from the password slot at unlock, or from the recovery slot with the recovery key alone. Authenticated + membership-gated + admin-tier RBAC like the unlock route it serves. 409 with a re-provision instruction for orgs created before the dual-slot hierarchy.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Org ID
+	@return ApiGetOrgsOrgIdVaultKeysRequest
+	*/
+	GetOrgsOrgIdVaultKeys(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultKeysRequest
+
+	// GetOrgsOrgIdVaultKeysExecute executes the request
+	//  @return HandlersOrgVaultKeysResponse
+	GetOrgsOrgIdVaultKeysExecute(r ApiGetOrgsOrgIdVaultKeysRequest) (*HandlersOrgVaultKeysResponse, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultMachines List the org vault's machines (issue #4030, A11)
+
+	The machine key inventory the vault tab renders: trust derived from the live agent key (fingerprint, Trusted/Revoked state, trusted-since), the secrets the machine holds (active secret references + labels), and its last delivery from the ledger. A11: revocation is NOT this surface's action — the agent page's kill-switch flips the derived state on the next load. No secret value appears in any field.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Org ID
+	@return ApiGetOrgsOrgIdVaultMachinesRequest
+	*/
+	GetOrgsOrgIdVaultMachines(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultMachinesRequest
+
+	// GetOrgsOrgIdVaultMachinesExecute executes the request
+	//  @return HandlersOrgVaultMachinesResponse
+	GetOrgsOrgIdVaultMachinesExecute(r ApiGetOrgsOrgIdVaultMachinesRequest) (*HandlersOrgVaultMachinesResponse, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultReceivedShares List shares sent to me in an org
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiGetOrgsOrgIdVaultReceivedSharesRequest
+	*/
+	GetOrgsOrgIdVaultReceivedShares(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultReceivedSharesRequest
+
+	// GetOrgsOrgIdVaultReceivedSharesExecute executes the request
+	//  @return map[string]interface{}
+	GetOrgsOrgIdVaultReceivedSharesExecute(r ApiGetOrgsOrgIdVaultReceivedSharesRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultRentalsId Read a vault rental's status (issue #4027)
+
+	Metadata-only projection of one rental (operation, target, timestamps, consumed flag). The released payload is never served back — the browser that minted it already holds the secret.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Org ID
+	@param id Rental ID
+	@return ApiGetOrgsOrgIdVaultRentalsIdRequest
+	*/
+	GetOrgsOrgIdVaultRentalsId(ctx context.Context, orgId int32, id string) ApiGetOrgsOrgIdVaultRentalsIdRequest
+
+	// GetOrgsOrgIdVaultRentalsIdExecute executes the request
+	//  @return HandlersVaultRentalStatusResponse
+	GetOrgsOrgIdVaultRentalsIdExecute(r ApiGetOrgsOrgIdVaultRentalsIdRequest) (*HandlersVaultRentalStatusResponse, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultSalt Read the org vault's KDF salt (transitional, issue #4025)
+
+	Returns the org's Argon2id vault salt (base64, 32 bytes) so the browser can derive the vault key locally at unlock time and decrypt the reveal route's ciphertext envelope client-side. Authenticated + membership-gated like the unlock route it accompanies (admin-tier RBAC). 409 Conflict when the org vault is not initialized — the same shape unlock answers.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Org ID
+	@return ApiGetOrgsOrgIdVaultSaltRequest
+	*/
+	GetOrgsOrgIdVaultSalt(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultSaltRequest
+
+	// GetOrgsOrgIdVaultSaltExecute executes the request
+	//  @return map[string]string
+	GetOrgsOrgIdVaultSaltExecute(r ApiGetOrgsOrgIdVaultSaltRequest) (map[string]string, *http.Response, error)
+
+	/*
+	GetOrgsOrgIdVaultShares List shares I have sent in an org
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiGetOrgsOrgIdVaultSharesRequest
+	*/
+	GetOrgsOrgIdVaultShares(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultSharesRequest
+
+	// GetOrgsOrgIdVaultSharesExecute executes the request
+	//  @return map[string]interface{}
+	GetOrgsOrgIdVaultSharesExecute(r ApiGetOrgsOrgIdVaultSharesRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetServiceAccountsSaIdAccessGrants List access grants for a service account
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param saId Service account ID
+	@return ApiGetServiceAccountsSaIdAccessGrantsRequest
+	*/
+	GetServiceAccountsSaIdAccessGrants(ctx context.Context, saId int32) ApiGetServiceAccountsSaIdAccessGrantsRequest
+
+	// GetServiceAccountsSaIdAccessGrantsExecute executes the request
+	//  @return []HandlersGrantWithStatus
+	GetServiceAccountsSaIdAccessGrantsExecute(r ApiGetServiceAccountsSaIdAccessGrantsRequest) ([]HandlersGrantWithStatus, *http.Response, error)
+
+	/*
+	GetServiceAccountsSaIdAccessGrantsMe Check my access to a service account
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param saId Service account ID
+	@return ApiGetServiceAccountsSaIdAccessGrantsMeRequest
+	*/
+	GetServiceAccountsSaIdAccessGrantsMe(ctx context.Context, saId int32) ApiGetServiceAccountsSaIdAccessGrantsMeRequest
+
+	// GetServiceAccountsSaIdAccessGrantsMeExecute executes the request
+	//  @return map[string]interface{}
+	GetServiceAccountsSaIdAccessGrantsMeExecute(r ApiGetServiceAccountsSaIdAccessGrantsMeRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
 	PostApiV1VaultJitApprove Approve or deny JIT access request
@@ -81,24 +309,55 @@ type VaultAPI interface {
 	PostApiV1VaultJitRequestExecute(r ApiPostApiV1VaultJitRequestRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	PostOrgsOrgIdVaultInit Initialize org vault
+	PostOrgsOrgIdVaultAccessGrants Grant a member org-wide vault access
 
-	Set the org vault password and derive the OrgKEK
+	Admin or owner only. Time-bound org vault access grant for a project member.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiPostOrgsOrgIdVaultAccessGrantsRequest
+	*/
+	PostOrgsOrgIdVaultAccessGrants(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultAccessGrantsRequest
+
+	// PostOrgsOrgIdVaultAccessGrantsExecute executes the request
+	//  @return ModelsAuthorizedAccess
+	PostOrgsOrgIdVaultAccessGrantsExecute(r ApiPostOrgsOrgIdVaultAccessGrantsRequest) (*ModelsAuthorizedAccess, *http.Response, error)
+
+	/*
+	PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets Rotate the secrets a machine holds (issue #4030, A11 — the tab's only write)
+
+	Records the rotation of every secret the machine holds and answers with the guided checklist (per-secret provider guidance and the surface that rotates it). The body acknowledgement is required — jobs using the old values may fail until they pick up the new ones. Offered for revoked machines too: rotating is exactly what makes a compromised machine's copy useless, and new values never deliver to a revoked machine (the agent gates refuse it; replacements wait for a trusted machine). No secret value is minted or returned — since D2 the browser seals every value.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Org ID
-	@return ApiPostOrgsOrgIdVaultInitRequest
+	@param agentId Agent (machine) ID
+	@return ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest
 	*/
-	PostOrgsOrgIdVaultInit(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultInitRequest
+	PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets(ctx context.Context, orgId int32, agentId int32) ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest
 
-	// PostOrgsOrgIdVaultInitExecute executes the request
-	//  @return HandlersOrgVaultInitResponse
-	PostOrgsOrgIdVaultInitExecute(r ApiPostOrgsOrgIdVaultInitRequest) (*HandlersOrgVaultInitResponse, *http.Response, error)
+	// PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsExecute executes the request
+	//  @return HandlersOrgVaultRotateResponse
+	PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsExecute(r ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest) (*HandlersOrgVaultRotateResponse, *http.Response, error)
+
+	/*
+	PostOrgsOrgIdVaultRentals Mint an operation-scoped vault secret rental (issue #4027, D3)
+
+	The unlocked browser releases the ONE secret an interactive spend operation needs: the request carries the operation slug (from the reviewed allowlist), the target reference, and the locally decrypted payload. The server wraps the payload with the server master key and stores it in Redis under a mandatory TTL (15-minute default, 60-minute ceiling); the vault key itself never transits. Minting is idempotent per (operation, target_ref) while a live rental exists — a redelivery reuses the same rental instead of piling up copies. Every mint (fresh or reused) is audited as an access-decision event.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Org ID
+	@return ApiPostOrgsOrgIdVaultRentalsRequest
+	*/
+	PostOrgsOrgIdVaultRentals(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultRentalsRequest
+
+	// PostOrgsOrgIdVaultRentalsExecute executes the request
+	//  @return HandlersVaultRentalStatusResponse
+	PostOrgsOrgIdVaultRentalsExecute(r ApiPostOrgsOrgIdVaultRentalsRequest) (*HandlersVaultRentalStatusResponse, *http.Response, error)
 
 	/*
 	PostOrgsOrgIdVaultRotatePassword Rotate org vault password
 
-	Verify current password and rekey the org vault
+	Verify the current password and rewrap the org vault's password slot (issue #4026: the vault key and every encrypted row are untouched — rotation is a slot rewrap, not a re-encrypt)
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Org ID
@@ -111,23 +370,780 @@ type VaultAPI interface {
 	PostOrgsOrgIdVaultRotatePasswordExecute(r ApiPostOrgsOrgIdVaultRotatePasswordRequest) (*HandlersOrgVaultRotatePasswordResponse, *http.Response, error)
 
 	/*
-	PostOrgsOrgIdVaultUnlock Unlock org vault
+	PostOrgsOrgIdVaultShares Share a vault secret with a recipient
 
-	Verify org vault password and create an org session
+	Sharer creates a time-bound share of a vault secret to a recipient in the org. Needs a fresh sudo window (X-BMC-Sudo or session marker). Releases the secret's own value (and linked registry credential) once, per ADR-104.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiPostOrgsOrgIdVaultSharesRequest
+	*/
+	PostOrgsOrgIdVaultShares(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultSharesRequest
+
+	// PostOrgsOrgIdVaultSharesExecute executes the request
+	//  @return HandlersSecretShareView
+	PostOrgsOrgIdVaultSharesExecute(r ApiPostOrgsOrgIdVaultSharesRequest) (*HandlersSecretShareView, *http.Response, error)
+
+	/*
+	PostServiceAccountsSaIdAccessGrants Grant a member time-bound access to a service account
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param saId Service account ID
+	@return ApiPostServiceAccountsSaIdAccessGrantsRequest
+	*/
+	PostServiceAccountsSaIdAccessGrants(ctx context.Context, saId int32) ApiPostServiceAccountsSaIdAccessGrantsRequest
+
+	// PostServiceAccountsSaIdAccessGrantsExecute executes the request
+	//  @return ModelsAuthorizedAccess
+	PostServiceAccountsSaIdAccessGrantsExecute(r ApiPostServiceAccountsSaIdAccessGrantsRequest) (*ModelsAuthorizedAccess, *http.Response, error)
+
+	/*
+	PutOrgsOrgIdVaultSlotsSlot Replace a wrapped org vault slot (issue #4026, A9; #4075 renamed the route)
+
+	Overwrites the org vault's recovery slot with a new client-wrapped blob, killing the previous backup recovery key at the moment of the replace (single-use semantics). The browser generates the new recovery key, wraps the slot client-side, and sends ONLY the wrapped blob + salt + fingerprint — the raw recovery key never transits. The only replaceable slot is "recovery" (the password slot changes only through rotate-password); any other slot name is a 404. Requires a recovery_key.replace operation rental (issue #4027: the browser proves it holds the vault key by releasing it into a one-time rental the server verifies against the stored password slot) + admin tier + the sudo gate, mirroring rotate-password. The acknowledgement flag must be true: the one-time reveal dialog cannot complete without it.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Org ID
-	@return ApiPostOrgsOrgIdVaultUnlockRequest
+	@param slot Slot to replace (only the recovery slot is replaceable)
+	@return ApiPutOrgsOrgIdVaultSlotsSlotRequest
 	*/
-	PostOrgsOrgIdVaultUnlock(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultUnlockRequest
+	PutOrgsOrgIdVaultSlotsSlot(ctx context.Context, orgId int32, slot string) ApiPutOrgsOrgIdVaultSlotsSlotRequest
 
-	// PostOrgsOrgIdVaultUnlockExecute executes the request
-	//  @return HandlersOrgVaultUnlockResponse
-	PostOrgsOrgIdVaultUnlockExecute(r ApiPostOrgsOrgIdVaultUnlockRequest) (*HandlersOrgVaultUnlockResponse, *http.Response, error)
+	// PutOrgsOrgIdVaultSlotsSlotExecute executes the request
+	//  @return HandlersOrgVaultReplaceRecoveryResponse
+	PutOrgsOrgIdVaultSlotsSlotExecute(r ApiPutOrgsOrgIdVaultSlotsSlotRequest) (*HandlersOrgVaultReplaceRecoveryResponse, *http.Response, error)
 }
 
 // VaultAPIService VaultAPI service
 type VaultAPIService service
+
+type ApiDeleteAccessGrantsGrantIdRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	grantId int32
+}
+
+func (r ApiDeleteAccessGrantsGrantIdRequest) Execute() (map[string]string, *http.Response, error) {
+	return r.ApiService.DeleteAccessGrantsGrantIdExecute(r)
+}
+
+/*
+DeleteAccessGrantsGrantId Revoke a service-account access grant now
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param grantId Access grant ID
+ @return ApiDeleteAccessGrantsGrantIdRequest
+*/
+func (a *VaultAPIService) DeleteAccessGrantsGrantId(ctx context.Context, grantId int32) ApiDeleteAccessGrantsGrantIdRequest {
+	return ApiDeleteAccessGrantsGrantIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		grantId: grantId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]string
+func (a *VaultAPIService) DeleteAccessGrantsGrantIdExecute(r ApiDeleteAccessGrantsGrantIdRequest) (map[string]string, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.DeleteAccessGrantsGrantId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/access-grants/{grant_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"grant_id"+"}", url.PathEscape(parameterValueToString(r.grantId, "grantId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	id int32
+}
+
+func (r ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest) Execute() (map[string]string, *http.Response, error) {
+	return r.ApiService.DeleteOrgsOrgIdVaultAccessGrantsIdExecute(r)
+}
+
+/*
+DeleteOrgsOrgIdVaultAccessGrantsId Revoke an org vault access grant now
+
+Admin or owner only.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @param id Access grant ID
+ @return ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest
+*/
+func (a *VaultAPIService) DeleteOrgsOrgIdVaultAccessGrantsId(ctx context.Context, orgId int32, id int32) ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest {
+	return ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]string
+func (a *VaultAPIService) DeleteOrgsOrgIdVaultAccessGrantsIdExecute(r ApiDeleteOrgsOrgIdVaultAccessGrantsIdRequest) (map[string]string, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.DeleteOrgsOrgIdVaultAccessGrantsId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/access-grants/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteOrgsOrgIdVaultRentalsIdRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	id string
+}
+
+func (r ApiDeleteOrgsOrgIdVaultRentalsIdRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteOrgsOrgIdVaultRentalsIdExecute(r)
+}
+
+/*
+DeleteOrgsOrgIdVaultRentalsId Revoke a vault rental (issue #4027)
+
+Deletes the rental and its operation index immediately — the active counterpart of the mandatory TTL. A revoked rental cannot be consumed; a revoke is audited like a mint.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @param id Rental ID
+ @return ApiDeleteOrgsOrgIdVaultRentalsIdRequest
+*/
+func (a *VaultAPIService) DeleteOrgsOrgIdVaultRentalsId(ctx context.Context, orgId int32, id string) ApiDeleteOrgsOrgIdVaultRentalsIdRequest {
+	return ApiDeleteOrgsOrgIdVaultRentalsIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		id: id,
+	}
+}
+
+// Execute executes the request
+func (a *VaultAPIService) DeleteOrgsOrgIdVaultRentalsIdExecute(r ApiDeleteOrgsOrgIdVaultRentalsIdRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.DeleteOrgsOrgIdVaultRentalsId")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/rentals/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"*/*"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiDeleteOrgsOrgIdVaultSharesShareIdRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	shareId string
+}
+
+func (r ApiDeleteOrgsOrgIdVaultSharesShareIdRequest) Execute() (*HandlersSecretShareView, *http.Response, error) {
+	return r.ApiService.DeleteOrgsOrgIdVaultSharesShareIdExecute(r)
+}
+
+/*
+DeleteOrgsOrgIdVaultSharesShareId End a share I sent
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @param shareId Share ID
+ @return ApiDeleteOrgsOrgIdVaultSharesShareIdRequest
+*/
+func (a *VaultAPIService) DeleteOrgsOrgIdVaultSharesShareId(ctx context.Context, orgId int32, shareId string) ApiDeleteOrgsOrgIdVaultSharesShareIdRequest {
+	return ApiDeleteOrgsOrgIdVaultSharesShareIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		shareId: shareId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersSecretShareView
+func (a *VaultAPIService) DeleteOrgsOrgIdVaultSharesShareIdExecute(r ApiDeleteOrgsOrgIdVaultSharesShareIdRequest) (*HandlersSecretShareView, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersSecretShareView
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.DeleteOrgsOrgIdVaultSharesShareId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/shares/{share_id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"share_id"+"}", url.PathEscape(parameterValueToString(r.shareId, "shareId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetAccessGrantsRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+}
+
+func (r ApiGetAccessGrantsRequest) Execute() ([]HandlersActiveGrantItem, *http.Response, error) {
+	return r.ApiService.GetAccessGrantsExecute(r)
+}
+
+/*
+GetAccessGrants List active access grants in my org
+
+Admin or owner only. Lists JIT and pre-granted service-account and org grants that are active now.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetAccessGrantsRequest
+*/
+func (a *VaultAPIService) GetAccessGrants(ctx context.Context) ApiGetAccessGrantsRequest {
+	return ApiGetAccessGrantsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return []HandlersActiveGrantItem
+func (a *VaultAPIService) GetAccessGrantsExecute(r ApiGetAccessGrantsRequest) ([]HandlersActiveGrantItem, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []HandlersActiveGrantItem
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetAccessGrants")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/access-grants"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiGetApiV1VaultJitRequestsRequest struct {
 	ctx context.Context
@@ -348,6 +1364,1676 @@ func (a *VaultAPIService) GetApiV1VaultJitStatusRequestTokenExecute(r ApiGetApiV
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 410 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultAccessGrantsRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+}
+
+func (r ApiGetOrgsOrgIdVaultAccessGrantsRequest) Execute() ([]HandlersGrantWithStatus, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultAccessGrantsExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultAccessGrants List org vault access grants
+
+Admin or owner only.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiGetOrgsOrgIdVaultAccessGrantsRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultAccessGrants(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultAccessGrantsRequest {
+	return ApiGetOrgsOrgIdVaultAccessGrantsRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return []HandlersGrantWithStatus
+func (a *VaultAPIService) GetOrgsOrgIdVaultAccessGrantsExecute(r ApiGetOrgsOrgIdVaultAccessGrantsRequest) ([]HandlersGrantWithStatus, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []HandlersGrantWithStatus
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultAccessGrants")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/access-grants"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultAccessGrantsMeRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+}
+
+func (r ApiGetOrgsOrgIdVaultAccessGrantsMeRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultAccessGrantsMeExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultAccessGrantsMe Check my org vault access
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiGetOrgsOrgIdVaultAccessGrantsMeRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultAccessGrantsMe(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultAccessGrantsMeRequest {
+	return ApiGetOrgsOrgIdVaultAccessGrantsMeRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *VaultAPIService) GetOrgsOrgIdVaultAccessGrantsMeExecute(r ApiGetOrgsOrgIdVaultAccessGrantsMeRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultAccessGrantsMe")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/access-grants/me"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultDeliveriesRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	days *int32
+}
+
+// Look-back window in days (default 7, max 30)
+func (r ApiGetOrgsOrgIdVaultDeliveriesRequest) Days(days int32) ApiGetOrgsOrgIdVaultDeliveriesRequest {
+	r.days = &days
+	return r
+}
+
+func (r ApiGetOrgsOrgIdVaultDeliveriesRequest) Execute() (*HandlersOrgVaultDeliveriesResponse, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultDeliveriesExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultDeliveries Read the org vault's delivery ledger (issue #4030, A7)
+
+The Secret deliveries card's read: every recorded delivery inside the look-back window (default 7 days, hard ceiling 30 — a wider ask is refused, never clamped), newest first. Each row: when, secret (identity + display label), machine, mode (wired = sealed into an install payload; rented = an operation-scoped release), and who authorized it. Values never appear on this surface.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @return ApiGetOrgsOrgIdVaultDeliveriesRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultDeliveries(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultDeliveriesRequest {
+	return ApiGetOrgsOrgIdVaultDeliveriesRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersOrgVaultDeliveriesResponse
+func (a *VaultAPIService) GetOrgsOrgIdVaultDeliveriesExecute(r ApiGetOrgsOrgIdVaultDeliveriesRequest) (*HandlersOrgVaultDeliveriesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersOrgVaultDeliveriesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultDeliveries")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/deliveries"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.days != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "days", r.days, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultKeysRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+}
+
+func (r ApiGetOrgsOrgIdVaultKeysRequest) Execute() (*HandlersOrgVaultKeysResponse, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultKeysExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultKeys Read the org vault's dual key slots (issue #4026)
+
+Returns the org's two vault-key slot blobs (password slot + recovery slot, opaque client-wrapped bytes), the Argon2id salts both derivations need, and the recovery key's fingerprint + created-at metadata (never the recovery key or the vault key). The browser unwraps the vault key LOCALLY from the password slot at unlock, or from the recovery slot with the recovery key alone. Authenticated + membership-gated + admin-tier RBAC like the unlock route it serves. 409 with a re-provision instruction for orgs created before the dual-slot hierarchy.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @return ApiGetOrgsOrgIdVaultKeysRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultKeys(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultKeysRequest {
+	return ApiGetOrgsOrgIdVaultKeysRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersOrgVaultKeysResponse
+func (a *VaultAPIService) GetOrgsOrgIdVaultKeysExecute(r ApiGetOrgsOrgIdVaultKeysRequest) (*HandlersOrgVaultKeysResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersOrgVaultKeysResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultKeys")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/keys"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultMachinesRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+}
+
+func (r ApiGetOrgsOrgIdVaultMachinesRequest) Execute() (*HandlersOrgVaultMachinesResponse, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultMachinesExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultMachines List the org vault's machines (issue #4030, A11)
+
+The machine key inventory the vault tab renders: trust derived from the live agent key (fingerprint, Trusted/Revoked state, trusted-since), the secrets the machine holds (active secret references + labels), and its last delivery from the ledger. A11: revocation is NOT this surface's action — the agent page's kill-switch flips the derived state on the next load. No secret value appears in any field.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @return ApiGetOrgsOrgIdVaultMachinesRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultMachines(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultMachinesRequest {
+	return ApiGetOrgsOrgIdVaultMachinesRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersOrgVaultMachinesResponse
+func (a *VaultAPIService) GetOrgsOrgIdVaultMachinesExecute(r ApiGetOrgsOrgIdVaultMachinesRequest) (*HandlersOrgVaultMachinesResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersOrgVaultMachinesResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultMachines")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/machines"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultReceivedSharesRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+}
+
+func (r ApiGetOrgsOrgIdVaultReceivedSharesRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultReceivedSharesExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultReceivedShares List shares sent to me in an org
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiGetOrgsOrgIdVaultReceivedSharesRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultReceivedShares(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultReceivedSharesRequest {
+	return ApiGetOrgsOrgIdVaultReceivedSharesRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *VaultAPIService) GetOrgsOrgIdVaultReceivedSharesExecute(r ApiGetOrgsOrgIdVaultReceivedSharesRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultReceivedShares")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/received-shares"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultRentalsIdRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	id string
+}
+
+func (r ApiGetOrgsOrgIdVaultRentalsIdRequest) Execute() (*HandlersVaultRentalStatusResponse, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultRentalsIdExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultRentalsId Read a vault rental's status (issue #4027)
+
+Metadata-only projection of one rental (operation, target, timestamps, consumed flag). The released payload is never served back — the browser that minted it already holds the secret.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @param id Rental ID
+ @return ApiGetOrgsOrgIdVaultRentalsIdRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultRentalsId(ctx context.Context, orgId int32, id string) ApiGetOrgsOrgIdVaultRentalsIdRequest {
+	return ApiGetOrgsOrgIdVaultRentalsIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersVaultRentalStatusResponse
+func (a *VaultAPIService) GetOrgsOrgIdVaultRentalsIdExecute(r ApiGetOrgsOrgIdVaultRentalsIdRequest) (*HandlersVaultRentalStatusResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersVaultRentalStatusResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultRentalsId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/rentals/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 410 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultSaltRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+}
+
+func (r ApiGetOrgsOrgIdVaultSaltRequest) Execute() (map[string]string, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultSaltExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultSalt Read the org vault's KDF salt (transitional, issue #4025)
+
+Returns the org's Argon2id vault salt (base64, 32 bytes) so the browser can derive the vault key locally at unlock time and decrypt the reveal route's ciphertext envelope client-side. Authenticated + membership-gated like the unlock route it accompanies (admin-tier RBAC). 409 Conflict when the org vault is not initialized — the same shape unlock answers.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @return ApiGetOrgsOrgIdVaultSaltRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultSalt(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultSaltRequest {
+	return ApiGetOrgsOrgIdVaultSaltRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]string
+func (a *VaultAPIService) GetOrgsOrgIdVaultSaltExecute(r ApiGetOrgsOrgIdVaultSaltRequest) (map[string]string, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultSalt")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/salt"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdVaultSharesRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	secretType *string
+	secretId *int32
+}
+
+// Filter by secret type
+func (r ApiGetOrgsOrgIdVaultSharesRequest) SecretType(secretType string) ApiGetOrgsOrgIdVaultSharesRequest {
+	r.secretType = &secretType
+	return r
+}
+
+// Filter by secret ID
+func (r ApiGetOrgsOrgIdVaultSharesRequest) SecretId(secretId int32) ApiGetOrgsOrgIdVaultSharesRequest {
+	r.secretId = &secretId
+	return r
+}
+
+func (r ApiGetOrgsOrgIdVaultSharesRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdVaultSharesExecute(r)
+}
+
+/*
+GetOrgsOrgIdVaultShares List shares I have sent in an org
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiGetOrgsOrgIdVaultSharesRequest
+*/
+func (a *VaultAPIService) GetOrgsOrgIdVaultShares(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultSharesRequest {
+	return ApiGetOrgsOrgIdVaultSharesRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *VaultAPIService) GetOrgsOrgIdVaultSharesExecute(r ApiGetOrgsOrgIdVaultSharesRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultShares")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/shares"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.secretType != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "secret_type", r.secretType, "", "")
+	}
+	if r.secretId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "secret_id", r.secretId, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetServiceAccountsSaIdAccessGrantsRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	saId int32
+}
+
+func (r ApiGetServiceAccountsSaIdAccessGrantsRequest) Execute() ([]HandlersGrantWithStatus, *http.Response, error) {
+	return r.ApiService.GetServiceAccountsSaIdAccessGrantsExecute(r)
+}
+
+/*
+GetServiceAccountsSaIdAccessGrants List access grants for a service account
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param saId Service account ID
+ @return ApiGetServiceAccountsSaIdAccessGrantsRequest
+*/
+func (a *VaultAPIService) GetServiceAccountsSaIdAccessGrants(ctx context.Context, saId int32) ApiGetServiceAccountsSaIdAccessGrantsRequest {
+	return ApiGetServiceAccountsSaIdAccessGrantsRequest{
+		ApiService: a,
+		ctx: ctx,
+		saId: saId,
+	}
+}
+
+// Execute executes the request
+//  @return []HandlersGrantWithStatus
+func (a *VaultAPIService) GetServiceAccountsSaIdAccessGrantsExecute(r ApiGetServiceAccountsSaIdAccessGrantsRequest) ([]HandlersGrantWithStatus, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []HandlersGrantWithStatus
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetServiceAccountsSaIdAccessGrants")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/service-accounts/{sa_id}/access-grants"
+	localVarPath = strings.Replace(localVarPath, "{"+"sa_id"+"}", url.PathEscape(parameterValueToString(r.saId, "saId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetServiceAccountsSaIdAccessGrantsMeRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	saId int32
+}
+
+func (r ApiGetServiceAccountsSaIdAccessGrantsMeRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetServiceAccountsSaIdAccessGrantsMeExecute(r)
+}
+
+/*
+GetServiceAccountsSaIdAccessGrantsMe Check my access to a service account
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param saId Service account ID
+ @return ApiGetServiceAccountsSaIdAccessGrantsMeRequest
+*/
+func (a *VaultAPIService) GetServiceAccountsSaIdAccessGrantsMe(ctx context.Context, saId int32) ApiGetServiceAccountsSaIdAccessGrantsMeRequest {
+	return ApiGetServiceAccountsSaIdAccessGrantsMeRequest{
+		ApiService: a,
+		ctx: ctx,
+		saId: saId,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *VaultAPIService) GetServiceAccountsSaIdAccessGrantsMeExecute(r ApiGetServiceAccountsSaIdAccessGrantsMeRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetServiceAccountsSaIdAccessGrantsMe")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/service-accounts/{sa_id}/access-grants/me"
+	localVarPath = strings.Replace(localVarPath, "{"+"sa_id"+"}", url.PathEscape(parameterValueToString(r.saId, "saId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -724,34 +3410,34 @@ func (a *VaultAPIService) PostApiV1VaultJitRequestExecute(r ApiPostApiV1VaultJit
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiPostOrgsOrgIdVaultInitRequest struct {
+type ApiPostOrgsOrgIdVaultAccessGrantsRequest struct {
 	ctx context.Context
 	ApiService VaultAPI
 	orgId int32
-	request *HandlersOrgVaultInitRequest
+	request *HandlersGrantAccessRequest
 }
 
-// Org vault password
-func (r ApiPostOrgsOrgIdVaultInitRequest) Request(request HandlersOrgVaultInitRequest) ApiPostOrgsOrgIdVaultInitRequest {
+// Grant
+func (r ApiPostOrgsOrgIdVaultAccessGrantsRequest) Request(request HandlersGrantAccessRequest) ApiPostOrgsOrgIdVaultAccessGrantsRequest {
 	r.request = &request
 	return r
 }
 
-func (r ApiPostOrgsOrgIdVaultInitRequest) Execute() (*HandlersOrgVaultInitResponse, *http.Response, error) {
-	return r.ApiService.PostOrgsOrgIdVaultInitExecute(r)
+func (r ApiPostOrgsOrgIdVaultAccessGrantsRequest) Execute() (*ModelsAuthorizedAccess, *http.Response, error) {
+	return r.ApiService.PostOrgsOrgIdVaultAccessGrantsExecute(r)
 }
 
 /*
-PostOrgsOrgIdVaultInit Initialize org vault
+PostOrgsOrgIdVaultAccessGrants Grant a member org-wide vault access
 
-Set the org vault password and derive the OrgKEK
+Admin or owner only. Time-bound org vault access grant for a project member.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param orgId Org ID
- @return ApiPostOrgsOrgIdVaultInitRequest
+ @param orgId Organization ID
+ @return ApiPostOrgsOrgIdVaultAccessGrantsRequest
 */
-func (a *VaultAPIService) PostOrgsOrgIdVaultInit(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultInitRequest {
-	return ApiPostOrgsOrgIdVaultInitRequest{
+func (a *VaultAPIService) PostOrgsOrgIdVaultAccessGrants(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultAccessGrantsRequest {
+	return ApiPostOrgsOrgIdVaultAccessGrantsRequest{
 		ApiService: a,
 		ctx: ctx,
 		orgId: orgId,
@@ -759,21 +3445,21 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultInit(ctx context.Context, orgId int3
 }
 
 // Execute executes the request
-//  @return HandlersOrgVaultInitResponse
-func (a *VaultAPIService) PostOrgsOrgIdVaultInitExecute(r ApiPostOrgsOrgIdVaultInitRequest) (*HandlersOrgVaultInitResponse, *http.Response, error) {
+//  @return ModelsAuthorizedAccess
+func (a *VaultAPIService) PostOrgsOrgIdVaultAccessGrantsExecute(r ApiPostOrgsOrgIdVaultAccessGrantsRequest) (*ModelsAuthorizedAccess, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *HandlersOrgVaultInitResponse
+		localVarReturnValue  *ModelsAuthorizedAccess
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PostOrgsOrgIdVaultInit")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PostOrgsOrgIdVaultAccessGrants")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/orgs/{org_id}/vault/init"
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/access-grants"
 	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -802,6 +3488,34 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultInitExecute(r ApiPostOrgsOrgIdVaultI
 	}
 	// body params
 	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -846,7 +3560,344 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultInitExecute(r ApiPostOrgsOrgIdVaultI
 					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	agentId int32
+	request *HandlersRotateHeldSecretsRequest
+}
+
+// The jobs-may-fail acknowledgement
+func (r ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest) Request(request HandlersRotateHeldSecretsRequest) ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest) Execute() (*HandlersOrgVaultRotateResponse, *http.Response, error) {
+	return r.ApiService.PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsExecute(r)
+}
+
+/*
+PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets Rotate the secrets a machine holds (issue #4030, A11 — the tab's only write)
+
+Records the rotation of every secret the machine holds and answers with the guided checklist (per-secret provider guidance and the surface that rotates it). The body acknowledgement is required — jobs using the old values may fail until they pick up the new ones. Offered for revoked machines too: rotating is exactly what makes a compromised machine's copy useless, and new values never deliver to a revoked machine (the agent gates refuse it; replacements wait for a trusted machine). No secret value is minted or returned — since D2 the browser seals every value.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @param agentId Agent (machine) ID
+ @return ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest
+*/
+func (a *VaultAPIService) PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets(ctx context.Context, orgId int32, agentId int32) ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest {
+	return ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		agentId: agentId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersOrgVaultRotateResponse
+func (a *VaultAPIService) PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsExecute(r ApiPostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecretsRequest) (*HandlersOrgVaultRotateResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersOrgVaultRotateResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/machines/{agent_id}/rotate-held-secrets"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"agent_id"+"}", url.PathEscape(parameterValueToString(r.agentId, "agentId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostOrgsOrgIdVaultRentalsRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	request *HandlersMintVaultRentalRequest
+}
+
+// Operation + target + released payload
+func (r ApiPostOrgsOrgIdVaultRentalsRequest) Request(request HandlersMintVaultRentalRequest) ApiPostOrgsOrgIdVaultRentalsRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPostOrgsOrgIdVaultRentalsRequest) Execute() (*HandlersVaultRentalStatusResponse, *http.Response, error) {
+	return r.ApiService.PostOrgsOrgIdVaultRentalsExecute(r)
+}
+
+/*
+PostOrgsOrgIdVaultRentals Mint an operation-scoped vault secret rental (issue #4027, D3)
+
+The unlocked browser releases the ONE secret an interactive spend operation needs: the request carries the operation slug (from the reviewed allowlist), the target reference, and the locally decrypted payload. The server wraps the payload with the server master key and stores it in Redis under a mandatory TTL (15-minute default, 60-minute ceiling); the vault key itself never transits. Minting is idempotent per (operation, target_ref) while a live rental exists — a redelivery reuses the same rental instead of piling up copies. Every mint (fresh or reused) is audited as an access-decision event.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @return ApiPostOrgsOrgIdVaultRentalsRequest
+*/
+func (a *VaultAPIService) PostOrgsOrgIdVaultRentals(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultRentalsRequest {
+	return ApiPostOrgsOrgIdVaultRentalsRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersVaultRentalStatusResponse
+func (a *VaultAPIService) PostOrgsOrgIdVaultRentalsExecute(r ApiPostOrgsOrgIdVaultRentalsRequest) (*HandlersVaultRentalStatusResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersVaultRentalStatusResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PostOrgsOrgIdVaultRentals")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/rentals"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -889,7 +3940,7 @@ type ApiPostOrgsOrgIdVaultRotatePasswordRequest struct {
 	request *HandlersOrgVaultRotatePasswordRequest
 }
 
-// Current + new passwords
+// Current + new passwords (optionally the client-wrapped new slot)
 func (r ApiPostOrgsOrgIdVaultRotatePasswordRequest) Request(request HandlersOrgVaultRotatePasswordRequest) ApiPostOrgsOrgIdVaultRotatePasswordRequest {
 	r.request = &request
 	return r
@@ -902,7 +3953,7 @@ func (r ApiPostOrgsOrgIdVaultRotatePasswordRequest) Execute() (*HandlersOrgVault
 /*
 PostOrgsOrgIdVaultRotatePassword Rotate org vault password
 
-Verify current password and rekey the org vault
+Verify the current password and rewrap the org vault's password slot (issue #4026: the vault key and every encrypted row are untouched — rotation is a slot rewrap, not a re-encrypt)
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param orgId Org ID
@@ -1029,34 +4080,34 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultRotatePasswordExecute(r ApiPostOrgsO
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiPostOrgsOrgIdVaultUnlockRequest struct {
+type ApiPostOrgsOrgIdVaultSharesRequest struct {
 	ctx context.Context
 	ApiService VaultAPI
 	orgId int32
-	request *HandlersOrgVaultUnlockRequest
+	request *HandlersCreateShareRequest
 }
 
-// Org vault password
-func (r ApiPostOrgsOrgIdVaultUnlockRequest) Request(request HandlersOrgVaultUnlockRequest) ApiPostOrgsOrgIdVaultUnlockRequest {
+// Share
+func (r ApiPostOrgsOrgIdVaultSharesRequest) Request(request HandlersCreateShareRequest) ApiPostOrgsOrgIdVaultSharesRequest {
 	r.request = &request
 	return r
 }
 
-func (r ApiPostOrgsOrgIdVaultUnlockRequest) Execute() (*HandlersOrgVaultUnlockResponse, *http.Response, error) {
-	return r.ApiService.PostOrgsOrgIdVaultUnlockExecute(r)
+func (r ApiPostOrgsOrgIdVaultSharesRequest) Execute() (*HandlersSecretShareView, *http.Response, error) {
+	return r.ApiService.PostOrgsOrgIdVaultSharesExecute(r)
 }
 
 /*
-PostOrgsOrgIdVaultUnlock Unlock org vault
+PostOrgsOrgIdVaultShares Share a vault secret with a recipient
 
-Verify org vault password and create an org session
+Sharer creates a time-bound share of a vault secret to a recipient in the org. Needs a fresh sudo window (X-BMC-Sudo or session marker). Releases the secret's own value (and linked registry credential) once, per ADR-104.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param orgId Org ID
- @return ApiPostOrgsOrgIdVaultUnlockRequest
+ @param orgId Organization ID
+ @return ApiPostOrgsOrgIdVaultSharesRequest
 */
-func (a *VaultAPIService) PostOrgsOrgIdVaultUnlock(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultUnlockRequest {
-	return ApiPostOrgsOrgIdVaultUnlockRequest{
+func (a *VaultAPIService) PostOrgsOrgIdVaultShares(ctx context.Context, orgId int32) ApiPostOrgsOrgIdVaultSharesRequest {
+	return ApiPostOrgsOrgIdVaultSharesRequest{
 		ApiService: a,
 		ctx: ctx,
 		orgId: orgId,
@@ -1064,21 +4115,21 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultUnlock(ctx context.Context, orgId in
 }
 
 // Execute executes the request
-//  @return HandlersOrgVaultUnlockResponse
-func (a *VaultAPIService) PostOrgsOrgIdVaultUnlockExecute(r ApiPostOrgsOrgIdVaultUnlockRequest) (*HandlersOrgVaultUnlockResponse, *http.Response, error) {
+//  @return HandlersSecretShareView
+func (a *VaultAPIService) PostOrgsOrgIdVaultSharesExecute(r ApiPostOrgsOrgIdVaultSharesRequest) (*HandlersSecretShareView, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *HandlersOrgVaultUnlockResponse
+		localVarReturnValue  *HandlersSecretShareView
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PostOrgsOrgIdVaultUnlock")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PostOrgsOrgIdVaultShares")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/orgs/{org_id}/vault/unlock"
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/shares"
 	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -1107,6 +4158,34 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultUnlockExecute(r ApiPostOrgsOrgIdVaul
 	}
 	// body params
 	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -1129,6 +4208,388 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultUnlockExecute(r ApiPostOrgsOrgIdVaul
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostServiceAccountsSaIdAccessGrantsRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	saId int32
+	request *HandlersGrantAccessRequest
+}
+
+// Grant
+func (r ApiPostServiceAccountsSaIdAccessGrantsRequest) Request(request HandlersGrantAccessRequest) ApiPostServiceAccountsSaIdAccessGrantsRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPostServiceAccountsSaIdAccessGrantsRequest) Execute() (*ModelsAuthorizedAccess, *http.Response, error) {
+	return r.ApiService.PostServiceAccountsSaIdAccessGrantsExecute(r)
+}
+
+/*
+PostServiceAccountsSaIdAccessGrants Grant a member time-bound access to a service account
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param saId Service account ID
+ @return ApiPostServiceAccountsSaIdAccessGrantsRequest
+*/
+func (a *VaultAPIService) PostServiceAccountsSaIdAccessGrants(ctx context.Context, saId int32) ApiPostServiceAccountsSaIdAccessGrantsRequest {
+	return ApiPostServiceAccountsSaIdAccessGrantsRequest{
+		ApiService: a,
+		ctx: ctx,
+		saId: saId,
+	}
+}
+
+// Execute executes the request
+//  @return ModelsAuthorizedAccess
+func (a *VaultAPIService) PostServiceAccountsSaIdAccessGrantsExecute(r ApiPostServiceAccountsSaIdAccessGrantsRequest) (*ModelsAuthorizedAccess, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ModelsAuthorizedAccess
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PostServiceAccountsSaIdAccessGrants")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/service-accounts/{sa_id}/access-grants"
+	localVarPath = strings.Replace(localVarPath, "{"+"sa_id"+"}", url.PathEscape(parameterValueToString(r.saId, "saId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPutOrgsOrgIdVaultSlotsSlotRequest struct {
+	ctx context.Context
+	ApiService VaultAPI
+	orgId int32
+	slot string
+	request *HandlersOrgVaultReplaceRecoveryRequest
+}
+
+// New recovery slot (client-wrapped) + ack
+func (r ApiPutOrgsOrgIdVaultSlotsSlotRequest) Request(request HandlersOrgVaultReplaceRecoveryRequest) ApiPutOrgsOrgIdVaultSlotsSlotRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPutOrgsOrgIdVaultSlotsSlotRequest) Execute() (*HandlersOrgVaultReplaceRecoveryResponse, *http.Response, error) {
+	return r.ApiService.PutOrgsOrgIdVaultSlotsSlotExecute(r)
+}
+
+/*
+PutOrgsOrgIdVaultSlotsSlot Replace a wrapped org vault slot (issue #4026, A9; #4075 renamed the route)
+
+Overwrites the org vault's recovery slot with a new client-wrapped blob, killing the previous backup recovery key at the moment of the replace (single-use semantics). The browser generates the new recovery key, wraps the slot client-side, and sends ONLY the wrapped blob + salt + fingerprint — the raw recovery key never transits. The only replaceable slot is "recovery" (the password slot changes only through rotate-password); any other slot name is a 404. Requires a recovery_key.replace operation rental (issue #4027: the browser proves it holds the vault key by releasing it into a one-time rental the server verifies against the stored password slot) + admin tier + the sudo gate, mirroring rotate-password. The acknowledgement flag must be true: the one-time reveal dialog cannot complete without it.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Org ID
+ @param slot Slot to replace (only the recovery slot is replaceable)
+ @return ApiPutOrgsOrgIdVaultSlotsSlotRequest
+*/
+func (a *VaultAPIService) PutOrgsOrgIdVaultSlotsSlot(ctx context.Context, orgId int32, slot string) ApiPutOrgsOrgIdVaultSlotsSlotRequest {
+	return ApiPutOrgsOrgIdVaultSlotsSlotRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		slot: slot,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersOrgVaultReplaceRecoveryResponse
+func (a *VaultAPIService) PutOrgsOrgIdVaultSlotsSlotExecute(r ApiPutOrgsOrgIdVaultSlotsSlotRequest) (*HandlersOrgVaultReplaceRecoveryResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersOrgVaultReplaceRecoveryResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.PutOrgsOrgIdVaultSlotsSlot")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/vault/slots/{slot}"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"slot"+"}", url.PathEscape(parameterValueToString(r.slot, "slot")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 401 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
@@ -1141,6 +4602,17 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultUnlockExecute(r ApiPostOrgsOrgIdVaul
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

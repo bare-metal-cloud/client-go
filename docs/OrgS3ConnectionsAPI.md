@@ -171,7 +171,7 @@ import (
 
 func main() {
 	orgId := int32(56) // int32 | Organization ID
-	request := *openapiclient.NewHandlersCreateOrgS3ConnectionRequest("AccessKeyId_example", "Endpoint_example", "Name_example", "Provider_example", "SecretAccessKey_example") // HandlersCreateOrgS3ConnectionRequest | S3 connection details
+	request := *openapiclient.NewHandlersCreateOrgS3ConnectionRequest("Name_example", "Provider_example") // HandlersCreateOrgS3ConnectionRequest | S3 connection details
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -242,7 +242,7 @@ import (
 func main() {
 	orgId := int32(56) // int32 | Organization ID
 	id := int32(56) // int32 | S3 Connection ID
-	request := *openapiclient.NewHandlersRotateOrgS3ConnectionCredentialsRequest("AccessKeyId_example", "SecretAccessKey_example") // HandlersRotateOrgS3ConnectionCredentialsRequest | New credentials
+	request := *openapiclient.NewHandlersRotateOrgS3ConnectionCredentialsRequest() // HandlersRotateOrgS3ConnectionCredentialsRequest | New credentials
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

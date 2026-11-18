@@ -20,13 +20,11 @@ var _ MappedNullable = &HandlersSealSecretRequest{}
 
 // HandlersSealSecretRequest struct for HandlersSealSecretRequest
 type HandlersSealSecretRequest struct {
-	// seal action (e.g. \"seal_sa_secret\") — must be in seal policy AllowedActions
-	Action *string `json:"action,omitempty"`
 	// the EncryptedData row to seal
 	EncryptedDataId *int32 `json:"encrypted_data_id,omitempty"`
 	// broker secret-type label (e.g. \"sa_credentials\")
 	SecretType *string `json:"secret_type,omitempty"`
-	// hex-encoded target worker pubkey (allowlisted in seal policy)
+	// hex-encoded target worker identity (audit label for the sealed blob's consumer)
 	WorkerKey *string `json:"worker_key,omitempty"`
 }
 
@@ -45,38 +43,6 @@ func NewHandlersSealSecretRequest() *HandlersSealSecretRequest {
 func NewHandlersSealSecretRequestWithDefaults() *HandlersSealSecretRequest {
 	this := HandlersSealSecretRequest{}
 	return &this
-}
-
-// GetAction returns the Action field value if set, zero value otherwise.
-func (o *HandlersSealSecretRequest) GetAction() string {
-	if o == nil || IsNil(o.Action) {
-		var ret string
-		return ret
-	}
-	return *o.Action
-}
-
-// GetActionOk returns a tuple with the Action field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *HandlersSealSecretRequest) GetActionOk() (*string, bool) {
-	if o == nil || IsNil(o.Action) {
-		return nil, false
-	}
-	return o.Action, true
-}
-
-// HasAction returns a boolean if a field has been set.
-func (o *HandlersSealSecretRequest) HasAction() bool {
-	if o != nil && !IsNil(o.Action) {
-		return true
-	}
-
-	return false
-}
-
-// SetAction gets a reference to the given string and assigns it to the Action field.
-func (o *HandlersSealSecretRequest) SetAction(v string) {
-	o.Action = &v
 }
 
 // GetEncryptedDataId returns the EncryptedDataId field value if set, zero value otherwise.
@@ -185,9 +151,6 @@ func (o HandlersSealSecretRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersSealSecretRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Action) {
-		toSerialize["action"] = o.Action
-	}
 	if !IsNil(o.EncryptedDataId) {
 		toSerialize["encrypted_data_id"] = o.EncryptedDataId
 	}

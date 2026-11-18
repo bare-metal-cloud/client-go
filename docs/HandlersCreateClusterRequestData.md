@@ -4,8 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Addons** | Pointer to **[]string** | Addons is the wizard Add-ons step&#39;s checkbox set (epic app-platform story 3.4): the optional extras ticked at formation, from the CLOSED set models.ClusterAddons (monitoring, public_entry, databases, log_book). The omitted/empty field records none. An unknown key is a 400 caller error; the set is normalized again pre-row in the service and persisted as the clusters.addons JSON array. Installation honesty: only &#39;monitoring&#39; has a real install path today (the formation-completion hook provisions the in-cluster monitoring stack); the other three keys persist as declared-but-not-yet-installing — the surfaces list them, nothing fake-installs them. | [optional] 
 **AdoptExisting** | Pointer to **bool** | AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint 4): accept pre-existing, RUNNING, same-version k3s on the members instead of installing. Without it, a member with running k3s is 409 existing_k3s_running. The server verifies EVERY member via the contamination preflight before honoring it (verified adoption records cluster.adopted&#x3D;true; an unverified opt-in is not honored). | [optional] 
 **AgentDeployMethod** | Pointer to **string** | AgentDeployMethod selects how the k8s-agent is deployed inside the cluster after provisioning: \&quot;kubectl\&quot; (default, applies manifest via client-go) or \&quot;helm\&quot; (installs via Helm SDK from the chart repo). | [optional] 
+**Backup** | Pointer to [**HandlersCreateClusterRequestDataBackup**](HandlersCreateClusterRequestDataBackup.md) |  | [optional] 
 **FailurePolicy** | Pointer to **string** | FailurePolicy is the E5-7 LOCKED failure policy for multi-master creates (story 125.3): \&quot;system_managed\&quot; (per-master retries to the deadline, then the quorum-preconditioned auto-return ladder) or \&quot;user_managed\&quot; (hold + action_required on first failure, zero autonomous actions). Locked for the operation; persisted with the operation record (job payload + the D6 hold) — never a cluster column. Multi-master only; single-master ignores it. | [optional] 
 **Ha** | Pointer to **bool** | High availability mode (cloud providers) | [optional] 
 **InstallConfig** | Pointer to **map[string]string** | InstallConfig overrides distribution install defaults. Keys recognized by the distribution (e.g. \&quot;snapshotter\&quot;) set the corresponding flag; unknown keys are passed through as --key&#x3D;value. Empty &#x3D; use distribution defaults. | [optional] 
@@ -35,6 +37,31 @@ will change when the set of required properties is changed
 NewHandlersCreateClusterRequestDataWithDefaults instantiates a new HandlersCreateClusterRequestData object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetAddons
+
+`func (o *HandlersCreateClusterRequestData) GetAddons() []string`
+
+GetAddons returns the Addons field if non-nil, zero value otherwise.
+
+### GetAddonsOk
+
+`func (o *HandlersCreateClusterRequestData) GetAddonsOk() (*[]string, bool)`
+
+GetAddonsOk returns a tuple with the Addons field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAddons
+
+`func (o *HandlersCreateClusterRequestData) SetAddons(v []string)`
+
+SetAddons sets Addons field to given value.
+
+### HasAddons
+
+`func (o *HandlersCreateClusterRequestData) HasAddons() bool`
+
+HasAddons returns a boolean if a field has been set.
 
 ### GetAdoptExisting
 
@@ -85,6 +112,31 @@ SetAgentDeployMethod sets AgentDeployMethod field to given value.
 `func (o *HandlersCreateClusterRequestData) HasAgentDeployMethod() bool`
 
 HasAgentDeployMethod returns a boolean if a field has been set.
+
+### GetBackup
+
+`func (o *HandlersCreateClusterRequestData) GetBackup() HandlersCreateClusterRequestDataBackup`
+
+GetBackup returns the Backup field if non-nil, zero value otherwise.
+
+### GetBackupOk
+
+`func (o *HandlersCreateClusterRequestData) GetBackupOk() (*HandlersCreateClusterRequestDataBackup, bool)`
+
+GetBackupOk returns a tuple with the Backup field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBackup
+
+`func (o *HandlersCreateClusterRequestData) SetBackup(v HandlersCreateClusterRequestDataBackup)`
+
+SetBackup sets Backup field to given value.
+
+### HasBackup
+
+`func (o *HandlersCreateClusterRequestData) HasBackup() bool`
+
+HasBackup returns a boolean if a field has been set.
 
 ### GetFailurePolicy
 

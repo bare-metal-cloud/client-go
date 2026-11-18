@@ -26,7 +26,7 @@ type CloudProviderCredentialsAPI interface {
 	/*
 	DeleteCloudProviderCredentialsId Delete cloud provider credentials
 
-	Delete cloud provider credentials by ID
+	Delete cloud provider credentials by ID. Credentials active references still point at refuse with 409; admin/owner can force with ?force=true, which clears the references and the stored versions in one transaction.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Credential ID
@@ -40,7 +40,8 @@ type CloudProviderCredentialsAPI interface {
 	/*
 	GetCloudProviderCredentials List all cloud provider credentials
 
-	Get all cloud provider credentials owned by the authenticated user
+	Get all cloud provider credentials owned by the authenticated user's active org/project selection.
+ID CONTRACT (issue #3874): each entry's `id` is the NUMERIC cloud_provider_credentials row id, not a composite "provider:id" string. The create wizards accept both shapes but the numeric half is what the create routes take as `*_credential_id` / `linked_credential_id`, so clients parse no string prefix: `entry.id` is used as-is.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetCloudProviderCredentialsRequest
@@ -50,6 +51,36 @@ type CloudProviderCredentialsAPI interface {
 	// GetCloudProviderCredentialsExecute executes the request
 	//  @return []map[string]interface{}
 	GetCloudProviderCredentialsExecute(r ApiGetCloudProviderCredentialsRequest) ([]map[string]interface{}, *http.Response, error)
+
+	/*
+	GetCloudProviderCredentialsIdBuckets List the bucket catalog captured for a cloud credential
+
+	The storage wizard's bucket step. Serves the bucket inventory captured at the credential's LAST SUCCESSFUL STORAGE VERIFICATION; it is empty until the credential has been verified, and the read never makes a live cloud call, so it is not gated by the org vault (the vault ask stays on the create submit). Each row carries the bucket name plus the region/account facts the picker shows; creation_date is empty when the verification did not report it. 404 when the credential is not in the caller's org.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Credential ID
+	@return ApiGetCloudProviderCredentialsIdBucketsRequest
+	*/
+	GetCloudProviderCredentialsIdBuckets(ctx context.Context, id int32) ApiGetCloudProviderCredentialsIdBucketsRequest
+
+	// GetCloudProviderCredentialsIdBucketsExecute executes the request
+	//  @return HandlersCredentialBucketCatalogResponse
+	GetCloudProviderCredentialsIdBucketsExecute(r ApiGetCloudProviderCredentialsIdBucketsRequest) (*HandlersCredentialBucketCatalogResponse, *http.Response, error)
+
+	/*
+	GetCloudProviderCredentialsIdRegistries List the registry catalog captured for a cloud credential
+
+	The image-registry wizard's details step. Serves the registry inventory captured at the credential's LAST SUCCESSFUL VERIFICATION (issue #3878): ECR repositories for an AWS credential, Docker-format Artifact Registry repositories for a GCP credential, and container registries for an Azure credential. It is empty until the credential has been verified — or when the verification could not enumerate any scope — and the read never makes a live cloud call, so it is not gated by the org vault. Each row carries the registry identity the picker posts (repository name, repository path, or login server), its region/location, and the owning account when the provider reported one. 404 when the credential is not in the caller's org.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Credential ID
+	@return ApiGetCloudProviderCredentialsIdRegistriesRequest
+	*/
+	GetCloudProviderCredentialsIdRegistries(ctx context.Context, id int32) ApiGetCloudProviderCredentialsIdRegistriesRequest
+
+	// GetCloudProviderCredentialsIdRegistriesExecute executes the request
+	//  @return HandlersCredentialRegistryCatalogResponse
+	GetCloudProviderCredentialsIdRegistriesExecute(r ApiGetCloudProviderCredentialsIdRegistriesRequest) (*HandlersCredentialRegistryCatalogResponse, *http.Response, error)
 
 	/*
 	PostCloudProviderCredentials Create cloud provider credentials
@@ -117,6 +148,13 @@ type ApiDeleteCloudProviderCredentialsIdRequest struct {
 	ctx context.Context
 	ApiService CloudProviderCredentialsAPI
 	id string
+	force *bool
+}
+
+// Force the delete past the reference guard (admin/owner only)
+func (r ApiDeleteCloudProviderCredentialsIdRequest) Force(force bool) ApiDeleteCloudProviderCredentialsIdRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteCloudProviderCredentialsIdRequest) Execute() (*http.Response, error) {
@@ -126,7 +164,7 @@ func (r ApiDeleteCloudProviderCredentialsIdRequest) Execute() (*http.Response, e
 /*
 DeleteCloudProviderCredentialsId Delete cloud provider credentials
 
-Delete cloud provider credentials by ID
+Delete cloud provider credentials by ID. Credentials active references still point at refuse with 409; admin/owner can force with ?force=true, which clears the references and the stored versions in one transaction.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Credential ID
@@ -160,6 +198,9 @@ func (a *CloudProviderCredentialsAPIService) DeleteCloudProviderCredentialsIdExe
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -224,7 +265,29 @@ func (a *CloudProviderCredentialsAPIService) DeleteCloudProviderCredentialsIdExe
 					newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -263,7 +326,8 @@ func (r ApiGetCloudProviderCredentialsRequest) Execute() ([]map[string]interface
 /*
 GetCloudProviderCredentials List all cloud provider credentials
 
-Get all cloud provider credentials owned by the authenticated user
+Get all cloud provider credentials owned by the authenticated user's active org/project selection.
+ID CONTRACT (issue #3874): each entry's `id` is the NUMERIC cloud_provider_credentials row id, not a composite "provider:id" string. The create wizards accept both shapes but the numeric half is what the create routes take as `*_credential_id` / `linked_credential_id`, so clients parse no string prefix: `entry.id` is used as-is.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGetCloudProviderCredentialsRequest
@@ -361,6 +425,304 @@ func (a *CloudProviderCredentialsAPIService) GetCloudProviderCredentialsExecute(
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetCloudProviderCredentialsIdBucketsRequest struct {
+	ctx context.Context
+	ApiService CloudProviderCredentialsAPI
+	id int32
+}
+
+func (r ApiGetCloudProviderCredentialsIdBucketsRequest) Execute() (*HandlersCredentialBucketCatalogResponse, *http.Response, error) {
+	return r.ApiService.GetCloudProviderCredentialsIdBucketsExecute(r)
+}
+
+/*
+GetCloudProviderCredentialsIdBuckets List the bucket catalog captured for a cloud credential
+
+The storage wizard's bucket step. Serves the bucket inventory captured at the credential's LAST SUCCESSFUL STORAGE VERIFICATION; it is empty until the credential has been verified, and the read never makes a live cloud call, so it is not gated by the org vault (the vault ask stays on the create submit). Each row carries the bucket name plus the region/account facts the picker shows; creation_date is empty when the verification did not report it. 404 when the credential is not in the caller's org.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Credential ID
+ @return ApiGetCloudProviderCredentialsIdBucketsRequest
+*/
+func (a *CloudProviderCredentialsAPIService) GetCloudProviderCredentialsIdBuckets(ctx context.Context, id int32) ApiGetCloudProviderCredentialsIdBucketsRequest {
+	return ApiGetCloudProviderCredentialsIdBucketsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersCredentialBucketCatalogResponse
+func (a *CloudProviderCredentialsAPIService) GetCloudProviderCredentialsIdBucketsExecute(r ApiGetCloudProviderCredentialsIdBucketsRequest) (*HandlersCredentialBucketCatalogResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersCredentialBucketCatalogResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudProviderCredentialsAPIService.GetCloudProviderCredentialsIdBuckets")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/cloud-provider-credentials/{id}/buckets"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetCloudProviderCredentialsIdRegistriesRequest struct {
+	ctx context.Context
+	ApiService CloudProviderCredentialsAPI
+	id int32
+}
+
+func (r ApiGetCloudProviderCredentialsIdRegistriesRequest) Execute() (*HandlersCredentialRegistryCatalogResponse, *http.Response, error) {
+	return r.ApiService.GetCloudProviderCredentialsIdRegistriesExecute(r)
+}
+
+/*
+GetCloudProviderCredentialsIdRegistries List the registry catalog captured for a cloud credential
+
+The image-registry wizard's details step. Serves the registry inventory captured at the credential's LAST SUCCESSFUL VERIFICATION (issue #3878): ECR repositories for an AWS credential, Docker-format Artifact Registry repositories for a GCP credential, and container registries for an Azure credential. It is empty until the credential has been verified — or when the verification could not enumerate any scope — and the read never makes a live cloud call, so it is not gated by the org vault. Each row carries the registry identity the picker posts (repository name, repository path, or login server), its region/location, and the owning account when the provider reported one. 404 when the credential is not in the caller's org.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Credential ID
+ @return ApiGetCloudProviderCredentialsIdRegistriesRequest
+*/
+func (a *CloudProviderCredentialsAPIService) GetCloudProviderCredentialsIdRegistries(ctx context.Context, id int32) ApiGetCloudProviderCredentialsIdRegistriesRequest {
+	return ApiGetCloudProviderCredentialsIdRegistriesRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersCredentialRegistryCatalogResponse
+func (a *CloudProviderCredentialsAPIService) GetCloudProviderCredentialsIdRegistriesExecute(r ApiGetCloudProviderCredentialsIdRegistriesRequest) (*HandlersCredentialRegistryCatalogResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersCredentialRegistryCatalogResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "CloudProviderCredentialsAPIService.GetCloudProviderCredentialsIdRegistries")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/cloud-provider-credentials/{id}/registries"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -543,6 +905,17 @@ func (a *CloudProviderCredentialsAPIService) PostCloudProviderCredentialsExecute
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -736,6 +1109,17 @@ func (a *CloudProviderCredentialsAPIService) PostCloudProviderCredentialsIdValid
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -899,6 +1283,17 @@ func (a *CloudProviderCredentialsAPIService) PostCloudProviderCredentialsValidat
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -1096,6 +1491,17 @@ func (a *CloudProviderCredentialsAPIService) PutCloudProviderCredentialsIdExecut
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

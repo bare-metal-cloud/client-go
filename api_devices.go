@@ -81,9 +81,9 @@ type DevicesAPI interface {
 	PostDevicesRevokeAllExecute(r ApiPostDevicesRevokeAllRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	PutDevicesCurrentTrustWithKey Mark current device as trusted by proving an unlocked org vault session
+	PutDevicesCurrentTrustWithKey Mark current device as trusted by proving a vault-key rental
 
-	Marks the current device as trusted after verifying the caller holds an unlocked org vault session (X-Org-Vault-Token header, validated by OrgVaultSessionMiddleware). If the device doesn't exist, it will be created. This ensures only someone with a valid unlocked vault session can mark a device as trusted.
+	Marks the current device as trusted after consuming a device.trust operation rental (issue #4027): the browser releases its locally held vault key into a one-time rental and the server possession-proves the rental by GCM-opening the org's stored vault guard row. If the device doesn't exist, it will be created. This ensures only someone holding the vault key can mark a device as trusted.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiPutDevicesCurrentTrustWithKeyRequest
@@ -659,9 +659,9 @@ func (r ApiPutDevicesCurrentTrustWithKeyRequest) Execute() (map[string]interface
 }
 
 /*
-PutDevicesCurrentTrustWithKey Mark current device as trusted by proving an unlocked org vault session
+PutDevicesCurrentTrustWithKey Mark current device as trusted by proving a vault-key rental
 
-Marks the current device as trusted after verifying the caller holds an unlocked org vault session (X-Org-Vault-Token header, validated by OrgVaultSessionMiddleware). If the device doesn't exist, it will be created. This ensures only someone with a valid unlocked vault session can mark a device as trusted.
+Marks the current device as trusted after consuming a device.trust operation rental (issue #4027): the browser releases its locally held vault key into a one-time rental and the server possession-proves the rental by GCM-opening the org's stored vault guard row. If the device doesn't exist, it will be created. This ensures only someone holding the vault key can mark a device as trusted.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPutDevicesCurrentTrustWithKeyRequest

@@ -8,7 +8,7 @@ Method | HTTP request | Description
 [**GetDevices**](DevicesAPI.md#GetDevices) | **Get** /devices | List all devices for the current user
 [**GetDevicesCurrent**](DevicesAPI.md#GetDevicesCurrent) | **Get** /devices/current | Get current device information
 [**PostDevicesRevokeAll**](DevicesAPI.md#PostDevicesRevokeAll) | **Post** /devices/revoke-all | Revoke all devices for the current user
-[**PutDevicesCurrentTrustWithKey**](DevicesAPI.md#PutDevicesCurrentTrustWithKey) | **Put** /devices/current/trust-with-key | Mark current device as trusted by proving an unlocked org vault session
+[**PutDevicesCurrentTrustWithKey**](DevicesAPI.md#PutDevicesCurrentTrustWithKey) | **Put** /devices/current/trust-with-key | Mark current device as trusted by proving a vault-key rental
 [**PutDevicesDeviceIdTrust**](DevicesAPI.md#PutDevicesDeviceIdTrust) | **Put** /devices/{device_id}/trust | Update trust status of a device
 
 
@@ -270,7 +270,7 @@ Other parameters are passed through a pointer to a apiPostDevicesRevokeAllReques
 
 > map[string]interface{} PutDevicesCurrentTrustWithKey(ctx).Request(request).Execute()
 
-Mark current device as trusted by proving an unlocked org vault session
+Mark current device as trusted by proving a vault-key rental
 
 
 
@@ -287,7 +287,7 @@ import (
 )
 
 func main() {
-	request := *openapiclient.NewHandlersTrustCurrentDeviceRequest("EncryptionKey_example") // HandlersTrustCurrentDeviceRequest | encryption_key is required and validated, but the trust gate is the org vault session (X-Org-Vault-Token header)
+	request := *openapiclient.NewHandlersTrustCurrentDeviceRequest() // HandlersTrustCurrentDeviceRequest | encryption_key is required and validated, but the trust gate is the org vault session (X-Org-Vault-Token header)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

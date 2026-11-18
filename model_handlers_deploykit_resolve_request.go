@@ -20,10 +20,16 @@ var _ MappedNullable = &HandlersDeploykitResolveRequest{}
 
 // HandlersDeploykitResolveRequest struct for HandlersDeploykitResolveRequest
 type HandlersDeploykitResolveRequest struct {
+	ArrivalInstance *string `json:"arrival_instance,omitempty"`
+	// Arrival is the generic arrival pick (\"public\" | \"tunnel\") with its optional addon instance sub-choice; ZoneID is the registry pick.
+	ArrivalKind *string `json:"arrival_kind,omitempty"`
+	// Blueprint is the deploy wizard's ORIGINALLY SELECTED source (epic 165 story 165.5 — additive and omitempty): the repo + ref + file the card resolved, persisted at install time so the update flow re-derives from the SAME selection (the never-silently-switch- files law). Absent on every pre-165.5 request.
+	Blueprint *HandlersInstallBlueprintSelection `json:"blueprint,omitempty"`
 	Bundle *BundleRef `json:"bundle,omitempty"`
 	Facts *EngineContextFacts `json:"facts,omitempty"`
 	Input map[string]map[string]interface{} `json:"input,omitempty"`
 	Target *string `json:"target,omitempty"`
+	ZoneId *int32 `json:"zone_id,omitempty"`
 }
 
 // NewHandlersDeploykitResolveRequest instantiates a new HandlersDeploykitResolveRequest object
@@ -41,6 +47,102 @@ func NewHandlersDeploykitResolveRequest() *HandlersDeploykitResolveRequest {
 func NewHandlersDeploykitResolveRequestWithDefaults() *HandlersDeploykitResolveRequest {
 	this := HandlersDeploykitResolveRequest{}
 	return &this
+}
+
+// GetArrivalInstance returns the ArrivalInstance field value if set, zero value otherwise.
+func (o *HandlersDeploykitResolveRequest) GetArrivalInstance() string {
+	if o == nil || IsNil(o.ArrivalInstance) {
+		var ret string
+		return ret
+	}
+	return *o.ArrivalInstance
+}
+
+// GetArrivalInstanceOk returns a tuple with the ArrivalInstance field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersDeploykitResolveRequest) GetArrivalInstanceOk() (*string, bool) {
+	if o == nil || IsNil(o.ArrivalInstance) {
+		return nil, false
+	}
+	return o.ArrivalInstance, true
+}
+
+// HasArrivalInstance returns a boolean if a field has been set.
+func (o *HandlersDeploykitResolveRequest) HasArrivalInstance() bool {
+	if o != nil && !IsNil(o.ArrivalInstance) {
+		return true
+	}
+
+	return false
+}
+
+// SetArrivalInstance gets a reference to the given string and assigns it to the ArrivalInstance field.
+func (o *HandlersDeploykitResolveRequest) SetArrivalInstance(v string) {
+	o.ArrivalInstance = &v
+}
+
+// GetArrivalKind returns the ArrivalKind field value if set, zero value otherwise.
+func (o *HandlersDeploykitResolveRequest) GetArrivalKind() string {
+	if o == nil || IsNil(o.ArrivalKind) {
+		var ret string
+		return ret
+	}
+	return *o.ArrivalKind
+}
+
+// GetArrivalKindOk returns a tuple with the ArrivalKind field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersDeploykitResolveRequest) GetArrivalKindOk() (*string, bool) {
+	if o == nil || IsNil(o.ArrivalKind) {
+		return nil, false
+	}
+	return o.ArrivalKind, true
+}
+
+// HasArrivalKind returns a boolean if a field has been set.
+func (o *HandlersDeploykitResolveRequest) HasArrivalKind() bool {
+	if o != nil && !IsNil(o.ArrivalKind) {
+		return true
+	}
+
+	return false
+}
+
+// SetArrivalKind gets a reference to the given string and assigns it to the ArrivalKind field.
+func (o *HandlersDeploykitResolveRequest) SetArrivalKind(v string) {
+	o.ArrivalKind = &v
+}
+
+// GetBlueprint returns the Blueprint field value if set, zero value otherwise.
+func (o *HandlersDeploykitResolveRequest) GetBlueprint() HandlersInstallBlueprintSelection {
+	if o == nil || IsNil(o.Blueprint) {
+		var ret HandlersInstallBlueprintSelection
+		return ret
+	}
+	return *o.Blueprint
+}
+
+// GetBlueprintOk returns a tuple with the Blueprint field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersDeploykitResolveRequest) GetBlueprintOk() (*HandlersInstallBlueprintSelection, bool) {
+	if o == nil || IsNil(o.Blueprint) {
+		return nil, false
+	}
+	return o.Blueprint, true
+}
+
+// HasBlueprint returns a boolean if a field has been set.
+func (o *HandlersDeploykitResolveRequest) HasBlueprint() bool {
+	if o != nil && !IsNil(o.Blueprint) {
+		return true
+	}
+
+	return false
+}
+
+// SetBlueprint gets a reference to the given HandlersInstallBlueprintSelection and assigns it to the Blueprint field.
+func (o *HandlersDeploykitResolveRequest) SetBlueprint(v HandlersInstallBlueprintSelection) {
+	o.Blueprint = &v
 }
 
 // GetBundle returns the Bundle field value if set, zero value otherwise.
@@ -171,6 +273,38 @@ func (o *HandlersDeploykitResolveRequest) SetTarget(v string) {
 	o.Target = &v
 }
 
+// GetZoneId returns the ZoneId field value if set, zero value otherwise.
+func (o *HandlersDeploykitResolveRequest) GetZoneId() int32 {
+	if o == nil || IsNil(o.ZoneId) {
+		var ret int32
+		return ret
+	}
+	return *o.ZoneId
+}
+
+// GetZoneIdOk returns a tuple with the ZoneId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersDeploykitResolveRequest) GetZoneIdOk() (*int32, bool) {
+	if o == nil || IsNil(o.ZoneId) {
+		return nil, false
+	}
+	return o.ZoneId, true
+}
+
+// HasZoneId returns a boolean if a field has been set.
+func (o *HandlersDeploykitResolveRequest) HasZoneId() bool {
+	if o != nil && !IsNil(o.ZoneId) {
+		return true
+	}
+
+	return false
+}
+
+// SetZoneId gets a reference to the given int32 and assigns it to the ZoneId field.
+func (o *HandlersDeploykitResolveRequest) SetZoneId(v int32) {
+	o.ZoneId = &v
+}
+
 func (o HandlersDeploykitResolveRequest) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -181,6 +315,15 @@ func (o HandlersDeploykitResolveRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersDeploykitResolveRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.ArrivalInstance) {
+		toSerialize["arrival_instance"] = o.ArrivalInstance
+	}
+	if !IsNil(o.ArrivalKind) {
+		toSerialize["arrival_kind"] = o.ArrivalKind
+	}
+	if !IsNil(o.Blueprint) {
+		toSerialize["blueprint"] = o.Blueprint
+	}
 	if !IsNil(o.Bundle) {
 		toSerialize["bundle"] = o.Bundle
 	}
@@ -192,6 +335,9 @@ func (o HandlersDeploykitResolveRequest) ToMap() (map[string]interface{}, error)
 	}
 	if !IsNil(o.Target) {
 		toSerialize["target"] = o.Target
+	}
+	if !IsNil(o.ZoneId) {
+		toSerialize["zone_id"] = o.ZoneId
 	}
 	return toSerialize, nil
 }

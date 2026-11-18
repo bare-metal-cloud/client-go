@@ -13,6 +13,8 @@ Method | HTTP request | Description
 [**GetNetworksIdNodes**](NetworksAPI.md#GetNetworksIdNodes) | **Get** /networks/{id}/nodes | List network nodes
 [**PostNetworks**](NetworksAPI.md#PostNetworks) | **Post** /networks | Create a new network
 [**PostNetworksIdDraftIntentDismiss**](NetworksAPI.md#PostNetworksIdDraftIntentDismiss) | **Post** /networks/{id}/draft-intent/dismiss | Dismiss a network&#39;s cluster-create draft intent
+[**PostNetworksIdForceDelete**](NetworksAPI.md#PostNetworksIdForceDelete) | **Post** /networks/{id}/force-delete | Force-delete a network stuck in delete_failed
+[**PostNetworksIdRetryDelete**](NetworksAPI.md#PostNetworksIdRetryDelete) | **Post** /networks/{id}/retry-delete | Retry deleting a failed network delete
 [**PostNetworksIdVms**](NetworksAPI.md#PostNetworksIdVms) | **Post** /networks/{id}/vms | Add VM to network
 [**PostNetworksIdVmsVmIdCancel**](NetworksAPI.md#PostNetworksIdVmsVmIdCancel) | **Post** /networks/{id}/vms/{vm_id}/cancel | Cancel in-flight VM-to-network join
 [**PostNetworksIdVmsVmIdRetry**](NetworksAPI.md#PostNetworksIdVmsVmIdRetry) | **Post** /networks/{id}/vms/{vm_id}/retry | Retry failed VM-to-network join
@@ -617,6 +619,146 @@ Name | Type | Description  | Notes
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiPostNetworksIdDraftIntentDismissRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]string**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostNetworksIdForceDelete
+
+> map[string]string PostNetworksIdForceDelete(ctx, id).Execute()
+
+Force-delete a network stuck in delete_failed
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Network ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.NetworksAPI.PostNetworksIdForceDelete(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `NetworksAPI.PostNetworksIdForceDelete``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostNetworksIdForceDelete`: map[string]string
+	fmt.Fprintf(os.Stdout, "Response from `NetworksAPI.PostNetworksIdForceDelete`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Network ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostNetworksIdForceDeleteRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]string**
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostNetworksIdRetryDelete
+
+> map[string]string PostNetworksIdRetryDelete(ctx, id).Execute()
+
+Retry deleting a failed network delete
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Network ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.NetworksAPI.PostNetworksIdRetryDelete(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `NetworksAPI.PostNetworksIdRetryDelete``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostNetworksIdRetryDelete`: map[string]string
+	fmt.Fprintf(os.Stdout, "Response from `NetworksAPI.PostNetworksIdRetryDelete`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Network ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostNetworksIdRetryDeleteRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

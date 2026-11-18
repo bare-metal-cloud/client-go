@@ -41,7 +41,8 @@ type MetricsAPI interface {
 	/*
 	GetVirtualMachinesIdMetricsHistory Get VM metrics history
 
-	Get historical time-series metrics from TimescaleDB
+	Get historical time-series metrics for a VM via the
+monitor-core read layer
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id VM ID
@@ -215,7 +216,8 @@ func (r ApiGetVirtualMachinesIdMetricsHistoryRequest) Execute() (*HandlersMetric
 /*
 GetVirtualMachinesIdMetricsHistory Get VM metrics history
 
-Get historical time-series metrics from TimescaleDB
+Get historical time-series metrics for a VM via the
+monitor-core read layer
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id VM ID
@@ -283,6 +285,20 @@ func (a *MetricsAPIService) GetVirtualMachinesIdMetricsHistoryExecute(r ApiGetVi
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -304,6 +320,16 @@ func (a *MetricsAPIService) GetVirtualMachinesIdMetricsHistoryExecute(r ApiGetVi
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v HandlersErrorResponse
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}

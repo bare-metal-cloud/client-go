@@ -22,6 +22,8 @@ var _ MappedNullable = &HandlersImportClusterRequest{}
 
 // HandlersImportClusterRequest struct for HandlersImportClusterRequest
 type HandlersImportClusterRequest struct {
+	// AdoptIngress is the explicit consent flag (story 133.3, GH #2200 AC 2, optional): when the target cluster runs a live traefik holding ingress, importing requires the owner's explicit acceptance that the platform's caddy gateway addon takes ingress over (traefik stops serving it). Without the flag a traefik-holding cluster REFUSES the import with named, guided alternatives — never a silent ingress takeover. Honorable only while the adoption is lossless (traefik serves no Traefik-native CRD routes the addon cannot replace).
+	AdoptIngress *bool `json:"adopt_ingress,omitempty"`
 	Kubeconfig *string `json:"kubeconfig,omitempty"`
 	Name string `json:"name"`
 }
@@ -44,6 +46,38 @@ func NewHandlersImportClusterRequest(name string) *HandlersImportClusterRequest 
 func NewHandlersImportClusterRequestWithDefaults() *HandlersImportClusterRequest {
 	this := HandlersImportClusterRequest{}
 	return &this
+}
+
+// GetAdoptIngress returns the AdoptIngress field value if set, zero value otherwise.
+func (o *HandlersImportClusterRequest) GetAdoptIngress() bool {
+	if o == nil || IsNil(o.AdoptIngress) {
+		var ret bool
+		return ret
+	}
+	return *o.AdoptIngress
+}
+
+// GetAdoptIngressOk returns a tuple with the AdoptIngress field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersImportClusterRequest) GetAdoptIngressOk() (*bool, bool) {
+	if o == nil || IsNil(o.AdoptIngress) {
+		return nil, false
+	}
+	return o.AdoptIngress, true
+}
+
+// HasAdoptIngress returns a boolean if a field has been set.
+func (o *HandlersImportClusterRequest) HasAdoptIngress() bool {
+	if o != nil && !IsNil(o.AdoptIngress) {
+		return true
+	}
+
+	return false
+}
+
+// SetAdoptIngress gets a reference to the given bool and assigns it to the AdoptIngress field.
+func (o *HandlersImportClusterRequest) SetAdoptIngress(v bool) {
+	o.AdoptIngress = &v
 }
 
 // GetKubeconfig returns the Kubeconfig field value if set, zero value otherwise.
@@ -112,6 +146,9 @@ func (o HandlersImportClusterRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersImportClusterRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.AdoptIngress) {
+		toSerialize["adopt_ingress"] = o.AdoptIngress
+	}
 	if !IsNil(o.Kubeconfig) {
 		toSerialize["kubeconfig"] = o.Kubeconfig
 	}

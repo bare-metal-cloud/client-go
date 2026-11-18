@@ -23,6 +23,9 @@ type HandlersOrgVaultRotatePasswordRequest struct {
 	CurrentOrgVaultPassword *string `json:"current_org_vault_password,omitempty"`
 	DeviceId *string `json:"device_id,omitempty"`
 	NewOrgVaultPassword *string `json:"new_org_vault_password,omitempty"`
+	NewPasswordSlot *string `json:"new_password_slot,omitempty"`
+	// Client-wrapped new password slot (base64) + its fresh Argon2id salt (base64, 32 bytes) + the new password — the #4026 browser flow's artifacts. All-or-nothing: any subset is a 400. The slot is an opaque blob the server stores verbatim (the same shape components/vault/slots wraps server-side).
+	NewVaultSalt *string `json:"new_vault_salt,omitempty"`
 	TrustedDevice *bool `json:"trusted_device,omitempty"`
 }
 
@@ -139,6 +142,70 @@ func (o *HandlersOrgVaultRotatePasswordRequest) SetNewOrgVaultPassword(v string)
 	o.NewOrgVaultPassword = &v
 }
 
+// GetNewPasswordSlot returns the NewPasswordSlot field value if set, zero value otherwise.
+func (o *HandlersOrgVaultRotatePasswordRequest) GetNewPasswordSlot() string {
+	if o == nil || IsNil(o.NewPasswordSlot) {
+		var ret string
+		return ret
+	}
+	return *o.NewPasswordSlot
+}
+
+// GetNewPasswordSlotOk returns a tuple with the NewPasswordSlot field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersOrgVaultRotatePasswordRequest) GetNewPasswordSlotOk() (*string, bool) {
+	if o == nil || IsNil(o.NewPasswordSlot) {
+		return nil, false
+	}
+	return o.NewPasswordSlot, true
+}
+
+// HasNewPasswordSlot returns a boolean if a field has been set.
+func (o *HandlersOrgVaultRotatePasswordRequest) HasNewPasswordSlot() bool {
+	if o != nil && !IsNil(o.NewPasswordSlot) {
+		return true
+	}
+
+	return false
+}
+
+// SetNewPasswordSlot gets a reference to the given string and assigns it to the NewPasswordSlot field.
+func (o *HandlersOrgVaultRotatePasswordRequest) SetNewPasswordSlot(v string) {
+	o.NewPasswordSlot = &v
+}
+
+// GetNewVaultSalt returns the NewVaultSalt field value if set, zero value otherwise.
+func (o *HandlersOrgVaultRotatePasswordRequest) GetNewVaultSalt() string {
+	if o == nil || IsNil(o.NewVaultSalt) {
+		var ret string
+		return ret
+	}
+	return *o.NewVaultSalt
+}
+
+// GetNewVaultSaltOk returns a tuple with the NewVaultSalt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersOrgVaultRotatePasswordRequest) GetNewVaultSaltOk() (*string, bool) {
+	if o == nil || IsNil(o.NewVaultSalt) {
+		return nil, false
+	}
+	return o.NewVaultSalt, true
+}
+
+// HasNewVaultSalt returns a boolean if a field has been set.
+func (o *HandlersOrgVaultRotatePasswordRequest) HasNewVaultSalt() bool {
+	if o != nil && !IsNil(o.NewVaultSalt) {
+		return true
+	}
+
+	return false
+}
+
+// SetNewVaultSalt gets a reference to the given string and assigns it to the NewVaultSalt field.
+func (o *HandlersOrgVaultRotatePasswordRequest) SetNewVaultSalt(v string) {
+	o.NewVaultSalt = &v
+}
+
 // GetTrustedDevice returns the TrustedDevice field value if set, zero value otherwise.
 func (o *HandlersOrgVaultRotatePasswordRequest) GetTrustedDevice() bool {
 	if o == nil || IsNil(o.TrustedDevice) {
@@ -189,6 +256,12 @@ func (o HandlersOrgVaultRotatePasswordRequest) ToMap() (map[string]interface{}, 
 	}
 	if !IsNil(o.NewOrgVaultPassword) {
 		toSerialize["new_org_vault_password"] = o.NewOrgVaultPassword
+	}
+	if !IsNil(o.NewPasswordSlot) {
+		toSerialize["new_password_slot"] = o.NewPasswordSlot
+	}
+	if !IsNil(o.NewVaultSalt) {
+		toSerialize["new_vault_salt"] = o.NewVaultSalt
 	}
 	if !IsNil(o.TrustedDevice) {
 		toSerialize["trusted_device"] = o.TrustedDevice

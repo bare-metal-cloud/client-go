@@ -25,6 +25,8 @@ type HandlersPatchImageRegistryRequest struct {
 	AwsRegion *string `json:"aws_region,omitempty"`
 	AzureCredentialId *int32 `json:"azure_credential_id,omitempty"`
 	CaCertificate *string `json:"ca_certificate,omitempty"`
+	// ClientEnvelope is the browser-sealed stored copy of the new credentials JSON (issue #4424, B5) — required when the patch rotates userpass/token credentials. The plaintext password still rides the request for the one live check.
+	ClientEnvelope *HandlersClientEnvelopeDTO `json:"client_envelope,omitempty"`
 	EcrRegion *string `json:"ecr_region,omitempty"`
 	GcpCredentialId *int32 `json:"gcp_credential_id,omitempty"`
 	LoginServer *string `json:"login_server,omitempty"`
@@ -208,6 +210,38 @@ func (o *HandlersPatchImageRegistryRequest) HasCaCertificate() bool {
 // SetCaCertificate gets a reference to the given string and assigns it to the CaCertificate field.
 func (o *HandlersPatchImageRegistryRequest) SetCaCertificate(v string) {
 	o.CaCertificate = &v
+}
+
+// GetClientEnvelope returns the ClientEnvelope field value if set, zero value otherwise.
+func (o *HandlersPatchImageRegistryRequest) GetClientEnvelope() HandlersClientEnvelopeDTO {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		var ret HandlersClientEnvelopeDTO
+		return ret
+	}
+	return *o.ClientEnvelope
+}
+
+// GetClientEnvelopeOk returns a tuple with the ClientEnvelope field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersPatchImageRegistryRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool) {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		return nil, false
+	}
+	return o.ClientEnvelope, true
+}
+
+// HasClientEnvelope returns a boolean if a field has been set.
+func (o *HandlersPatchImageRegistryRequest) HasClientEnvelope() bool {
+	if o != nil && !IsNil(o.ClientEnvelope) {
+		return true
+	}
+
+	return false
+}
+
+// SetClientEnvelope gets a reference to the given HandlersClientEnvelopeDTO and assigns it to the ClientEnvelope field.
+func (o *HandlersPatchImageRegistryRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO) {
+	o.ClientEnvelope = &v
 }
 
 // GetEcrRegion returns the EcrRegion field value if set, zero value otherwise.
@@ -426,6 +460,9 @@ func (o HandlersPatchImageRegistryRequest) ToMap() (map[string]interface{}, erro
 	}
 	if !IsNil(o.CaCertificate) {
 		toSerialize["ca_certificate"] = o.CaCertificate
+	}
+	if !IsNil(o.ClientEnvelope) {
+		toSerialize["client_envelope"] = o.ClientEnvelope
 	}
 	if !IsNil(o.EcrRegion) {
 		toSerialize["ecr_region"] = o.EcrRegion
