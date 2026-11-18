@@ -4,21 +4,33 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Addons** | Pointer to **[]string** | ── The platform&#39;s Add-ons decision (epic app-platform story 3.4) ──  Addons records the wizard Add-ons step&#39;s checkbox set at formation: a JSON array of keys from the CLOSED set below (monitoring, public_entry, databases, log_book), in the client&#39;s selection order. Empty (&#39;[]&#39; — the column default) &#x3D; no addons: every pre-3.4 row, the import path, and API creates that omit the field. The create gate (handlers/ clusters.go + ClusterServiceImpl.ProvisionClusterBYOV) validates the keys pre-row; an unknown key never lands.  HONEST SCOPE (story 3.4): of the four keys, only &#39;monitoring&#39; has a real install path today — the formation-completion hook (the WriteK8sClusterImportResult success leg) creates the in-cluster MonitoringStack (ADR-061) and enqueues the existing Helm provision task. &#39;public_entry&#39; (the deploykit gateway addon fires inside the app-deploy workflow — no standalone formation-time ensure exists), &#39;databases&#39; (the real lane is the user-driven DatabaseConfiguration flow — an auto-deploy would invent a name, sizing, and a vault context the user never chose), and &#39;log_book&#39; (no log-aggregation surface exists) persist as DECLARED: the detail surface lists them, nothing fake-installs them. The addon set is exposed on the platform detail response (enrichClusterFields) — the add/remove-later management endpoint is future work. | [optional] 
 **Adopted** | Pointer to **bool** | Adopted records the D3 ADOPT decision (story 124.3, constraint 4): creation&#39;s contamination preflight found pre-existing, RUNNING, same-version k3s on EVERY member and the caller explicitly opted in with adopt_existing. Adopted means BMC installed NO k3s on any member (SetupNode&#39;s k3s step is skipped downstream); the D9 canonical predicate bmc_installed_k3s &#x3D; (origin&#x3D;&#x3D;created &amp;&amp; !adopted) keys on this column, and adopted clusters are panel-only (D8). | [optional] 
 **AgentDeployMethod** | Pointer to **string** | \&quot;kubectl\&quot; (default) or \&quot;helm\&quot; | [optional] 
+**AgentImageTag** | Pointer to **string** | AgentImageTag is the bmc-agent-k8s image tag last applied to this cluster&#39;s agent Deployment — by cluster import or by the backend-driven update (agent-update epic story 6, GH #3369 AC3). Ending the uncommanded drift means the platform can ANSWER \&quot;what is this cluster running\&quot; without reading the cluster. Empty &#x3D; unknown / pre-story-6 row. | [optional] 
+**AgentImageTagPrevious** | Pointer to **string** | AgentImageTagPrevious is the tag that ran before the last apply — the manual-recovery record (story 6 AC2): no server-side rollback exists (roll-forward is the law), so the operator reads THIS column to know what to put back when an applied image proves bad. | [optional] 
 **ApiEndpoint** | Pointer to **string** |  | [optional] 
+**BackupPlan** | Pointer to **string** | ── The platform&#39;s backup decision (epic app-platform story 3.3) ──  BackupPlan records the wizard Backup step&#39;s radio choice at formation: \&quot;daily\&quot;, \&quot;hourly\&quot;, or \&quot;none\&quot;. Empty string &#x3D; no decision recorded — every pre-3.3 row, the import path, and API creates that omit the field read back as unconfigured (never as a claimed \&quot;none\&quot;: an explicit no-backups decision and an unconfigured row are different facts, and the surfaces must not conflate them).  BackupRetentionDays is the PLAN-IMPLIED retention (daily&#x3D;7, hourly&#x3D;30, none&#x3D;0) — derived server-side at the create gate, never client-set, so the retention promise on every surface stays the engine&#39;s own number.  BackupS3ConnectionID references the org&#39;s vault-guarded S3 connection backups land in (s3_connections.id). Non-nil only when the plan is daily/hourly — the create gate (handlers/clusters.go + ClusterServiceImpl.ProvisionClusterBYOV) rejects an on-plan create whose connection is missing or belongs to another org, pre-row.  HONEST SCOPE (story 3.3, updated by story S2 / #3883): this is the decision record, validated at the create gate, and the backup executor now schedules from it (services/backupexec, run by the worker): cluster state per formation, operator-native Postgres/MariaDB backups, and the volume lane&#39;s wiring. Volumes are not captured yet (the agent-side file tier is not shipped), and the wizard deliberately OMITS the mockup&#39;s \&quot;verified by an automatic restore test\&quot; footnote: drills exist as scripts, but no restore test runs automatically per formation. | [optional] 
+**BackupRetentionDays** | Pointer to **int32** |  | [optional] 
+**BackupS3ConnectionId** | Pointer to **int32** | The index name matches migration 000158&#39;s idx_clusters_backup_s3_connection exactly — the unnamed &#x60;index&#x60; tag would auto-mint a second, differently named index over the same column (naming drift between AutoMigrate and the migration). | [optional] 
 **CloudConfig** | Pointer to **map[string]interface{}** | Provider-specific configuration | [optional] 
 **CreatedAt** | Pointer to **string** |  | [optional] 
 **CreatedByUserId** | Pointer to **int32** |  | [optional] 
 **Distribution** | Pointer to **string** |  | [optional] 
+**EngineEpoch** | Pointer to **int32** | EngineEpoch is the authority epoch: monotonic, bumped by the flip service under the row lock. Zero for never-flipped clusters. | [optional] 
+**EngineMode** | Pointer to **string** | ── The per-cluster engine authority record (Epic 145 story 145.2, GH #2623; grill Q1) ──  Deploy authority for the customer plane lives HERE as a record: engine &#x3D; bmc | in-cluster plus a monotonic epoch, flipped transactionally at the migration wizard&#39;s cutover (story 145.7). The BMC engine is fenced at ITS dispatch chokepoint on the customer-plane leg ONLY (story 145.4; catalog-plane dispatch is mode-independent per R1a); the in-cluster engine checks the authority at its job-completion boundaries. The write path is services/engineauthority — the ONLY writer; the epoch strictly advances (revert plus re-migration advances it; concurrent flips cannot regress it). No distributed lock: the wizard sequences drain, flip, assume.  EngineMode defaults to &#39;bmc&#39; — every pre-145 cluster reads today&#39;s behavior. | [optional] 
+**EngineNamespaces** | Pointer to **[]string** | EngineNamespaces is the DECLARED namespace set the wizard declares at cutover (grill Q3, ruled option b): the engine&#39;s authority answer carries it, specs validate their namespace-bearing fields against it at parse time, and the engine&#39;s RBAC binds exactly there. JSON array of strings; typed shape via EngineNamespaceSet. | [optional] 
+**EngineTierVCapable** | Pointer to **bool** | EngineTierVCapable is the Tier V capability flag (the plan: node-host runners via the agent&#39;s job handler) — flipped by the wizard&#39;s Tier V disclosure consent through the engineauthority write path. The CAPABILITY CHECK against specs is story 145.5&#39;s, at schedule time. | [optional] 
 **HeadscaleAcl** | Pointer to **map[string]interface{}** |  | [optional] 
 **HeadscaleEnabled** | Pointer to **bool** | Headscale mesh networking (Story 51-2). HeadscaleUserID added in Epic 100 Story 100-2: canonical numeric ID assigned by Headscale at CreateUser time, persisted so the teardown path (DisableClusterMesh / DeleteUserByID) doesn&#39;t have to derive the name from the DB row. Mirrors Network.MeshNetworkConfig.HeadscaleUserID. See ADR-058 for the direct-headscale cluster-mesh path. | [optional] 
 **HeadscaleUser** | Pointer to **string** |  | [optional] 
 **HeadscaleUserId** | Pointer to **string** |  | [optional] 
 **Id** | Pointer to **int32** |  | [optional] 
+**IngressAdopted** | Pointer to **bool** | IngressAdopted records the imported cluster owner&#39;s EXPLICIT consent (story 133.3, GH #2200 AC 2): a live traefik held the cluster&#39;s ingress at import time and the owner accepted the platform&#39;s caddy gateway addon taking it over (traefik stops serving ingress). The engine honors this recorded decision at every later gateway ensure — without it, the addon refuses with the named ErrTraefikIngressConsent (never a silent takeover). Honorable only while the adoption is lossless (no Traefik-native CRD routes); that check is the engine rule&#39;s, at every use.  SCHEMA NOTE (review L5, story 133.3): this column currently exists through GORM AutoMigrate alone. The established convention (the sibling Adopted column, migrations 20260830154357 and 20260829190024) pairs a struct column with an idempotent &#x60;ADD COLUMN IF NOT EXISTS&#x60; goose migration so both schema paths converge; no such migration has landed here yet. A future timestamped add_clusters_ingress_adopted migration following the sibling-migration template is the owed follow-up if production schema truth is expected to include this column before AutoMigrate runs. | [optional] 
 **InstallConfig** | Pointer to **map[string]interface{}** | InstallConfig carries per-cluster overrides for the k8s distribution installer (e.g. {\&quot;snapshotter\&quot;:\&quot;native\&quot;} for nested-container tests). Keys not recognized by the distribution are passed through as --key&#x3D;value install flags. Empty/nil means \&quot;use distribution defaults\&quot; — no flags are forced. This is persisted so crash-resume and asynq retries retain the caller&#39;s intent. | [optional] 
 **K8sVersion** | Pointer to **string** | Cluster metadata fields for imported clusters | [optional] 
 **LatestVersion** | Pointer to **string** |  | [optional] 
+**ManagedClass** | Pointer to **string** | ManagedClass is the platform&#39;s STORED class (story C8, #3974, plan §5a — destructive-consequences-2026-10-27.md): whose account the platform&#39;s machines live on. &#39;managed&#39; &#x3D; BMC&#39;s cloud account (members carry VirtualMachine.AccessMode&#x3D;&#39;platform&#39;); &#39;user&#39; &#x3D; the user&#39;s own account (AccessMode&#x3D;&#39;byov&#39; — BYOV, user cloud key, multipass).  Written ONCE at creation from the founding members (an import row is &#39;user&#39; by definition), and enforced against EVERY membership write afterwards — a cross-class machine is refused with platform_class_mismatch, never absorbed: a platform&#39;s class never changes by adding machines. Empty means the row predates the column and the migration has not backfilled it; services.PlatformManagedClass is the ONE accessor — it derives from the current members, stamps the derived answer, and every consumer reads the class through it (never a fresh member scan, never origin heuristics). | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **NodeCount** | Pointer to **int32** |  | [optional] 
 **OperationGeneration** | Pointer to **int32** | OperationGeneration is D6&#39;s serialization counter: every mutating action CASes WHERE operation_generation &#x3D; N and bumps it. Zero for never-mutated rows. See services/cluster_operation_cas.go. | [optional] 
@@ -58,6 +70,31 @@ will change when the set of required properties is changed
 NewModelsClusterWithDefaults instantiates a new ModelsCluster object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetAddons
+
+`func (o *ModelsCluster) GetAddons() []string`
+
+GetAddons returns the Addons field if non-nil, zero value otherwise.
+
+### GetAddonsOk
+
+`func (o *ModelsCluster) GetAddonsOk() (*[]string, bool)`
+
+GetAddonsOk returns a tuple with the Addons field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAddons
+
+`func (o *ModelsCluster) SetAddons(v []string)`
+
+SetAddons sets Addons field to given value.
+
+### HasAddons
+
+`func (o *ModelsCluster) HasAddons() bool`
+
+HasAddons returns a boolean if a field has been set.
 
 ### GetAdopted
 
@@ -109,6 +146,56 @@ SetAgentDeployMethod sets AgentDeployMethod field to given value.
 
 HasAgentDeployMethod returns a boolean if a field has been set.
 
+### GetAgentImageTag
+
+`func (o *ModelsCluster) GetAgentImageTag() string`
+
+GetAgentImageTag returns the AgentImageTag field if non-nil, zero value otherwise.
+
+### GetAgentImageTagOk
+
+`func (o *ModelsCluster) GetAgentImageTagOk() (*string, bool)`
+
+GetAgentImageTagOk returns a tuple with the AgentImageTag field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAgentImageTag
+
+`func (o *ModelsCluster) SetAgentImageTag(v string)`
+
+SetAgentImageTag sets AgentImageTag field to given value.
+
+### HasAgentImageTag
+
+`func (o *ModelsCluster) HasAgentImageTag() bool`
+
+HasAgentImageTag returns a boolean if a field has been set.
+
+### GetAgentImageTagPrevious
+
+`func (o *ModelsCluster) GetAgentImageTagPrevious() string`
+
+GetAgentImageTagPrevious returns the AgentImageTagPrevious field if non-nil, zero value otherwise.
+
+### GetAgentImageTagPreviousOk
+
+`func (o *ModelsCluster) GetAgentImageTagPreviousOk() (*string, bool)`
+
+GetAgentImageTagPreviousOk returns a tuple with the AgentImageTagPrevious field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAgentImageTagPrevious
+
+`func (o *ModelsCluster) SetAgentImageTagPrevious(v string)`
+
+SetAgentImageTagPrevious sets AgentImageTagPrevious field to given value.
+
+### HasAgentImageTagPrevious
+
+`func (o *ModelsCluster) HasAgentImageTagPrevious() bool`
+
+HasAgentImageTagPrevious returns a boolean if a field has been set.
+
 ### GetApiEndpoint
 
 `func (o *ModelsCluster) GetApiEndpoint() string`
@@ -133,6 +220,81 @@ SetApiEndpoint sets ApiEndpoint field to given value.
 `func (o *ModelsCluster) HasApiEndpoint() bool`
 
 HasApiEndpoint returns a boolean if a field has been set.
+
+### GetBackupPlan
+
+`func (o *ModelsCluster) GetBackupPlan() string`
+
+GetBackupPlan returns the BackupPlan field if non-nil, zero value otherwise.
+
+### GetBackupPlanOk
+
+`func (o *ModelsCluster) GetBackupPlanOk() (*string, bool)`
+
+GetBackupPlanOk returns a tuple with the BackupPlan field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBackupPlan
+
+`func (o *ModelsCluster) SetBackupPlan(v string)`
+
+SetBackupPlan sets BackupPlan field to given value.
+
+### HasBackupPlan
+
+`func (o *ModelsCluster) HasBackupPlan() bool`
+
+HasBackupPlan returns a boolean if a field has been set.
+
+### GetBackupRetentionDays
+
+`func (o *ModelsCluster) GetBackupRetentionDays() int32`
+
+GetBackupRetentionDays returns the BackupRetentionDays field if non-nil, zero value otherwise.
+
+### GetBackupRetentionDaysOk
+
+`func (o *ModelsCluster) GetBackupRetentionDaysOk() (*int32, bool)`
+
+GetBackupRetentionDaysOk returns a tuple with the BackupRetentionDays field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBackupRetentionDays
+
+`func (o *ModelsCluster) SetBackupRetentionDays(v int32)`
+
+SetBackupRetentionDays sets BackupRetentionDays field to given value.
+
+### HasBackupRetentionDays
+
+`func (o *ModelsCluster) HasBackupRetentionDays() bool`
+
+HasBackupRetentionDays returns a boolean if a field has been set.
+
+### GetBackupS3ConnectionId
+
+`func (o *ModelsCluster) GetBackupS3ConnectionId() int32`
+
+GetBackupS3ConnectionId returns the BackupS3ConnectionId field if non-nil, zero value otherwise.
+
+### GetBackupS3ConnectionIdOk
+
+`func (o *ModelsCluster) GetBackupS3ConnectionIdOk() (*int32, bool)`
+
+GetBackupS3ConnectionIdOk returns a tuple with the BackupS3ConnectionId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBackupS3ConnectionId
+
+`func (o *ModelsCluster) SetBackupS3ConnectionId(v int32)`
+
+SetBackupS3ConnectionId sets BackupS3ConnectionId field to given value.
+
+### HasBackupS3ConnectionId
+
+`func (o *ModelsCluster) HasBackupS3ConnectionId() bool`
+
+HasBackupS3ConnectionId returns a boolean if a field has been set.
 
 ### GetCloudConfig
 
@@ -233,6 +395,106 @@ SetDistribution sets Distribution field to given value.
 `func (o *ModelsCluster) HasDistribution() bool`
 
 HasDistribution returns a boolean if a field has been set.
+
+### GetEngineEpoch
+
+`func (o *ModelsCluster) GetEngineEpoch() int32`
+
+GetEngineEpoch returns the EngineEpoch field if non-nil, zero value otherwise.
+
+### GetEngineEpochOk
+
+`func (o *ModelsCluster) GetEngineEpochOk() (*int32, bool)`
+
+GetEngineEpochOk returns a tuple with the EngineEpoch field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEngineEpoch
+
+`func (o *ModelsCluster) SetEngineEpoch(v int32)`
+
+SetEngineEpoch sets EngineEpoch field to given value.
+
+### HasEngineEpoch
+
+`func (o *ModelsCluster) HasEngineEpoch() bool`
+
+HasEngineEpoch returns a boolean if a field has been set.
+
+### GetEngineMode
+
+`func (o *ModelsCluster) GetEngineMode() string`
+
+GetEngineMode returns the EngineMode field if non-nil, zero value otherwise.
+
+### GetEngineModeOk
+
+`func (o *ModelsCluster) GetEngineModeOk() (*string, bool)`
+
+GetEngineModeOk returns a tuple with the EngineMode field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEngineMode
+
+`func (o *ModelsCluster) SetEngineMode(v string)`
+
+SetEngineMode sets EngineMode field to given value.
+
+### HasEngineMode
+
+`func (o *ModelsCluster) HasEngineMode() bool`
+
+HasEngineMode returns a boolean if a field has been set.
+
+### GetEngineNamespaces
+
+`func (o *ModelsCluster) GetEngineNamespaces() []string`
+
+GetEngineNamespaces returns the EngineNamespaces field if non-nil, zero value otherwise.
+
+### GetEngineNamespacesOk
+
+`func (o *ModelsCluster) GetEngineNamespacesOk() (*[]string, bool)`
+
+GetEngineNamespacesOk returns a tuple with the EngineNamespaces field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEngineNamespaces
+
+`func (o *ModelsCluster) SetEngineNamespaces(v []string)`
+
+SetEngineNamespaces sets EngineNamespaces field to given value.
+
+### HasEngineNamespaces
+
+`func (o *ModelsCluster) HasEngineNamespaces() bool`
+
+HasEngineNamespaces returns a boolean if a field has been set.
+
+### GetEngineTierVCapable
+
+`func (o *ModelsCluster) GetEngineTierVCapable() bool`
+
+GetEngineTierVCapable returns the EngineTierVCapable field if non-nil, zero value otherwise.
+
+### GetEngineTierVCapableOk
+
+`func (o *ModelsCluster) GetEngineTierVCapableOk() (*bool, bool)`
+
+GetEngineTierVCapableOk returns a tuple with the EngineTierVCapable field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEngineTierVCapable
+
+`func (o *ModelsCluster) SetEngineTierVCapable(v bool)`
+
+SetEngineTierVCapable sets EngineTierVCapable field to given value.
+
+### HasEngineTierVCapable
+
+`func (o *ModelsCluster) HasEngineTierVCapable() bool`
+
+HasEngineTierVCapable returns a boolean if a field has been set.
 
 ### GetHeadscaleAcl
 
@@ -359,6 +621,31 @@ SetId sets Id field to given value.
 
 HasId returns a boolean if a field has been set.
 
+### GetIngressAdopted
+
+`func (o *ModelsCluster) GetIngressAdopted() bool`
+
+GetIngressAdopted returns the IngressAdopted field if non-nil, zero value otherwise.
+
+### GetIngressAdoptedOk
+
+`func (o *ModelsCluster) GetIngressAdoptedOk() (*bool, bool)`
+
+GetIngressAdoptedOk returns a tuple with the IngressAdopted field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIngressAdopted
+
+`func (o *ModelsCluster) SetIngressAdopted(v bool)`
+
+SetIngressAdopted sets IngressAdopted field to given value.
+
+### HasIngressAdopted
+
+`func (o *ModelsCluster) HasIngressAdopted() bool`
+
+HasIngressAdopted returns a boolean if a field has been set.
+
 ### GetInstallConfig
 
 `func (o *ModelsCluster) GetInstallConfig() map[string]interface{}`
@@ -433,6 +720,31 @@ SetLatestVersion sets LatestVersion field to given value.
 `func (o *ModelsCluster) HasLatestVersion() bool`
 
 HasLatestVersion returns a boolean if a field has been set.
+
+### GetManagedClass
+
+`func (o *ModelsCluster) GetManagedClass() string`
+
+GetManagedClass returns the ManagedClass field if non-nil, zero value otherwise.
+
+### GetManagedClassOk
+
+`func (o *ModelsCluster) GetManagedClassOk() (*string, bool)`
+
+GetManagedClassOk returns a tuple with the ManagedClass field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetManagedClass
+
+`func (o *ModelsCluster) SetManagedClass(v string)`
+
+SetManagedClass sets ManagedClass field to given value.
+
+### HasManagedClass
+
+`func (o *ModelsCluster) HasManagedClass() bool`
+
+HasManagedClass returns a boolean if a field has been set.
 
 ### GetName
 

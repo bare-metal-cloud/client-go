@@ -20,6 +20,10 @@ var _ MappedNullable = &EngineHostClaim{}
 
 // EngineHostClaim struct for EngineHostClaim
 type EngineHostClaim struct {
+	// ArrivalInstance names the arrival addon instance serving the claimed host (empty for the platform entry). Re-stamped with ArrivalKind.
+	ArrivalInstance *string `json:"arrival_instance,omitempty"`
+	// ArrivalKind is the claim's arrival dimension (epic 154, §4.2): the arrival family serving the claimed host (bundle.ArrivalKind vocabulary). Empty on pre-154 claims — the dimension is additive omitempty and legacy claims marshal/parse byte-identically.  The re-stamp law: the claim is re-stamped with the CURRENT revision's arrival dimension on every route-changing revision (a provision-time stamp goes stale the moment an app migrates arrival on upgrade). Claims stay cluster-global — a DNS name points one place regardless of which edge serves it — and the current-revision dimension is what the addon-uninstall refusal and the per-arrival teardown read. The HOST registry owns the stamping (record on provision, release on uninstall); this fact shape is the engine's contract for what it reads.
+	ArrivalKind *BundleArrivalKind `json:"arrival_kind,omitempty"`
 	// Host is the claimed hostname (normalized: lowercase, no trailing dot).
 	Host *string `json:"host,omitempty"`
 	// InstallName names the install holding the claim — the conflicting install a uniqueness refusal names (the backend maps that refusal to HTTP 422; the module's contract is the sentinel).
@@ -41,6 +45,70 @@ func NewEngineHostClaim() *EngineHostClaim {
 func NewEngineHostClaimWithDefaults() *EngineHostClaim {
 	this := EngineHostClaim{}
 	return &this
+}
+
+// GetArrivalInstance returns the ArrivalInstance field value if set, zero value otherwise.
+func (o *EngineHostClaim) GetArrivalInstance() string {
+	if o == nil || IsNil(o.ArrivalInstance) {
+		var ret string
+		return ret
+	}
+	return *o.ArrivalInstance
+}
+
+// GetArrivalInstanceOk returns a tuple with the ArrivalInstance field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineHostClaim) GetArrivalInstanceOk() (*string, bool) {
+	if o == nil || IsNil(o.ArrivalInstance) {
+		return nil, false
+	}
+	return o.ArrivalInstance, true
+}
+
+// HasArrivalInstance returns a boolean if a field has been set.
+func (o *EngineHostClaim) HasArrivalInstance() bool {
+	if o != nil && !IsNil(o.ArrivalInstance) {
+		return true
+	}
+
+	return false
+}
+
+// SetArrivalInstance gets a reference to the given string and assigns it to the ArrivalInstance field.
+func (o *EngineHostClaim) SetArrivalInstance(v string) {
+	o.ArrivalInstance = &v
+}
+
+// GetArrivalKind returns the ArrivalKind field value if set, zero value otherwise.
+func (o *EngineHostClaim) GetArrivalKind() BundleArrivalKind {
+	if o == nil || IsNil(o.ArrivalKind) {
+		var ret BundleArrivalKind
+		return ret
+	}
+	return *o.ArrivalKind
+}
+
+// GetArrivalKindOk returns a tuple with the ArrivalKind field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineHostClaim) GetArrivalKindOk() (*BundleArrivalKind, bool) {
+	if o == nil || IsNil(o.ArrivalKind) {
+		return nil, false
+	}
+	return o.ArrivalKind, true
+}
+
+// HasArrivalKind returns a boolean if a field has been set.
+func (o *EngineHostClaim) HasArrivalKind() bool {
+	if o != nil && !IsNil(o.ArrivalKind) {
+		return true
+	}
+
+	return false
+}
+
+// SetArrivalKind gets a reference to the given BundleArrivalKind and assigns it to the ArrivalKind field.
+func (o *EngineHostClaim) SetArrivalKind(v BundleArrivalKind) {
+	o.ArrivalKind = &v
 }
 
 // GetHost returns the Host field value if set, zero value otherwise.
@@ -117,6 +185,12 @@ func (o EngineHostClaim) MarshalJSON() ([]byte, error) {
 
 func (o EngineHostClaim) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.ArrivalInstance) {
+		toSerialize["arrival_instance"] = o.ArrivalInstance
+	}
+	if !IsNil(o.ArrivalKind) {
+		toSerialize["arrival_kind"] = o.ArrivalKind
+	}
 	if !IsNil(o.Host) {
 		toSerialize["host"] = o.Host
 	}

@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 ## GetOrgsOrgIdAuditEvents
 
-> map[string]interface{} GetOrgsOrgIdAuditEvents(ctx, orgId).Cursor(cursor).Limit(limit).ResourceType(resourceType).ActorUserId(actorUserId).From(from).To(to).Execute()
+> map[string]interface{} GetOrgsOrgIdAuditEvents(ctx, orgId).Cursor(cursor).Limit(limit).ResourceType(resourceType).ResourceId(resourceId).ActorUserId(actorUserId).From(from).To(to).Execute()
 
 List org audit events
 
@@ -33,13 +33,14 @@ func main() {
 	cursor := "cursor_example" // string | Opaque pagination cursor (optional)
 	limit := int32(56) // int32 | Page size (default 50, max 200) (optional)
 	resourceType := "resourceType_example" // string | Filter by resource_type (optional)
+	resourceId := "resourceId_example" // string | Filter by resource_id (composes with resource_type — the per-install query) (optional)
 	actorUserId := int32(56) // int32 | Filter by actor user id (optional)
 	from := "from_example" // string | Inclusive lower bound (RFC3339) (optional)
 	to := "to_example" // string | Inclusive upper bound (RFC3339) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.AuditAPI.GetOrgsOrgIdAuditEvents(context.Background(), orgId).Cursor(cursor).Limit(limit).ResourceType(resourceType).ActorUserId(actorUserId).From(from).To(to).Execute()
+	resp, r, err := apiClient.AuditAPI.GetOrgsOrgIdAuditEvents(context.Background(), orgId).Cursor(cursor).Limit(limit).ResourceType(resourceType).ResourceId(resourceId).ActorUserId(actorUserId).From(from).To(to).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AuditAPI.GetOrgsOrgIdAuditEvents``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -68,6 +69,7 @@ Name | Type | Description  | Notes
  **cursor** | **string** | Opaque pagination cursor | 
  **limit** | **int32** | Page size (default 50, max 200) | 
  **resourceType** | **string** | Filter by resource_type | 
+ **resourceId** | **string** | Filter by resource_id (composes with resource_type — the per-install query) | 
  **actorUserId** | **int32** | Filter by actor user id | 
  **from** | **string** | Inclusive lower bound (RFC3339) | 
  **to** | **string** | Inclusive upper bound (RFC3339) | 

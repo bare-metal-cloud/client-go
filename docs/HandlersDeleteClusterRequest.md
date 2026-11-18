@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **AcknowledgeIrreversible** | Pointer to **bool** | AcknowledgeIrreversible is the AC5 confirm-again flag (the server&#39;s irreversibility_warning 409 carries the verbatim text; re-submit with this true). | [optional] 
+**ImpactFingerprint** | Pointer to **string** | ImpactFingerprint is the epic-#3964 story-C1 execute-time re-verification handle: the fingerprint GET /clusters/:id/delete-impact returned. When provided and the consequences moved since that preflight, the delete refuses with 409 consequence_changed carrying the fresh impact. Absent &#x3D; the legacy contract, unchanged. | [optional] 
 **VmDisposition** | Pointer to **string** |  | [optional] 
 **VmDispositions** | Pointer to **map[string]string** |  | [optional] 
 
@@ -51,6 +52,31 @@ SetAcknowledgeIrreversible sets AcknowledgeIrreversible field to given value.
 `func (o *HandlersDeleteClusterRequest) HasAcknowledgeIrreversible() bool`
 
 HasAcknowledgeIrreversible returns a boolean if a field has been set.
+
+### GetImpactFingerprint
+
+`func (o *HandlersDeleteClusterRequest) GetImpactFingerprint() string`
+
+GetImpactFingerprint returns the ImpactFingerprint field if non-nil, zero value otherwise.
+
+### GetImpactFingerprintOk
+
+`func (o *HandlersDeleteClusterRequest) GetImpactFingerprintOk() (*string, bool)`
+
+GetImpactFingerprintOk returns a tuple with the ImpactFingerprint field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetImpactFingerprint
+
+`func (o *HandlersDeleteClusterRequest) SetImpactFingerprint(v string)`
+
+SetImpactFingerprint sets ImpactFingerprint field to given value.
+
+### HasImpactFingerprint
+
+`func (o *HandlersDeleteClusterRequest) HasImpactFingerprint() bool`
+
+HasImpactFingerprint returns a boolean if a field has been set.
 
 ### GetVmDisposition
 

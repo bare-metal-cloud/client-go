@@ -22,13 +22,20 @@ var _ MappedNullable = &HandlersCreateOrgS3ConnectionRequest{}
 
 // HandlersCreateOrgS3ConnectionRequest struct for HandlersCreateOrgS3ConnectionRequest
 type HandlersCreateOrgS3ConnectionRequest struct {
-	AccessKeyId string `json:"access_key_id"`
+	AccessKey *string `json:"access_key,omitempty"`
+	AccessKeyId *string `json:"access_key_id,omitempty"`
+	// azblob (Azure Blob) fields — issue #3576.
+	Account *string `json:"account,omitempty"`
+	Container *string `json:"container,omitempty"`
 	DefaultBucket *string `json:"default_bucket,omitempty"`
-	Endpoint string `json:"endpoint"`
+	Endpoint *string `json:"endpoint,omitempty"`
+	LinkedCredentialId *int32 `json:"linked_credential_id,omitempty"`
 	Name string `json:"name"`
 	Provider string `json:"provider"`
 	Region *string `json:"region,omitempty"`
-	SecretAccessKey string `json:"secret_access_key"`
+	SecretAccessKey *string `json:"secret_access_key,omitempty"`
+	// ServiceAccountJSON is the gcs native credential (issue #3879): the plaintext JSON key for a service account, replacing the HMAC pair.
+	ServiceAccountJson *string `json:"service_account_json,omitempty"`
 }
 
 type _HandlersCreateOrgS3ConnectionRequest HandlersCreateOrgS3ConnectionRequest
@@ -37,13 +44,10 @@ type _HandlersCreateOrgS3ConnectionRequest HandlersCreateOrgS3ConnectionRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewHandlersCreateOrgS3ConnectionRequest(accessKeyId string, endpoint string, name string, provider string, secretAccessKey string) *HandlersCreateOrgS3ConnectionRequest {
+func NewHandlersCreateOrgS3ConnectionRequest(name string, provider string) *HandlersCreateOrgS3ConnectionRequest {
 	this := HandlersCreateOrgS3ConnectionRequest{}
-	this.AccessKeyId = accessKeyId
-	this.Endpoint = endpoint
 	this.Name = name
 	this.Provider = provider
-	this.SecretAccessKey = secretAccessKey
 	return &this
 }
 
@@ -55,28 +59,132 @@ func NewHandlersCreateOrgS3ConnectionRequestWithDefaults() *HandlersCreateOrgS3C
 	return &this
 }
 
-// GetAccessKeyId returns the AccessKeyId field value
-func (o *HandlersCreateOrgS3ConnectionRequest) GetAccessKeyId() string {
-	if o == nil {
+// GetAccessKey returns the AccessKey field value if set, zero value otherwise.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetAccessKey() string {
+	if o == nil || IsNil(o.AccessKey) {
 		var ret string
 		return ret
 	}
-
-	return o.AccessKeyId
+	return *o.AccessKey
 }
 
-// GetAccessKeyIdOk returns a tuple with the AccessKeyId field value
+// GetAccessKeyOk returns a tuple with the AccessKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *HandlersCreateOrgS3ConnectionRequest) GetAccessKeyIdOk() (*string, bool) {
-	if o == nil {
+func (o *HandlersCreateOrgS3ConnectionRequest) GetAccessKeyOk() (*string, bool) {
+	if o == nil || IsNil(o.AccessKey) {
 		return nil, false
 	}
-	return &o.AccessKeyId, true
+	return o.AccessKey, true
 }
 
-// SetAccessKeyId sets field value
+// HasAccessKey returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasAccessKey() bool {
+	if o != nil && !IsNil(o.AccessKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetAccessKey gets a reference to the given string and assigns it to the AccessKey field.
+func (o *HandlersCreateOrgS3ConnectionRequest) SetAccessKey(v string) {
+	o.AccessKey = &v
+}
+
+// GetAccessKeyId returns the AccessKeyId field value if set, zero value otherwise.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetAccessKeyId() string {
+	if o == nil || IsNil(o.AccessKeyId) {
+		var ret string
+		return ret
+	}
+	return *o.AccessKeyId
+}
+
+// GetAccessKeyIdOk returns a tuple with the AccessKeyId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetAccessKeyIdOk() (*string, bool) {
+	if o == nil || IsNil(o.AccessKeyId) {
+		return nil, false
+	}
+	return o.AccessKeyId, true
+}
+
+// HasAccessKeyId returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasAccessKeyId() bool {
+	if o != nil && !IsNil(o.AccessKeyId) {
+		return true
+	}
+
+	return false
+}
+
+// SetAccessKeyId gets a reference to the given string and assigns it to the AccessKeyId field.
 func (o *HandlersCreateOrgS3ConnectionRequest) SetAccessKeyId(v string) {
-	o.AccessKeyId = v
+	o.AccessKeyId = &v
+}
+
+// GetAccount returns the Account field value if set, zero value otherwise.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetAccount() string {
+	if o == nil || IsNil(o.Account) {
+		var ret string
+		return ret
+	}
+	return *o.Account
+}
+
+// GetAccountOk returns a tuple with the Account field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetAccountOk() (*string, bool) {
+	if o == nil || IsNil(o.Account) {
+		return nil, false
+	}
+	return o.Account, true
+}
+
+// HasAccount returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasAccount() bool {
+	if o != nil && !IsNil(o.Account) {
+		return true
+	}
+
+	return false
+}
+
+// SetAccount gets a reference to the given string and assigns it to the Account field.
+func (o *HandlersCreateOrgS3ConnectionRequest) SetAccount(v string) {
+	o.Account = &v
+}
+
+// GetContainer returns the Container field value if set, zero value otherwise.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetContainer() string {
+	if o == nil || IsNil(o.Container) {
+		var ret string
+		return ret
+	}
+	return *o.Container
+}
+
+// GetContainerOk returns a tuple with the Container field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetContainerOk() (*string, bool) {
+	if o == nil || IsNil(o.Container) {
+		return nil, false
+	}
+	return o.Container, true
+}
+
+// HasContainer returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasContainer() bool {
+	if o != nil && !IsNil(o.Container) {
+		return true
+	}
+
+	return false
+}
+
+// SetContainer gets a reference to the given string and assigns it to the Container field.
+func (o *HandlersCreateOrgS3ConnectionRequest) SetContainer(v string) {
+	o.Container = &v
 }
 
 // GetDefaultBucket returns the DefaultBucket field value if set, zero value otherwise.
@@ -111,28 +219,68 @@ func (o *HandlersCreateOrgS3ConnectionRequest) SetDefaultBucket(v string) {
 	o.DefaultBucket = &v
 }
 
-// GetEndpoint returns the Endpoint field value
+// GetEndpoint returns the Endpoint field value if set, zero value otherwise.
 func (o *HandlersCreateOrgS3ConnectionRequest) GetEndpoint() string {
-	if o == nil {
+	if o == nil || IsNil(o.Endpoint) {
 		var ret string
 		return ret
 	}
-
-	return o.Endpoint
+	return *o.Endpoint
 }
 
-// GetEndpointOk returns a tuple with the Endpoint field value
+// GetEndpointOk returns a tuple with the Endpoint field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HandlersCreateOrgS3ConnectionRequest) GetEndpointOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Endpoint) {
 		return nil, false
 	}
-	return &o.Endpoint, true
+	return o.Endpoint, true
 }
 
-// SetEndpoint sets field value
+// HasEndpoint returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasEndpoint() bool {
+	if o != nil && !IsNil(o.Endpoint) {
+		return true
+	}
+
+	return false
+}
+
+// SetEndpoint gets a reference to the given string and assigns it to the Endpoint field.
 func (o *HandlersCreateOrgS3ConnectionRequest) SetEndpoint(v string) {
-	o.Endpoint = v
+	o.Endpoint = &v
+}
+
+// GetLinkedCredentialId returns the LinkedCredentialId field value if set, zero value otherwise.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetLinkedCredentialId() int32 {
+	if o == nil || IsNil(o.LinkedCredentialId) {
+		var ret int32
+		return ret
+	}
+	return *o.LinkedCredentialId
+}
+
+// GetLinkedCredentialIdOk returns a tuple with the LinkedCredentialId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetLinkedCredentialIdOk() (*int32, bool) {
+	if o == nil || IsNil(o.LinkedCredentialId) {
+		return nil, false
+	}
+	return o.LinkedCredentialId, true
+}
+
+// HasLinkedCredentialId returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasLinkedCredentialId() bool {
+	if o != nil && !IsNil(o.LinkedCredentialId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLinkedCredentialId gets a reference to the given int32 and assigns it to the LinkedCredentialId field.
+func (o *HandlersCreateOrgS3ConnectionRequest) SetLinkedCredentialId(v int32) {
+	o.LinkedCredentialId = &v
 }
 
 // GetName returns the Name field value
@@ -215,28 +363,68 @@ func (o *HandlersCreateOrgS3ConnectionRequest) SetRegion(v string) {
 	o.Region = &v
 }
 
-// GetSecretAccessKey returns the SecretAccessKey field value
+// GetSecretAccessKey returns the SecretAccessKey field value if set, zero value otherwise.
 func (o *HandlersCreateOrgS3ConnectionRequest) GetSecretAccessKey() string {
-	if o == nil {
+	if o == nil || IsNil(o.SecretAccessKey) {
 		var ret string
 		return ret
 	}
-
-	return o.SecretAccessKey
+	return *o.SecretAccessKey
 }
 
-// GetSecretAccessKeyOk returns a tuple with the SecretAccessKey field value
+// GetSecretAccessKeyOk returns a tuple with the SecretAccessKey field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HandlersCreateOrgS3ConnectionRequest) GetSecretAccessKeyOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.SecretAccessKey) {
 		return nil, false
 	}
-	return &o.SecretAccessKey, true
+	return o.SecretAccessKey, true
 }
 
-// SetSecretAccessKey sets field value
+// HasSecretAccessKey returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasSecretAccessKey() bool {
+	if o != nil && !IsNil(o.SecretAccessKey) {
+		return true
+	}
+
+	return false
+}
+
+// SetSecretAccessKey gets a reference to the given string and assigns it to the SecretAccessKey field.
 func (o *HandlersCreateOrgS3ConnectionRequest) SetSecretAccessKey(v string) {
-	o.SecretAccessKey = v
+	o.SecretAccessKey = &v
+}
+
+// GetServiceAccountJson returns the ServiceAccountJson field value if set, zero value otherwise.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetServiceAccountJson() string {
+	if o == nil || IsNil(o.ServiceAccountJson) {
+		var ret string
+		return ret
+	}
+	return *o.ServiceAccountJson
+}
+
+// GetServiceAccountJsonOk returns a tuple with the ServiceAccountJson field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) GetServiceAccountJsonOk() (*string, bool) {
+	if o == nil || IsNil(o.ServiceAccountJson) {
+		return nil, false
+	}
+	return o.ServiceAccountJson, true
+}
+
+// HasServiceAccountJson returns a boolean if a field has been set.
+func (o *HandlersCreateOrgS3ConnectionRequest) HasServiceAccountJson() bool {
+	if o != nil && !IsNil(o.ServiceAccountJson) {
+		return true
+	}
+
+	return false
+}
+
+// SetServiceAccountJson gets a reference to the given string and assigns it to the ServiceAccountJson field.
+func (o *HandlersCreateOrgS3ConnectionRequest) SetServiceAccountJson(v string) {
+	o.ServiceAccountJson = &v
 }
 
 func (o HandlersCreateOrgS3ConnectionRequest) MarshalJSON() ([]byte, error) {
@@ -249,17 +437,38 @@ func (o HandlersCreateOrgS3ConnectionRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersCreateOrgS3ConnectionRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["access_key_id"] = o.AccessKeyId
+	if !IsNil(o.AccessKey) {
+		toSerialize["access_key"] = o.AccessKey
+	}
+	if !IsNil(o.AccessKeyId) {
+		toSerialize["access_key_id"] = o.AccessKeyId
+	}
+	if !IsNil(o.Account) {
+		toSerialize["account"] = o.Account
+	}
+	if !IsNil(o.Container) {
+		toSerialize["container"] = o.Container
+	}
 	if !IsNil(o.DefaultBucket) {
 		toSerialize["default_bucket"] = o.DefaultBucket
 	}
-	toSerialize["endpoint"] = o.Endpoint
+	if !IsNil(o.Endpoint) {
+		toSerialize["endpoint"] = o.Endpoint
+	}
+	if !IsNil(o.LinkedCredentialId) {
+		toSerialize["linked_credential_id"] = o.LinkedCredentialId
+	}
 	toSerialize["name"] = o.Name
 	toSerialize["provider"] = o.Provider
 	if !IsNil(o.Region) {
 		toSerialize["region"] = o.Region
 	}
-	toSerialize["secret_access_key"] = o.SecretAccessKey
+	if !IsNil(o.SecretAccessKey) {
+		toSerialize["secret_access_key"] = o.SecretAccessKey
+	}
+	if !IsNil(o.ServiceAccountJson) {
+		toSerialize["service_account_json"] = o.ServiceAccountJson
+	}
 	return toSerialize, nil
 }
 
@@ -268,11 +477,8 @@ func (o *HandlersCreateOrgS3ConnectionRequest) UnmarshalJSON(data []byte) (err e
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"access_key_id",
-		"endpoint",
 		"name",
 		"provider",
-		"secret_access_key",
 	}
 
 	allProperties := make(map[string]interface{})

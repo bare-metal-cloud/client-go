@@ -20,6 +20,9 @@ var _ MappedNullable = &HandlersOrgS3ConnectionResponse{}
 
 // HandlersOrgS3ConnectionResponse struct for HandlersOrgS3ConnectionResponse
 type HandlersOrgS3ConnectionResponse struct {
+	// Issue #3576 — azblob fields (empty for the S3-family providers).
+	Account *string `json:"account,omitempty"`
+	Container *string `json:"container,omitempty"`
 	CreatedAt *string `json:"created_at,omitempty"`
 	// Credentials is ALWAYS a masked view. The list path does not even decrypt (AC5); the create/edit paths return this same minimal placeholder.
 	Credentials *map[string]string `json:"credentials,omitempty"`
@@ -29,8 +32,12 @@ type HandlersOrgS3ConnectionResponse struct {
 	HasVaultCredentials *bool `json:"has_vault_credentials,omitempty"`
 	Id *int32 `json:"id,omitempty"`
 	LastUsedAt map[string]interface{} `json:"last_used_at,omitempty"`
+	// LinkedCredentialID is set on link-mode rows of every provider (issue #3874; azblob since #3576): the connection authenticates through that org cloud credential and stores no vault credentials of its own, so a key rotation does not apply to it.
+	LinkedCredentialId *int32 `json:"linked_credential_id,omitempty"`
 	Name *string `json:"name,omitempty"`
 	Provider *string `json:"provider,omitempty"`
+	// Region is the S3-family region (issue #3874); empty for azblob rows.
+	Region *string `json:"region,omitempty"`
 	UpdatedAt *string `json:"updated_at,omitempty"`
 }
 
@@ -49,6 +56,70 @@ func NewHandlersOrgS3ConnectionResponse() *HandlersOrgS3ConnectionResponse {
 func NewHandlersOrgS3ConnectionResponseWithDefaults() *HandlersOrgS3ConnectionResponse {
 	this := HandlersOrgS3ConnectionResponse{}
 	return &this
+}
+
+// GetAccount returns the Account field value if set, zero value otherwise.
+func (o *HandlersOrgS3ConnectionResponse) GetAccount() string {
+	if o == nil || IsNil(o.Account) {
+		var ret string
+		return ret
+	}
+	return *o.Account
+}
+
+// GetAccountOk returns a tuple with the Account field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersOrgS3ConnectionResponse) GetAccountOk() (*string, bool) {
+	if o == nil || IsNil(o.Account) {
+		return nil, false
+	}
+	return o.Account, true
+}
+
+// HasAccount returns a boolean if a field has been set.
+func (o *HandlersOrgS3ConnectionResponse) HasAccount() bool {
+	if o != nil && !IsNil(o.Account) {
+		return true
+	}
+
+	return false
+}
+
+// SetAccount gets a reference to the given string and assigns it to the Account field.
+func (o *HandlersOrgS3ConnectionResponse) SetAccount(v string) {
+	o.Account = &v
+}
+
+// GetContainer returns the Container field value if set, zero value otherwise.
+func (o *HandlersOrgS3ConnectionResponse) GetContainer() string {
+	if o == nil || IsNil(o.Container) {
+		var ret string
+		return ret
+	}
+	return *o.Container
+}
+
+// GetContainerOk returns a tuple with the Container field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersOrgS3ConnectionResponse) GetContainerOk() (*string, bool) {
+	if o == nil || IsNil(o.Container) {
+		return nil, false
+	}
+	return o.Container, true
+}
+
+// HasContainer returns a boolean if a field has been set.
+func (o *HandlersOrgS3ConnectionResponse) HasContainer() bool {
+	if o != nil && !IsNil(o.Container) {
+		return true
+	}
+
+	return false
+}
+
+// SetContainer gets a reference to the given string and assigns it to the Container field.
+func (o *HandlersOrgS3ConnectionResponse) SetContainer(v string) {
+	o.Container = &v
 }
 
 // GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
@@ -275,6 +346,38 @@ func (o *HandlersOrgS3ConnectionResponse) SetLastUsedAt(v map[string]interface{}
 	o.LastUsedAt = v
 }
 
+// GetLinkedCredentialId returns the LinkedCredentialId field value if set, zero value otherwise.
+func (o *HandlersOrgS3ConnectionResponse) GetLinkedCredentialId() int32 {
+	if o == nil || IsNil(o.LinkedCredentialId) {
+		var ret int32
+		return ret
+	}
+	return *o.LinkedCredentialId
+}
+
+// GetLinkedCredentialIdOk returns a tuple with the LinkedCredentialId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersOrgS3ConnectionResponse) GetLinkedCredentialIdOk() (*int32, bool) {
+	if o == nil || IsNil(o.LinkedCredentialId) {
+		return nil, false
+	}
+	return o.LinkedCredentialId, true
+}
+
+// HasLinkedCredentialId returns a boolean if a field has been set.
+func (o *HandlersOrgS3ConnectionResponse) HasLinkedCredentialId() bool {
+	if o != nil && !IsNil(o.LinkedCredentialId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLinkedCredentialId gets a reference to the given int32 and assigns it to the LinkedCredentialId field.
+func (o *HandlersOrgS3ConnectionResponse) SetLinkedCredentialId(v int32) {
+	o.LinkedCredentialId = &v
+}
+
 // GetName returns the Name field value if set, zero value otherwise.
 func (o *HandlersOrgS3ConnectionResponse) GetName() string {
 	if o == nil || IsNil(o.Name) {
@@ -339,6 +442,38 @@ func (o *HandlersOrgS3ConnectionResponse) SetProvider(v string) {
 	o.Provider = &v
 }
 
+// GetRegion returns the Region field value if set, zero value otherwise.
+func (o *HandlersOrgS3ConnectionResponse) GetRegion() string {
+	if o == nil || IsNil(o.Region) {
+		var ret string
+		return ret
+	}
+	return *o.Region
+}
+
+// GetRegionOk returns a tuple with the Region field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersOrgS3ConnectionResponse) GetRegionOk() (*string, bool) {
+	if o == nil || IsNil(o.Region) {
+		return nil, false
+	}
+	return o.Region, true
+}
+
+// HasRegion returns a boolean if a field has been set.
+func (o *HandlersOrgS3ConnectionResponse) HasRegion() bool {
+	if o != nil && !IsNil(o.Region) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegion gets a reference to the given string and assigns it to the Region field.
+func (o *HandlersOrgS3ConnectionResponse) SetRegion(v string) {
+	o.Region = &v
+}
+
 // GetUpdatedAt returns the UpdatedAt field value if set, zero value otherwise.
 func (o *HandlersOrgS3ConnectionResponse) GetUpdatedAt() string {
 	if o == nil || IsNil(o.UpdatedAt) {
@@ -381,6 +516,12 @@ func (o HandlersOrgS3ConnectionResponse) MarshalJSON() ([]byte, error) {
 
 func (o HandlersOrgS3ConnectionResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Account) {
+		toSerialize["account"] = o.Account
+	}
+	if !IsNil(o.Container) {
+		toSerialize["container"] = o.Container
+	}
 	if !IsNil(o.CreatedAt) {
 		toSerialize["created_at"] = o.CreatedAt
 	}
@@ -402,11 +543,17 @@ func (o HandlersOrgS3ConnectionResponse) ToMap() (map[string]interface{}, error)
 	if !IsNil(o.LastUsedAt) {
 		toSerialize["last_used_at"] = o.LastUsedAt
 	}
+	if !IsNil(o.LinkedCredentialId) {
+		toSerialize["linked_credential_id"] = o.LinkedCredentialId
+	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
 	if !IsNil(o.Provider) {
 		toSerialize["provider"] = o.Provider
+	}
+	if !IsNil(o.Region) {
+		toSerialize["region"] = o.Region
 	}
 	if !IsNil(o.UpdatedAt) {
 		toSerialize["updated_at"] = o.UpdatedAt

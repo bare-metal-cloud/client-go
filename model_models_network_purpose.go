@@ -22,11 +22,13 @@ type ModelsNetworkPurpose string
 // List of models.NetworkPurpose
 const (
 	MODELSNETWORKPURPOSE_NetworkPurposeClusterCreate ModelsNetworkPurpose = "cluster-create"
+	MODELSNETWORKPURPOSE_NetworkPurposeProjectFabric ModelsNetworkPurpose = "project-fabric"
 )
 
 // All allowed values of ModelsNetworkPurpose enum
 var AllowedModelsNetworkPurposeEnumValues = []ModelsNetworkPurpose{
 	"cluster-create",
+	"project-fabric",
 }
 
 func (v *ModelsNetworkPurpose) UnmarshalJSON(src []byte) error {

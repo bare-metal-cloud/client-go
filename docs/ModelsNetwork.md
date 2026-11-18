@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **Purpose** | Pointer to [**ModelsNetworkPurpose**](ModelsNetworkPurpose.md) | Purpose is the durable cluster-create draft intent (124.17): \&quot;\&quot; for ordinary networks, \&quot;cluster-create\&quot; for wizard-created drafts. See the NetworkPurpose docs. GORM AutoMigrate (dev-stage policy) adds the column on next boot; 000055 keeps the goose path convergent. | [optional] 
 **ReconcileAttempts** | Pointer to **int32** | ReconcileAttempts is incremented by the Story 101-12 Temporal reconciler every time it retries a stuck row. When it reaches MaxReconcileAttempts (10) the row flips to NetworkStatusErrorPermanent. GORM AutoMigrate (dev-stage policy) adds the column on next boot. | [optional] 
 **Status** | Pointer to [**ModelsNetworkStatus**](ModelsNetworkStatus.md) |  | [optional] 
+**StatusReason** | Pointer to **string** | StatusReason carries the human-readable failure reason for the visible failed / delete_failed states (#2359, #2362). Empty on healthy rows. | [optional] 
 **Type** | Pointer to [**ModelsNetworkType**](ModelsNetworkType.md) |  | [optional] 
 **UpdatedAt** | Pointer to **string** |  | [optional] 
 **Vms** | Pointer to [**[]ModelsVirtualMachine**](ModelsVirtualMachine.md) | Relations | [optional] 
@@ -390,6 +391,31 @@ SetStatus sets Status field to given value.
 `func (o *ModelsNetwork) HasStatus() bool`
 
 HasStatus returns a boolean if a field has been set.
+
+### GetStatusReason
+
+`func (o *ModelsNetwork) GetStatusReason() string`
+
+GetStatusReason returns the StatusReason field if non-nil, zero value otherwise.
+
+### GetStatusReasonOk
+
+`func (o *ModelsNetwork) GetStatusReasonOk() (*string, bool)`
+
+GetStatusReasonOk returns a tuple with the StatusReason field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStatusReason
+
+`func (o *ModelsNetwork) SetStatusReason(v string)`
+
+SetStatusReason sets StatusReason field to given value.
+
+### HasStatusReason
+
+`func (o *ModelsNetwork) HasStatusReason() bool`
+
+HasStatusReason returns a boolean if a field has been set.
 
 ### GetType
 

@@ -4,15 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AccessKeyId** | **string** |  | 
+**AccessKeyId** | Pointer to **string** |  | [optional] 
 **Region** | Pointer to **string** |  | [optional] 
-**SecretAccessKey** | **string** |  | 
+**SecretAccessKey** | Pointer to **string** |  | [optional] 
+**ServiceAccountJson** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
 ### NewHandlersRotateOrgS3ConnectionCredentialsRequest
 
-`func NewHandlersRotateOrgS3ConnectionCredentialsRequest(accessKeyId string, secretAccessKey string, ) *HandlersRotateOrgS3ConnectionCredentialsRequest`
+`func NewHandlersRotateOrgS3ConnectionCredentialsRequest() *HandlersRotateOrgS3ConnectionCredentialsRequest`
 
 NewHandlersRotateOrgS3ConnectionCredentialsRequest instantiates a new HandlersRotateOrgS3ConnectionCredentialsRequest object
 This constructor will assign default values to properties that have it defined,
@@ -46,6 +47,11 @@ and a boolean to check if the value has been set.
 
 SetAccessKeyId sets AccessKeyId field to given value.
 
+### HasAccessKeyId
+
+`func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) HasAccessKeyId() bool`
+
+HasAccessKeyId returns a boolean if a field has been set.
 
 ### GetRegion
 
@@ -91,6 +97,36 @@ and a boolean to check if the value has been set.
 
 SetSecretAccessKey sets SecretAccessKey field to given value.
 
+### HasSecretAccessKey
+
+`func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) HasSecretAccessKey() bool`
+
+HasSecretAccessKey returns a boolean if a field has been set.
+
+### GetServiceAccountJson
+
+`func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetServiceAccountJson() string`
+
+GetServiceAccountJson returns the ServiceAccountJson field if non-nil, zero value otherwise.
+
+### GetServiceAccountJsonOk
+
+`func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) GetServiceAccountJsonOk() (*string, bool)`
+
+GetServiceAccountJsonOk returns a tuple with the ServiceAccountJson field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetServiceAccountJson
+
+`func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) SetServiceAccountJson(v string)`
+
+SetServiceAccountJson sets ServiceAccountJson field to given value.
+
+### HasServiceAccountJson
+
+`func (o *HandlersRotateOrgS3ConnectionCredentialsRequest) HasServiceAccountJson() bool`
+
+HasServiceAccountJson returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

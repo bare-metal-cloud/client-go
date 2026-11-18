@@ -27,6 +27,8 @@ const (
 	MODELSNETWORKSTATUS_NetworkStatusInactive ModelsNetworkStatus = "inactive"
 	MODELSNETWORKSTATUS_NetworkStatusError ModelsNetworkStatus = "error"
 	MODELSNETWORKSTATUS_NetworkStatusErrorPermanent ModelsNetworkStatus = "error_permanent"
+	MODELSNETWORKSTATUS_NetworkStatusFailed ModelsNetworkStatus = "failed"
+	MODELSNETWORKSTATUS_NetworkStatusDeleteFailed ModelsNetworkStatus = "delete_failed"
 )
 
 // All allowed values of ModelsNetworkStatus enum
@@ -37,6 +39,8 @@ var AllowedModelsNetworkStatusEnumValues = []ModelsNetworkStatus{
 	"inactive",
 	"error",
 	"error_permanent",
+	"failed",
+	"delete_failed",
 }
 
 func (v *ModelsNetworkStatus) UnmarshalJSON(src []byte) error {

@@ -103,6 +103,76 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test ClustersAPIService GetClustersIdBackupMigration", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdBackupMigration(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdBackupRuns", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdBackupRuns(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdBackupStatus", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdBackupStatus(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdDeleteImpact", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdDeleteImpact(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdEdgeHostname", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdEdgeHostname(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test ClustersAPIService GetClustersIdEvents", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -131,6 +201,62 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test ClustersAPIService GetClustersIdK8sViewAccess", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdK8sViewAccess(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdK8sWatchProxyPath", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+		var proxyPath string
+
+		httpRes, err := apiClient.ClustersAPI.GetClustersIdK8sWatchProxyPath(context.Background(), id, proxyPath).Execute()
+
+		require.Nil(t, err)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdLatency", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdLatency(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdMonitorStatus", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdMonitorStatus(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test ClustersAPIService GetClustersIdNetwork", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -138,6 +264,20 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 		var id string
 
 		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdNetwork(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService GetClustersIdTimeline", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdTimeline(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -159,11 +299,40 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test ClustersAPIService GetClustersIdVirtualMachinesVmIdRemoveImpact", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+		var vmId int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.GetClustersIdVirtualMachinesVmIdRemoveImpact(context.Background(), id, vmId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test ClustersAPIService GetClustersNew", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		resp, httpRes, err := apiClient.ClustersAPI.GetClustersNew(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService PatchClustersIdBackupPlan", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.ClustersAPI.PatchClustersIdBackupPlan(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -183,6 +352,35 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test ClustersAPIService PostClustersIdBackupMigrationResume", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.ClustersAPI.PostClustersIdBackupMigrationResume(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService PostClustersIdBackupRunsRunIdRestore", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var runId int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.PostClustersIdBackupRunsRunIdRestore(context.Background(), id, runId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test ClustersAPIService PostClustersIdExplorerSetup", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -190,6 +388,20 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 		var id string
 
 		resp, httpRes, err := apiClient.ClustersAPI.PostClustersIdExplorerSetup(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService PostClustersIdK8sViewAccessRequest", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.ClustersAPI.PostClustersIdK8sViewAccessRequest(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -230,6 +442,18 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 		t.Skip("skip test")  // remove to run test
 
 		resp, httpRes, err := apiClient.ClustersAPI.PostClustersImport(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test ClustersAPIService PostClustersPeerProbe", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.ClustersAPI.PostClustersPeerProbe(context.Background()).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

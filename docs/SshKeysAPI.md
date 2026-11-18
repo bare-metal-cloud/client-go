@@ -13,7 +13,7 @@ Method | HTTP request | Description
 
 ## DeleteSshKeysId
 
-> DeleteSshKeysId(ctx, id).Execute()
+> DeleteSshKeysId(ctx, id).Force(force).Execute()
 
 Delete an SSH key
 
@@ -33,10 +33,11 @@ import (
 
 func main() {
 	id := "id_example" // string | SSH Key ID
+	force := true // bool | Force the delete past the reference guard (admin/owner only) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.SshKeysAPI.DeleteSshKeysId(context.Background(), id).Execute()
+	r, err := apiClient.SshKeysAPI.DeleteSshKeysId(context.Background(), id).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `SshKeysAPI.DeleteSshKeysId``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -60,6 +61,7 @@ Other parameters are passed through a pointer to a apiDeleteSshKeysIdRequest str
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force the delete past the reference guard (admin/owner only) | 
 
 ### Return type
 
@@ -231,7 +233,7 @@ import (
 )
 
 func main() {
-	request := *openapiclient.NewHandlersCreateSSHKeyRequest("Key_example", "Title_example") // HandlersCreateSSHKeyRequest | SSH key details
+	request := *openapiclient.NewHandlersCreateSSHKeyRequest("Title_example") // HandlersCreateSSHKeyRequest | SSH key details
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

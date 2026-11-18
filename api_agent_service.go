@@ -77,6 +77,34 @@ type AgentServiceAPI interface {
 	// PostAgentShutdownExecute executes the request
 	//  @return map[string]string
 	PostAgentShutdownExecute(r ApiPostAgentShutdownRequest) (map[string]string, *http.Response, error)
+
+	/*
+	PostAgentSupportBundles Upload an agent support bundle
+
+	Authenticated support-bundle intake for the bmc-agent report flow: the X-BMC-* signed-header scheme (the tunnel gate's), a 50 MB cap, a per-agent rate limit, S3 storage under the agent's prefix, and a support-intake row. Returns the server-minted reference id (BUG-<ULID>).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPostAgentSupportBundlesRequest
+	*/
+	PostAgentSupportBundles(ctx context.Context) ApiPostAgentSupportBundlesRequest
+
+	// PostAgentSupportBundlesExecute executes the request
+	//  @return AgentSupportBundleUploadResponse
+	PostAgentSupportBundlesExecute(r ApiPostAgentSupportBundlesRequest) (*AgentSupportBundleUploadResponse, *http.Response, error)
+
+	/*
+	PostAgentUpdatesEvents Report an agent update restore event
+
+	Authenticated watchdog intake: the X-BMC-* signed-header scheme (the tunnel gate's), the machine-auth family of POST /agent/support/bundles. Carries {attempt, outcome: restored|restore-failed, trace≤8KB masked}; flips the agent's rollout-agent row to the truthful outcome, stores the capped trace for triage, and writes the audit row. Idempotent: duplicates and unknown attempt ids never corrupt a row.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPostAgentUpdatesEventsRequest
+	*/
+	PostAgentUpdatesEvents(ctx context.Context) ApiPostAgentUpdatesEventsRequest
+
+	// PostAgentUpdatesEventsExecute executes the request
+	//  @return AgentUpdateRestoreEventResponse
+	PostAgentUpdatesEventsExecute(r ApiPostAgentUpdatesEventsRequest) (*AgentUpdateRestoreEventResponse, *http.Response, error)
 }
 
 // AgentServiceAPIService AgentServiceAPI service
@@ -541,6 +569,477 @@ func (a *AgentServiceAPIService) PostAgentShutdownExecute(r ApiPostAgentShutdown
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAgentSupportBundlesRequest struct {
+	ctx context.Context
+	ApiService AgentServiceAPI
+	xBMCAgentID *string
+	xBMCTs *string
+	xBMCNonce *string
+	xBMCSig *string
+	xBMCBundleNote *string
+}
+
+// Enrolled numeric agent id
+func (r ApiPostAgentSupportBundlesRequest) XBMCAgentID(xBMCAgentID string) ApiPostAgentSupportBundlesRequest {
+	r.xBMCAgentID = &xBMCAgentID
+	return r
+}
+
+// Unix timestamp (±60s skew window)
+func (r ApiPostAgentSupportBundlesRequest) XBMCTs(xBMCTs string) ApiPostAgentSupportBundlesRequest {
+	r.xBMCTs = &xBMCTs
+	return r
+}
+
+// Single-use hex nonce (replay window)
+func (r ApiPostAgentSupportBundlesRequest) XBMCNonce(xBMCNonce string) ApiPostAgentSupportBundlesRequest {
+	r.xBMCNonce = &xBMCNonce
+	return r
+}
+
+// Hex Ed25519 signature over agent_id|ts|nonce
+func (r ApiPostAgentSupportBundlesRequest) XBMCSig(xBMCSig string) ApiPostAgentSupportBundlesRequest {
+	r.xBMCSig = &xBMCSig
+	return r
+}
+
+// Optional operator note (masked upstream by the CLI)
+func (r ApiPostAgentSupportBundlesRequest) XBMCBundleNote(xBMCBundleNote string) ApiPostAgentSupportBundlesRequest {
+	r.xBMCBundleNote = &xBMCBundleNote
+	return r
+}
+
+func (r ApiPostAgentSupportBundlesRequest) Execute() (*AgentSupportBundleUploadResponse, *http.Response, error) {
+	return r.ApiService.PostAgentSupportBundlesExecute(r)
+}
+
+/*
+PostAgentSupportBundles Upload an agent support bundle
+
+Authenticated support-bundle intake for the bmc-agent report flow: the X-BMC-* signed-header scheme (the tunnel gate's), a 50 MB cap, a per-agent rate limit, S3 storage under the agent's prefix, and a support-intake row. Returns the server-minted reference id (BUG-<ULID>).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostAgentSupportBundlesRequest
+*/
+func (a *AgentServiceAPIService) PostAgentSupportBundles(ctx context.Context) ApiPostAgentSupportBundlesRequest {
+	return ApiPostAgentSupportBundlesRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return AgentSupportBundleUploadResponse
+func (a *AgentServiceAPIService) PostAgentSupportBundlesExecute(r ApiPostAgentSupportBundlesRequest) (*AgentSupportBundleUploadResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *AgentSupportBundleUploadResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AgentServiceAPIService.PostAgentSupportBundles")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/agent/support/bundles"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.xBMCAgentID == nil {
+		return localVarReturnValue, nil, reportError("xBMCAgentID is required and must be specified")
+	}
+	if r.xBMCTs == nil {
+		return localVarReturnValue, nil, reportError("xBMCTs is required and must be specified")
+	}
+	if r.xBMCNonce == nil {
+		return localVarReturnValue, nil, reportError("xBMCNonce is required and must be specified")
+	}
+	if r.xBMCSig == nil {
+		return localVarReturnValue, nil, reportError("xBMCSig is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Agent-ID", r.xBMCAgentID, "", "")
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Ts", r.xBMCTs, "", "")
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Nonce", r.xBMCNonce, "", "")
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Sig", r.xBMCSig, "", "")
+	if r.xBMCBundleNote != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Bundle-Note", r.xBMCBundleNote, "", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 413 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 502 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostAgentUpdatesEventsRequest struct {
+	ctx context.Context
+	ApiService AgentServiceAPI
+	xBMCAgentID *string
+	xBMCTs *string
+	xBMCNonce *string
+	xBMCSig *string
+	event *AgentUpdateRestoreEventRequest
+}
+
+// Enrolled numeric agent id
+func (r ApiPostAgentUpdatesEventsRequest) XBMCAgentID(xBMCAgentID string) ApiPostAgentUpdatesEventsRequest {
+	r.xBMCAgentID = &xBMCAgentID
+	return r
+}
+
+// Unix timestamp (±60s skew window)
+func (r ApiPostAgentUpdatesEventsRequest) XBMCTs(xBMCTs string) ApiPostAgentUpdatesEventsRequest {
+	r.xBMCTs = &xBMCTs
+	return r
+}
+
+// Single-use hex nonce (replay window)
+func (r ApiPostAgentUpdatesEventsRequest) XBMCNonce(xBMCNonce string) ApiPostAgentUpdatesEventsRequest {
+	r.xBMCNonce = &xBMCNonce
+	return r
+}
+
+// Hex Ed25519 signature over agent_id|ts|nonce
+func (r ApiPostAgentUpdatesEventsRequest) XBMCSig(xBMCSig string) ApiPostAgentUpdatesEventsRequest {
+	r.xBMCSig = &xBMCSig
+	return r
+}
+
+// The restore event
+func (r ApiPostAgentUpdatesEventsRequest) Event(event AgentUpdateRestoreEventRequest) ApiPostAgentUpdatesEventsRequest {
+	r.event = &event
+	return r
+}
+
+func (r ApiPostAgentUpdatesEventsRequest) Execute() (*AgentUpdateRestoreEventResponse, *http.Response, error) {
+	return r.ApiService.PostAgentUpdatesEventsExecute(r)
+}
+
+/*
+PostAgentUpdatesEvents Report an agent update restore event
+
+Authenticated watchdog intake: the X-BMC-* signed-header scheme (the tunnel gate's), the machine-auth family of POST /agent/support/bundles. Carries {attempt, outcome: restored|restore-failed, trace≤8KB masked}; flips the agent's rollout-agent row to the truthful outcome, stores the capped trace for triage, and writes the audit row. Idempotent: duplicates and unknown attempt ids never corrupt a row.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostAgentUpdatesEventsRequest
+*/
+func (a *AgentServiceAPIService) PostAgentUpdatesEvents(ctx context.Context) ApiPostAgentUpdatesEventsRequest {
+	return ApiPostAgentUpdatesEventsRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return AgentUpdateRestoreEventResponse
+func (a *AgentServiceAPIService) PostAgentUpdatesEventsExecute(r ApiPostAgentUpdatesEventsRequest) (*AgentUpdateRestoreEventResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *AgentUpdateRestoreEventResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AgentServiceAPIService.PostAgentUpdatesEvents")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/agent/updates/events"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.xBMCAgentID == nil {
+		return localVarReturnValue, nil, reportError("xBMCAgentID is required and must be specified")
+	}
+	if r.xBMCTs == nil {
+		return localVarReturnValue, nil, reportError("xBMCTs is required and must be specified")
+	}
+	if r.xBMCNonce == nil {
+		return localVarReturnValue, nil, reportError("xBMCNonce is required and must be specified")
+	}
+	if r.xBMCSig == nil {
+		return localVarReturnValue, nil, reportError("xBMCSig is required and must be specified")
+	}
+	if r.event == nil {
+		return localVarReturnValue, nil, reportError("event is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Agent-ID", r.xBMCAgentID, "", "")
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Ts", r.xBMCTs, "", "")
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Nonce", r.xBMCNonce, "", "")
+	parameterAddToHeaderOrQuery(localVarHeaderParams, "X-BMC-Sig", r.xBMCSig, "", "")
+	// body params
+	localVarPostBody = r.event
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 413 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

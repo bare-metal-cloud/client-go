@@ -24,6 +24,8 @@ type ServicesRoleRecommendationResponse struct {
 	DataCoverage *ServicesRoleDataCoverage `json:"data_coverage,omitempty"`
 	MasterCount *int32 `json:"master_count,omitempty"`
 	MasterCountGuidance []RolerecsMasterCountOption `json:"master_count_guidance,omitempty"`
+	// NetworkMeasurement is the story-144.4 honesty block (ADDITIVE — every pre-existing key stays byte-identical).
+	NetworkMeasurement *ServicesRoleNetworkMeasurement `json:"network_measurement,omitempty"`
 	SupportedMasterCounts []int32 `json:"supported_master_counts,omitempty"`
 }
 
@@ -172,6 +174,38 @@ func (o *ServicesRoleRecommendationResponse) SetMasterCountGuidance(v []Rolerecs
 	o.MasterCountGuidance = v
 }
 
+// GetNetworkMeasurement returns the NetworkMeasurement field value if set, zero value otherwise.
+func (o *ServicesRoleRecommendationResponse) GetNetworkMeasurement() ServicesRoleNetworkMeasurement {
+	if o == nil || IsNil(o.NetworkMeasurement) {
+		var ret ServicesRoleNetworkMeasurement
+		return ret
+	}
+	return *o.NetworkMeasurement
+}
+
+// GetNetworkMeasurementOk returns a tuple with the NetworkMeasurement field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServicesRoleRecommendationResponse) GetNetworkMeasurementOk() (*ServicesRoleNetworkMeasurement, bool) {
+	if o == nil || IsNil(o.NetworkMeasurement) {
+		return nil, false
+	}
+	return o.NetworkMeasurement, true
+}
+
+// HasNetworkMeasurement returns a boolean if a field has been set.
+func (o *ServicesRoleRecommendationResponse) HasNetworkMeasurement() bool {
+	if o != nil && !IsNil(o.NetworkMeasurement) {
+		return true
+	}
+
+	return false
+}
+
+// SetNetworkMeasurement gets a reference to the given ServicesRoleNetworkMeasurement and assigns it to the NetworkMeasurement field.
+func (o *ServicesRoleRecommendationResponse) SetNetworkMeasurement(v ServicesRoleNetworkMeasurement) {
+	o.NetworkMeasurement = &v
+}
+
 // GetSupportedMasterCounts returns the SupportedMasterCounts field value if set, zero value otherwise.
 func (o *ServicesRoleRecommendationResponse) GetSupportedMasterCounts() []int32 {
 	if o == nil || IsNil(o.SupportedMasterCounts) {
@@ -225,6 +259,9 @@ func (o ServicesRoleRecommendationResponse) ToMap() (map[string]interface{}, err
 	}
 	if !IsNil(o.MasterCountGuidance) {
 		toSerialize["master_count_guidance"] = o.MasterCountGuidance
+	}
+	if !IsNil(o.NetworkMeasurement) {
+		toSerialize["network_measurement"] = o.NetworkMeasurement
 	}
 	if !IsNil(o.SupportedMasterCounts) {
 		toSerialize["supported_master_counts"] = o.SupportedMasterCounts

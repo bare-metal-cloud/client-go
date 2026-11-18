@@ -22,6 +22,8 @@ var _ MappedNullable = &HandlersDeleteClusterRequest{}
 type HandlersDeleteClusterRequest struct {
 	// AcknowledgeIrreversible is the AC5 confirm-again flag (the server's irreversibility_warning 409 carries the verbatim text; re-submit with this true).
 	AcknowledgeIrreversible *bool `json:"acknowledge_irreversible,omitempty"`
+	// ImpactFingerprint is the epic-#3964 story-C1 execute-time re-verification handle: the fingerprint GET /clusters/:id/delete-impact returned. When provided and the consequences moved since that preflight, the delete refuses with 409 consequence_changed carrying the fresh impact. Absent = the legacy contract, unchanged.
+	ImpactFingerprint *string `json:"impact_fingerprint,omitempty"`
 	VmDisposition *string `json:"vm_disposition,omitempty"`
 	VmDispositions *map[string]string `json:"vm_dispositions,omitempty"`
 }
@@ -73,6 +75,38 @@ func (o *HandlersDeleteClusterRequest) HasAcknowledgeIrreversible() bool {
 // SetAcknowledgeIrreversible gets a reference to the given bool and assigns it to the AcknowledgeIrreversible field.
 func (o *HandlersDeleteClusterRequest) SetAcknowledgeIrreversible(v bool) {
 	o.AcknowledgeIrreversible = &v
+}
+
+// GetImpactFingerprint returns the ImpactFingerprint field value if set, zero value otherwise.
+func (o *HandlersDeleteClusterRequest) GetImpactFingerprint() string {
+	if o == nil || IsNil(o.ImpactFingerprint) {
+		var ret string
+		return ret
+	}
+	return *o.ImpactFingerprint
+}
+
+// GetImpactFingerprintOk returns a tuple with the ImpactFingerprint field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersDeleteClusterRequest) GetImpactFingerprintOk() (*string, bool) {
+	if o == nil || IsNil(o.ImpactFingerprint) {
+		return nil, false
+	}
+	return o.ImpactFingerprint, true
+}
+
+// HasImpactFingerprint returns a boolean if a field has been set.
+func (o *HandlersDeleteClusterRequest) HasImpactFingerprint() bool {
+	if o != nil && !IsNil(o.ImpactFingerprint) {
+		return true
+	}
+
+	return false
+}
+
+// SetImpactFingerprint gets a reference to the given string and assigns it to the ImpactFingerprint field.
+func (o *HandlersDeleteClusterRequest) SetImpactFingerprint(v string) {
+	o.ImpactFingerprint = &v
 }
 
 // GetVmDisposition returns the VmDisposition field value if set, zero value otherwise.
@@ -151,6 +185,9 @@ func (o HandlersDeleteClusterRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.AcknowledgeIrreversible) {
 		toSerialize["acknowledge_irreversible"] = o.AcknowledgeIrreversible
+	}
+	if !IsNil(o.ImpactFingerprint) {
+		toSerialize["impact_fingerprint"] = o.ImpactFingerprint
 	}
 	if !IsNil(o.VmDisposition) {
 		toSerialize["vm_disposition"] = o.VmDisposition

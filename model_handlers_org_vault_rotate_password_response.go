@@ -20,7 +20,6 @@ var _ MappedNullable = &HandlersOrgVaultRotatePasswordResponse{}
 
 // HandlersOrgVaultRotatePasswordResponse struct for HandlersOrgVaultRotatePasswordResponse
 type HandlersOrgVaultRotatePasswordResponse struct {
-	OrgSessionToken *string `json:"org_session_token,omitempty"`
 	Rotated *bool `json:"rotated,omitempty"`
 }
 
@@ -39,38 +38,6 @@ func NewHandlersOrgVaultRotatePasswordResponse() *HandlersOrgVaultRotatePassword
 func NewHandlersOrgVaultRotatePasswordResponseWithDefaults() *HandlersOrgVaultRotatePasswordResponse {
 	this := HandlersOrgVaultRotatePasswordResponse{}
 	return &this
-}
-
-// GetOrgSessionToken returns the OrgSessionToken field value if set, zero value otherwise.
-func (o *HandlersOrgVaultRotatePasswordResponse) GetOrgSessionToken() string {
-	if o == nil || IsNil(o.OrgSessionToken) {
-		var ret string
-		return ret
-	}
-	return *o.OrgSessionToken
-}
-
-// GetOrgSessionTokenOk returns a tuple with the OrgSessionToken field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *HandlersOrgVaultRotatePasswordResponse) GetOrgSessionTokenOk() (*string, bool) {
-	if o == nil || IsNil(o.OrgSessionToken) {
-		return nil, false
-	}
-	return o.OrgSessionToken, true
-}
-
-// HasOrgSessionToken returns a boolean if a field has been set.
-func (o *HandlersOrgVaultRotatePasswordResponse) HasOrgSessionToken() bool {
-	if o != nil && !IsNil(o.OrgSessionToken) {
-		return true
-	}
-
-	return false
-}
-
-// SetOrgSessionToken gets a reference to the given string and assigns it to the OrgSessionToken field.
-func (o *HandlersOrgVaultRotatePasswordResponse) SetOrgSessionToken(v string) {
-	o.OrgSessionToken = &v
 }
 
 // GetRotated returns the Rotated field value if set, zero value otherwise.
@@ -115,9 +82,6 @@ func (o HandlersOrgVaultRotatePasswordResponse) MarshalJSON() ([]byte, error) {
 
 func (o HandlersOrgVaultRotatePasswordResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.OrgSessionToken) {
-		toSerialize["org_session_token"] = o.OrgSessionToken
-	}
 	if !IsNil(o.Rotated) {
 		toSerialize["rotated"] = o.Rotated
 	}

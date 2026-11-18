@@ -4,6 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ArrivalInstance** | Pointer to **string** | ArrivalInstance names the arrival addon instance serving the claimed host (empty for the platform entry). Re-stamped with ArrivalKind. | [optional] 
+**ArrivalKind** | Pointer to [**BundleArrivalKind**](BundleArrivalKind.md) | ArrivalKind is the claim&#39;s arrival dimension (epic 154, §4.2): the arrival family serving the claimed host (bundle.ArrivalKind vocabulary). Empty on pre-154 claims — the dimension is additive omitempty and legacy claims marshal/parse byte-identically.  The re-stamp law: the claim is re-stamped with the CURRENT revision&#39;s arrival dimension on every route-changing revision (a provision-time stamp goes stale the moment an app migrates arrival on upgrade). Claims stay cluster-global — a DNS name points one place regardless of which edge serves it — and the current-revision dimension is what the addon-uninstall refusal and the per-arrival teardown read. The HOST registry owns the stamping (record on provision, release on uninstall); this fact shape is the engine&#39;s contract for what it reads. | [optional] 
 **Host** | Pointer to **string** | Host is the claimed hostname (normalized: lowercase, no trailing dot). | [optional] 
 **InstallName** | Pointer to **string** | InstallName names the install holding the claim — the conflicting install a uniqueness refusal names (the backend maps that refusal to HTTP 422; the module&#39;s contract is the sentinel). | [optional] 
 
@@ -25,6 +27,56 @@ will change when the set of required properties is changed
 NewEngineHostClaimWithDefaults instantiates a new EngineHostClaim object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetArrivalInstance
+
+`func (o *EngineHostClaim) GetArrivalInstance() string`
+
+GetArrivalInstance returns the ArrivalInstance field if non-nil, zero value otherwise.
+
+### GetArrivalInstanceOk
+
+`func (o *EngineHostClaim) GetArrivalInstanceOk() (*string, bool)`
+
+GetArrivalInstanceOk returns a tuple with the ArrivalInstance field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetArrivalInstance
+
+`func (o *EngineHostClaim) SetArrivalInstance(v string)`
+
+SetArrivalInstance sets ArrivalInstance field to given value.
+
+### HasArrivalInstance
+
+`func (o *EngineHostClaim) HasArrivalInstance() bool`
+
+HasArrivalInstance returns a boolean if a field has been set.
+
+### GetArrivalKind
+
+`func (o *EngineHostClaim) GetArrivalKind() BundleArrivalKind`
+
+GetArrivalKind returns the ArrivalKind field if non-nil, zero value otherwise.
+
+### GetArrivalKindOk
+
+`func (o *EngineHostClaim) GetArrivalKindOk() (*BundleArrivalKind, bool)`
+
+GetArrivalKindOk returns a tuple with the ArrivalKind field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetArrivalKind
+
+`func (o *EngineHostClaim) SetArrivalKind(v BundleArrivalKind)`
+
+SetArrivalKind sets ArrivalKind field to given value.
+
+### HasArrivalKind
+
+`func (o *EngineHostClaim) HasArrivalKind() bool`
+
+HasArrivalKind returns a boolean if a field has been set.
 
 ### GetHost
 

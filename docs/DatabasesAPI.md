@@ -8,15 +8,24 @@ Method | HTTP request | Description
 [**GetServicesDatabases**](DatabasesAPI.md#GetServicesDatabases) | **Get** /services/databases | List all databases
 [**GetServicesDatabasesConfigSchema**](DatabasesAPI.md#GetServicesDatabasesConfigSchema) | **Get** /services/databases/config/schema | Get database configuration schema
 [**GetServicesDatabasesId**](DatabasesAPI.md#GetServicesDatabasesId) | **Get** /services/databases/{id} | Get database details
+[**GetServicesDatabasesIdAdminChanges**](DatabasesAPI.md#GetServicesDatabasesIdAdminChanges) | **Get** /services/databases/{id}/admin/changes | List the database service&#39;s admin change log
+[**GetServicesDatabasesIdAdminDatabases**](DatabasesAPI.md#GetServicesDatabasesIdAdminDatabases) | **Get** /services/databases/{id}/admin/databases | List the databases on a database service
+[**GetServicesDatabasesIdAdminParameters**](DatabasesAPI.md#GetServicesDatabasesIdAdminParameters) | **Get** /services/databases/{id}/admin/parameters | List the engine parameters on a database service
 [**GetServicesDatabasesIdConnection**](DatabasesAPI.md#GetServicesDatabasesIdConnection) | **Get** /services/databases/{id}/connection | Get database connection info
 [**PostServicesDatabases**](DatabasesAPI.md#PostServicesDatabases) | **Post** /services/databases | Create database configuration
 [**PostServicesDatabasesConfigValidate**](DatabasesAPI.md#PostServicesDatabasesConfigValidate) | **Post** /services/databases/config/validate | Validate database configuration
+[**PostServicesDatabasesIdAdminDatabases**](DatabasesAPI.md#PostServicesDatabasesIdAdminDatabases) | **Post** /services/databases/{id}/admin/databases | Create a database on a database service
+[**PostServicesDatabasesIdAdminParametersApplyRestart**](DatabasesAPI.md#PostServicesDatabasesIdAdminParametersApplyRestart) | **Post** /services/databases/{id}/admin/parameters/apply-restart | Apply the staged parameter changes and restart
 [**PostServicesDatabasesIdConnectionResetPassword**](DatabasesAPI.md#PostServicesDatabasesIdConnectionResetPassword) | **Post** /services/databases/{id}/connection/reset-password | Reset database password
+[**PostServicesDatabasesIdRecoverLane**](DatabasesAPI.md#PostServicesDatabasesIdRecoverLane) | **Post** /services/databases/{id}/recover-lane | Recover a stranded backup lane (admin)
 [**PostServicesDatabasesIdRestart**](DatabasesAPI.md#PostServicesDatabasesIdRestart) | **Post** /services/databases/{id}/restart | Restart a database (graceful rolling restart)
+[**PostServicesDatabasesIdRestore**](DatabasesAPI.md#PostServicesDatabasesIdRestore) | **Post** /services/databases/{id}/restore | Restore a database from a backup archive (deploykit engine)
 [**PostServicesDatabasesIdScaleResources**](DatabasesAPI.md#PostServicesDatabasesIdScaleResources) | **Post** /services/databases/{id}/scale-resources | Scale database CPU/memory resources
 [**PostServicesDatabasesIdScaleStorage**](DatabasesAPI.md#PostServicesDatabasesIdScaleStorage) | **Post** /services/databases/{id}/scale-storage | Scale database storage (increase only)
 [**PostServicesDatabasesIdStart**](DatabasesAPI.md#PostServicesDatabasesIdStart) | **Post** /services/databases/{id}/start | Start a stopped database (restore replicas)
 [**PostServicesDatabasesIdStop**](DatabasesAPI.md#PostServicesDatabasesIdStop) | **Post** /services/databases/{id}/stop | Stop a database (scale to 0 replicas)
+[**PostServicesDatabasesIdUpgrade**](DatabasesAPI.md#PostServicesDatabasesIdUpgrade) | **Post** /services/databases/{id}/upgrade | Upgrade a database (deploykit engine)
+[**PutServicesDatabasesIdAdminParametersName**](DatabasesAPI.md#PutServicesDatabasesIdAdminParametersName) | **Put** /services/databases/{id}/admin/parameters/{name} | Edit one engine parameter on a database service
 
 
 
@@ -166,7 +175,7 @@ import (
 )
 
 func main() {
-	type_ := "type__example" // string | Database type (postgresql, mongodb, mariadb)
+	type_ := "type__example" // string | Database type (postgresql, mariadb)
 	clusterId := "clusterId_example" // string | Cluster ID for storage classes
 
 	configuration := openapiclient.NewConfiguration()
@@ -190,7 +199,7 @@ Other parameters are passed through a pointer to a apiGetServicesDatabasesConfig
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **type_** | **string** | Database type (postgresql, mongodb, mariadb) | 
+ **type_** | **string** | Database type (postgresql, mariadb) | 
  **clusterId** | **string** | Cluster ID for storage classes | 
 
 ### Return type
@@ -271,6 +280,216 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServicesDatabasesIdAdminChanges
+
+> map[string]interface{} GetServicesDatabasesIdAdminChanges(ctx, id).Execute()
+
+List the database service's admin change log
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdAdminChanges(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdAdminChanges``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdAdminChanges`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdAdminChanges`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdAdminChangesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServicesDatabasesIdAdminDatabases
+
+> map[string]interface{} GetServicesDatabasesIdAdminDatabases(ctx, id).Execute()
+
+List the databases on a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdAdminDatabases(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdAdminDatabases``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdAdminDatabases`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdAdminDatabases`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdAdminDatabasesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServicesDatabasesIdAdminParameters
+
+> map[string]interface{} GetServicesDatabasesIdAdminParameters(ctx, id).Execute()
+
+List the engine parameters on a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdAdminParameters(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdAdminParameters``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdAdminParameters`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdAdminParameters`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdAdminParametersRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -475,6 +694,148 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## PostServicesDatabasesIdAdminDatabases
+
+> map[string]interface{} PostServicesDatabasesIdAdminDatabases(ctx, id).Request(request).Execute()
+
+Create a database on a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	request := *openapiclient.NewHandlersCreateAdminDatabaseRequest() // HandlersCreateAdminDatabaseRequest | The database name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdAdminDatabases(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdAdminDatabases``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdAdminDatabases`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdAdminDatabases`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdAdminDatabasesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersCreateAdminDatabaseRequest**](HandlersCreateAdminDatabaseRequest.md) | The database name | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdAdminParametersApplyRestart
+
+> map[string]interface{} PostServicesDatabasesIdAdminParametersApplyRestart(ctx, id).Execute()
+
+Apply the staged parameter changes and restart
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdAdminParametersApplyRestart(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdAdminParametersApplyRestart``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdAdminParametersApplyRestart`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdAdminParametersApplyRestart`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdAdminParametersApplyRestartRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## PostServicesDatabasesIdConnectionResetPassword
 
 > map[string]interface{} PostServicesDatabasesIdConnectionResetPassword(ctx, id).Execute()
@@ -545,6 +906,78 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## PostServicesDatabasesIdRecoverLane
+
+> map[string]interface{} PostServicesDatabasesIdRecoverLane(ctx, id).Request(request).Execute()
+
+Recover a stranded backup lane (admin)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	request := *openapiclient.NewHandlersRecoverLaneRequest() // HandlersRecoverLaneRequest | Explicit operator acknowledgment (confirm must be true)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdRecoverLane(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdRecoverLane``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdRecoverLane`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdRecoverLane`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdRecoverLaneRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersRecoverLaneRequest**](HandlersRecoverLaneRequest.md) | Explicit operator acknowledgment (confirm must be true) | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## PostServicesDatabasesIdRestart
 
 > map[string]interface{} PostServicesDatabasesIdRestart(ctx, id).Execute()
@@ -594,6 +1027,78 @@ Other parameters are passed through a pointer to a apiPostServicesDatabasesIdRes
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdRestore
+
+> map[string]interface{} PostServicesDatabasesIdRestore(ctx, id).Request(request).Execute()
+
+Restore a database from a backup archive (deploykit engine)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	request := *openapiclient.NewHandlersRestoreDatabaseRequest() // HandlersRestoreDatabaseRequest | Archive handle (destination_ref, object_key, digest) plus the explicit fresh confirm
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdRestore(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdRestore``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdRestore`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdRestore`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdRestoreRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersRestoreDatabaseRequest**](HandlersRestoreDatabaseRequest.md) | Archive handle (destination_ref, object_key, digest) plus the explicit fresh confirm | 
 
 ### Return type
 
@@ -872,6 +1377,153 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **request** | [**HandlersStopDatabaseRequest**](HandlersStopDatabaseRequest.md) | Confirmation with database name | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdUpgrade
+
+> map[string]interface{} PostServicesDatabasesIdUpgrade(ctx, id).Request(request).Execute()
+
+Upgrade a database (deploykit engine)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	request := *openapiclient.NewHandlersUpgradeDatabaseRequest() // HandlersUpgradeDatabaseRequest | Target version (empty upgrades to the catalog's latest) (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdUpgrade(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdUpgrade``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdUpgrade`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdUpgrade`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdUpgradeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersUpgradeDatabaseRequest**](HandlersUpgradeDatabaseRequest.md) | Target version (empty upgrades to the catalog&#39;s latest) | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PutServicesDatabasesIdAdminParametersName
+
+> map[string]interface{} PutServicesDatabasesIdAdminParametersName(ctx, id, name).Request(request).Execute()
+
+Edit one engine parameter on a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	name := "name_example" // string | Parameter name (lowercase GUC name, optionally dotted)
+	request := *openapiclient.NewHandlersSetAdminParameterRequest() // HandlersSetAdminParameterRequest | The parameter value
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PutServicesDatabasesIdAdminParametersName(context.Background(), id, name).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PutServicesDatabasesIdAdminParametersName``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PutServicesDatabasesIdAdminParametersName`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PutServicesDatabasesIdAdminParametersName`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**name** | **string** | Parameter name (lowercase GUC name, optionally dotted) | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPutServicesDatabasesIdAdminParametersNameRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **request** | [**HandlersSetAdminParameterRequest**](HandlersSetAdminParameterRequest.md) | The parameter value | 
 
 ### Return type
 

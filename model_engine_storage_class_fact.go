@@ -20,6 +20,8 @@ var _ MappedNullable = &EngineStorageClassFact{}
 
 // EngineStorageClassFact struct for EngineStorageClassFact
 type EngineStorageClassFact struct {
+	// AllowVolumeExpansion is the class's allowVolumeExpansion flag as the platform observed it on the StorageClass object (the dk64 ledger's standing interpretation). POINTER on purpose: an omitempty plain bool drops false on the wire, making capability-FALSE wire-indistinguishable from UNKNOWN — nil = unknown (collected before the flag existed, or no live read backed it), false = refused capability, true = expandable. The restore gate's phase-0 live read overwrites a carried nil before any consumer runs (an absent field on the live object maps to false, never pointer-nil), so no gate phase ever sees UNKNOWN from a live-verified path; a compile-side refusal on nil applies only where no live read exists, and the member's ABSENCE from the payload (not a nil flag inside a present fact) is the MISSING-FACT case. Additive field (omitempty): facts written before dk64 Story A decode with it nil and re-marshal byte-identically.
+	AllowVolumeExpansion *bool `json:"allow_volume_expansion,omitempty"`
 	// Name is the class name (\"local\" | \"local-cow\" | \"lvm-thin\" | \"longhorn-3rep\").
 	Name *string `json:"name,omitempty"`
 	// Replication is the class's replica factor (1 | 3); replicated classes are refused below vendor minimums (STORAGE.md §7).
@@ -43,6 +45,38 @@ func NewEngineStorageClassFact() *EngineStorageClassFact {
 func NewEngineStorageClassFactWithDefaults() *EngineStorageClassFact {
 	this := EngineStorageClassFact{}
 	return &this
+}
+
+// GetAllowVolumeExpansion returns the AllowVolumeExpansion field value if set, zero value otherwise.
+func (o *EngineStorageClassFact) GetAllowVolumeExpansion() bool {
+	if o == nil || IsNil(o.AllowVolumeExpansion) {
+		var ret bool
+		return ret
+	}
+	return *o.AllowVolumeExpansion
+}
+
+// GetAllowVolumeExpansionOk returns a tuple with the AllowVolumeExpansion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *EngineStorageClassFact) GetAllowVolumeExpansionOk() (*bool, bool) {
+	if o == nil || IsNil(o.AllowVolumeExpansion) {
+		return nil, false
+	}
+	return o.AllowVolumeExpansion, true
+}
+
+// HasAllowVolumeExpansion returns a boolean if a field has been set.
+func (o *EngineStorageClassFact) HasAllowVolumeExpansion() bool {
+	if o != nil && !IsNil(o.AllowVolumeExpansion) {
+		return true
+	}
+
+	return false
+}
+
+// SetAllowVolumeExpansion gets a reference to the given bool and assigns it to the AllowVolumeExpansion field.
+func (o *EngineStorageClassFact) SetAllowVolumeExpansion(v bool) {
+	o.AllowVolumeExpansion = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -151,6 +185,9 @@ func (o EngineStorageClassFact) MarshalJSON() ([]byte, error) {
 
 func (o EngineStorageClassFact) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.AllowVolumeExpansion) {
+		toSerialize["allow_volume_expansion"] = o.AllowVolumeExpansion
+	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}

@@ -4,7 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Key** | **string** |  | 
+**ClientEnvelope** | Pointer to [**HandlersClientEnvelopeDTO**](HandlersClientEnvelopeDTO.md) |  | [optional] 
+**Fingerprint** | Pointer to **string** |  | [optional] 
+**Key** | Pointer to **string** |  | [optional] 
 **Scope** | Pointer to **string** |  | [optional] 
 **Title** | **string** |  | 
 
@@ -12,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewHandlersCreateSSHKeyRequest
 
-`func NewHandlersCreateSSHKeyRequest(key string, title string, ) *HandlersCreateSSHKeyRequest`
+`func NewHandlersCreateSSHKeyRequest(title string, ) *HandlersCreateSSHKeyRequest`
 
 NewHandlersCreateSSHKeyRequest instantiates a new HandlersCreateSSHKeyRequest object
 This constructor will assign default values to properties that have it defined,
@@ -26,6 +28,56 @@ will change when the set of required properties is changed
 NewHandlersCreateSSHKeyRequestWithDefaults instantiates a new HandlersCreateSSHKeyRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetClientEnvelope
+
+`func (o *HandlersCreateSSHKeyRequest) GetClientEnvelope() HandlersClientEnvelopeDTO`
+
+GetClientEnvelope returns the ClientEnvelope field if non-nil, zero value otherwise.
+
+### GetClientEnvelopeOk
+
+`func (o *HandlersCreateSSHKeyRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool)`
+
+GetClientEnvelopeOk returns a tuple with the ClientEnvelope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClientEnvelope
+
+`func (o *HandlersCreateSSHKeyRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO)`
+
+SetClientEnvelope sets ClientEnvelope field to given value.
+
+### HasClientEnvelope
+
+`func (o *HandlersCreateSSHKeyRequest) HasClientEnvelope() bool`
+
+HasClientEnvelope returns a boolean if a field has been set.
+
+### GetFingerprint
+
+`func (o *HandlersCreateSSHKeyRequest) GetFingerprint() string`
+
+GetFingerprint returns the Fingerprint field if non-nil, zero value otherwise.
+
+### GetFingerprintOk
+
+`func (o *HandlersCreateSSHKeyRequest) GetFingerprintOk() (*string, bool)`
+
+GetFingerprintOk returns a tuple with the Fingerprint field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetFingerprint
+
+`func (o *HandlersCreateSSHKeyRequest) SetFingerprint(v string)`
+
+SetFingerprint sets Fingerprint field to given value.
+
+### HasFingerprint
+
+`func (o *HandlersCreateSSHKeyRequest) HasFingerprint() bool`
+
+HasFingerprint returns a boolean if a field has been set.
 
 ### GetKey
 
@@ -46,6 +98,11 @@ and a boolean to check if the value has been set.
 
 SetKey sets Key field to given value.
 
+### HasKey
+
+`func (o *HandlersCreateSSHKeyRequest) HasKey() bool`
+
+HasKey returns a boolean if a field has been set.
 
 ### GetScope
 

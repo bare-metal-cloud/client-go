@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **ProjectId** | Pointer to **int32** |  | [optional] 
 **Purpose** | Pointer to [**ModelsNetworkPurpose**](ModelsNetworkPurpose.md) | Draft intent (story 124.17 AC7): &#39;cluster-create&#39; when the wizard created this network as a draft for the cluster named by DraftName. Surfaces the Networks-page resume banner / \&quot;Prepared for a cluster\&quot; chip without a per-row join-status call. | [optional] 
 **Status** | Pointer to [**ModelsNetworkStatus**](ModelsNetworkStatus.md) |  | [optional] 
+**StatusReason** | Pointer to **string** | StatusReason carries the visible failure reason for the failed / delete_failed states (#2359, #2362); empty on healthy rows. The FE renders it under the status chip. | [optional] 
 **UpdatedAt** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -232,6 +233,31 @@ SetStatus sets Status field to given value.
 `func (o *NetworkbackendNetwork) HasStatus() bool`
 
 HasStatus returns a boolean if a field has been set.
+
+### GetStatusReason
+
+`func (o *NetworkbackendNetwork) GetStatusReason() string`
+
+GetStatusReason returns the StatusReason field if non-nil, zero value otherwise.
+
+### GetStatusReasonOk
+
+`func (o *NetworkbackendNetwork) GetStatusReasonOk() (*string, bool)`
+
+GetStatusReasonOk returns a tuple with the StatusReason field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStatusReason
+
+`func (o *NetworkbackendNetwork) SetStatusReason(v string)`
+
+SetStatusReason sets StatusReason field to given value.
+
+### HasStatusReason
+
+`func (o *NetworkbackendNetwork) HasStatusReason() bool`
+
+HasStatusReason returns a boolean if a field has been set.
 
 ### GetUpdatedAt
 

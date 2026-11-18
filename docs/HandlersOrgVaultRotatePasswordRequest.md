@@ -7,6 +7,8 @@ Name | Type | Description | Notes
 **CurrentOrgVaultPassword** | Pointer to **string** |  | [optional] 
 **DeviceId** | Pointer to **string** |  | [optional] 
 **NewOrgVaultPassword** | Pointer to **string** |  | [optional] 
+**NewPasswordSlot** | Pointer to **string** |  | [optional] 
+**NewVaultSalt** | Pointer to **string** | Client-wrapped new password slot (base64) + its fresh Argon2id salt (base64, 32 bytes) + the new password — the #4026 browser flow&#39;s artifacts. All-or-nothing: any subset is a 400. The slot is an opaque blob the server stores verbatim (the same shape components/vault/slots wraps server-side). | [optional] 
 **TrustedDevice** | Pointer to **bool** |  | [optional] 
 
 ## Methods
@@ -102,6 +104,56 @@ SetNewOrgVaultPassword sets NewOrgVaultPassword field to given value.
 `func (o *HandlersOrgVaultRotatePasswordRequest) HasNewOrgVaultPassword() bool`
 
 HasNewOrgVaultPassword returns a boolean if a field has been set.
+
+### GetNewPasswordSlot
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) GetNewPasswordSlot() string`
+
+GetNewPasswordSlot returns the NewPasswordSlot field if non-nil, zero value otherwise.
+
+### GetNewPasswordSlotOk
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) GetNewPasswordSlotOk() (*string, bool)`
+
+GetNewPasswordSlotOk returns a tuple with the NewPasswordSlot field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetNewPasswordSlot
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) SetNewPasswordSlot(v string)`
+
+SetNewPasswordSlot sets NewPasswordSlot field to given value.
+
+### HasNewPasswordSlot
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) HasNewPasswordSlot() bool`
+
+HasNewPasswordSlot returns a boolean if a field has been set.
+
+### GetNewVaultSalt
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) GetNewVaultSalt() string`
+
+GetNewVaultSalt returns the NewVaultSalt field if non-nil, zero value otherwise.
+
+### GetNewVaultSaltOk
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) GetNewVaultSaltOk() (*string, bool)`
+
+GetNewVaultSaltOk returns a tuple with the NewVaultSalt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetNewVaultSalt
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) SetNewVaultSalt(v string)`
+
+SetNewVaultSalt sets NewVaultSalt field to given value.
+
+### HasNewVaultSalt
+
+`func (o *HandlersOrgVaultRotatePasswordRequest) HasNewVaultSalt() bool`
+
+HasNewVaultSalt returns a boolean if a field has been set.
 
 ### GetTrustedDevice
 

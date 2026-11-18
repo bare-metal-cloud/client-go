@@ -22,6 +22,33 @@ func Test_bmc_SecretsAPIService(t *testing.T) {
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
+	t.Run("Test SecretsAPIService GetSecrets", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.SecretsAPI.GetSecrets(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test SecretsAPIService GetSecretsTypeId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var type_ string
+		var id int32
+
+		resp, httpRes, err := apiClient.SecretsAPI.GetSecretsTypeId(context.Background(), type_, id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test SecretsAPIService GetSecretsTypeIdUsage", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -37,6 +64,21 @@ func Test_bmc_SecretsAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test SecretsAPIService GetSecretsTypeIdValue", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var type_ string
+		var id int32
+
+		resp, httpRes, err := apiClient.SecretsAPI.GetSecretsTypeIdValue(context.Background(), type_, id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test SecretsAPIService GetSecretsTypeIdVersions", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -45,6 +87,21 @@ func Test_bmc_SecretsAPIService(t *testing.T) {
 		var id int32
 
 		resp, httpRes, err := apiClient.SecretsAPI.GetSecretsTypeIdVersions(context.Background(), type_, id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test SecretsAPIService PostSecretsTypeIdTestConnection", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var type_ string
+		var id int32
+
+		resp, httpRes, err := apiClient.SecretsAPI.PostSecretsTypeIdTestConnection(context.Background(), type_, id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

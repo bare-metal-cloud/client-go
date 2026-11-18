@@ -1,0 +1,442 @@
+# \AlertsAPI
+
+All URIs are relative to *http://localhost:3001/api/v1*
+
+Method | HTTP request | Description
+------------- | ------------- | -------------
+[**DeleteVirtualMachinesIdAlertRulesRuleId**](AlertsAPI.md#DeleteVirtualMachinesIdAlertRulesRuleId) | **Delete** /virtual-machines/{id}/alert-rules/{rule_id} | Delete an alert rule on a VM
+[**GetVirtualMachinesIdAlertRules**](AlertsAPI.md#GetVirtualMachinesIdAlertRules) | **Get** /virtual-machines/{id}/alert-rules | List a VM&#39;s alert rules
+[**PostOrgsOrgIdAlertsIdAcknowledge**](AlertsAPI.md#PostOrgsOrgIdAlertsIdAcknowledge) | **Post** /orgs/{org_id}/alerts/{id}/acknowledge | Acknowledge an org alert event
+[**PostOrgsOrgIdAlertsIdResolve**](AlertsAPI.md#PostOrgsOrgIdAlertsIdResolve) | **Post** /orgs/{org_id}/alerts/{id}/resolve | Resolve an org alert event
+[**PostVirtualMachinesIdAlertRules**](AlertsAPI.md#PostVirtualMachinesIdAlertRules) | **Post** /virtual-machines/{id}/alert-rules | Create an alert rule on a VM
+[**PutVirtualMachinesIdAlertRulesRuleId**](AlertsAPI.md#PutVirtualMachinesIdAlertRulesRuleId) | **Put** /virtual-machines/{id}/alert-rules/{rule_id} | Update an alert rule on a VM
+
+
+
+## DeleteVirtualMachinesIdAlertRulesRuleId
+
+> map[string]interface{} DeleteVirtualMachinesIdAlertRulesRuleId(ctx, id, ruleId).Execute()
+
+Delete an alert rule on a VM
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | VM ID
+	ruleId := int32(56) // int32 | Rule ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.DeleteVirtualMachinesIdAlertRulesRuleId(context.Background(), id, ruleId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.DeleteVirtualMachinesIdAlertRulesRuleId``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `DeleteVirtualMachinesIdAlertRulesRuleId`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.DeleteVirtualMachinesIdAlertRulesRuleId`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | VM ID | 
+**ruleId** | **int32** | Rule ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteVirtualMachinesIdAlertRulesRuleIdRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetVirtualMachinesIdAlertRules
+
+> []ModelsAlertRule GetVirtualMachinesIdAlertRules(ctx, id).Execute()
+
+List a VM's alert rules
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | VM ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.GetVirtualMachinesIdAlertRules(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.GetVirtualMachinesIdAlertRules``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetVirtualMachinesIdAlertRules`: []ModelsAlertRule
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.GetVirtualMachinesIdAlertRules`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | VM ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetVirtualMachinesIdAlertRulesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**[]ModelsAlertRule**](ModelsAlertRule.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostOrgsOrgIdAlertsIdAcknowledge
+
+> ModelsAlertEvent PostOrgsOrgIdAlertsIdAcknowledge(ctx, orgId, id).Execute()
+
+Acknowledge an org alert event
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	orgId := int32(56) // int32 | Organization ID
+	id := int32(56) // int32 | Alert event ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.PostOrgsOrgIdAlertsIdAcknowledge(context.Background(), orgId, id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.PostOrgsOrgIdAlertsIdAcknowledge``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostOrgsOrgIdAlertsIdAcknowledge`: ModelsAlertEvent
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.PostOrgsOrgIdAlertsIdAcknowledge`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32** | Organization ID | 
+**id** | **int32** | Alert event ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostOrgsOrgIdAlertsIdAcknowledgeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+[**ModelsAlertEvent**](ModelsAlertEvent.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostOrgsOrgIdAlertsIdResolve
+
+> ModelsAlertEvent PostOrgsOrgIdAlertsIdResolve(ctx, orgId, id).Execute()
+
+Resolve an org alert event
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	orgId := int32(56) // int32 | Organization ID
+	id := int32(56) // int32 | Alert event ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.PostOrgsOrgIdAlertsIdResolve(context.Background(), orgId, id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.PostOrgsOrgIdAlertsIdResolve``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostOrgsOrgIdAlertsIdResolve`: ModelsAlertEvent
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.PostOrgsOrgIdAlertsIdResolve`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32** | Organization ID | 
+**id** | **int32** | Alert event ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostOrgsOrgIdAlertsIdResolveRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+[**ModelsAlertEvent**](ModelsAlertEvent.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostVirtualMachinesIdAlertRules
+
+> ModelsAlertRule PostVirtualMachinesIdAlertRules(ctx, id).Request(request).Execute()
+
+Create an alert rule on a VM
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | VM ID
+	request := *openapiclient.NewModelsAlertRule() // ModelsAlertRule | Rule
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.PostVirtualMachinesIdAlertRules(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.PostVirtualMachinesIdAlertRules``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostVirtualMachinesIdAlertRules`: ModelsAlertRule
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.PostVirtualMachinesIdAlertRules`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | VM ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostVirtualMachinesIdAlertRulesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**ModelsAlertRule**](ModelsAlertRule.md) | Rule | 
+
+### Return type
+
+[**ModelsAlertRule**](ModelsAlertRule.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PutVirtualMachinesIdAlertRulesRuleId
+
+> ModelsAlertRule PutVirtualMachinesIdAlertRulesRuleId(ctx, id, ruleId).Request(request).Execute()
+
+Update an alert rule on a VM
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | VM ID
+	ruleId := int32(56) // int32 | Rule ID
+	request := *openapiclient.NewModelsAlertRule() // ModelsAlertRule | Rule
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.PutVirtualMachinesIdAlertRulesRuleId(context.Background(), id, ruleId).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.PutVirtualMachinesIdAlertRulesRuleId``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PutVirtualMachinesIdAlertRulesRuleId`: ModelsAlertRule
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.PutVirtualMachinesIdAlertRulesRuleId`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | VM ID | 
+**ruleId** | **int32** | Rule ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPutVirtualMachinesIdAlertRulesRuleIdRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **request** | [**ModelsAlertRule**](ModelsAlertRule.md) | Rule | 
+
+### Return type
+
+[**ModelsAlertRule**](ModelsAlertRule.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+

@@ -26,7 +26,7 @@ type ImageRegistriesAPI interface {
 	/*
 	DeleteImageRegistriesId Delete an image registry
 
-	Delete an image registry by ID with usage check
+	Delete an image registry by ID with usage check. A registry active references still point at refuses with 409; admin/owner can force with ?force=true, which clears the references and the stored versions in one transaction.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Registry ID
@@ -182,13 +182,14 @@ Modify-while-referenced policy is under HITL reopen (#523) for audit/versioning 
 	Store a new image registry connection with encrypted credentials.
 
 Registry types and their authentication (creatable):
+- docker-hub-public: Public Docker Hub (credential-less: name+type only, no
+auth fields; the URL auto-fills to https://registry-1.docker.io — issue #3577)
 - docker-hub-private: Private Docker Hub (username + access token)
 - ghcr: GitHub Container Registry (Personal Access Token)
 - ecr: AWS Elastic Container Registry (AWS credential ID + region)
 - gcr: Google Container Registry (GCP credential ID)
 - acr: Azure Container Registry (Azure credential ID OR username/password)
 - private: Private Docker v2 registry (URL + username/password)
-Note: docker-hub-public is not creatable (Story 79.7); existing rows may still be read.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiPostImageRegistriesRequest
@@ -202,7 +203,7 @@ Note: docker-hub-public is not creatable (Story 79.7); existing rows may still b
 	/*
 	PostImageRegistriesTest Test an image registry connection
 
-	Live-validate registry identity (/v2/) and credentials using the same validators as create. Cloud modes decrypt via org vault when unlocked; otherwise identity + credential presence.
+	Live-validate registry identity (/v2/) and credentials using the same validators as create. Linked cloud modes run the full check when the request pins an image_registry.verify rental of the linked credential (X-Vault-Rental-ID); otherwise identity + credential presence.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiPostImageRegistriesTestRequest
@@ -221,6 +222,13 @@ type ApiDeleteImageRegistriesIdRequest struct {
 	ctx context.Context
 	ApiService ImageRegistriesAPI
 	id string
+	force *bool
+}
+
+// Force the delete past the reference guard (admin/owner only)
+func (r ApiDeleteImageRegistriesIdRequest) Force(force bool) ApiDeleteImageRegistriesIdRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteImageRegistriesIdRequest) Execute() (*http.Response, error) {
@@ -230,7 +238,7 @@ func (r ApiDeleteImageRegistriesIdRequest) Execute() (*http.Response, error) {
 /*
 DeleteImageRegistriesId Delete an image registry
 
-Delete an image registry by ID with usage check
+Delete an image registry by ID with usage check. A registry active references still point at refuses with 409; admin/owner can force with ?force=true, which clears the references and the stored versions in one transaction.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Registry ID
@@ -264,6 +272,9 @@ func (a *ImageRegistriesAPIService) DeleteImageRegistriesIdExecute(r ApiDeleteIm
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -328,7 +339,29 @@ func (a *ImageRegistriesAPIService) DeleteImageRegistriesIdExecute(r ApiDeleteIm
 					newErr.model = v
 			return localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -1768,13 +1801,14 @@ PostImageRegistries Create a new image registry
 Store a new image registry connection with encrypted credentials.
 
 Registry types and their authentication (creatable):
+- docker-hub-public: Public Docker Hub (credential-less: name+type only, no
+auth fields; the URL auto-fills to https://registry-1.docker.io — issue #3577)
 - docker-hub-private: Private Docker Hub (username + access token)
 - ghcr: GitHub Container Registry (Personal Access Token)
 - ecr: AWS Elastic Container Registry (AWS credential ID + region)
 - gcr: Google Container Registry (GCP credential ID)
 - acr: Azure Container Registry (Azure credential ID OR username/password)
 - private: Private Docker v2 registry (URL + username/password)
-Note: docker-hub-public is not creatable (Story 79.7); existing rows may still be read.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostImageRegistriesRequest
@@ -1843,20 +1877,6 @@ func (a *ImageRegistriesAPIService) PostImageRegistriesExecute(r ApiPostImageReg
 			}
 		}
 	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["EncryptionKeyAuth"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["X-Encryption-Key"] = key
-			}
-		}
-	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -1901,7 +1921,7 @@ func (a *ImageRegistriesAPIService) PostImageRegistriesExecute(r ApiPostImageReg
 					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 403 {
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -1956,7 +1976,7 @@ func (r ApiPostImageRegistriesTestRequest) Execute() (*HandlersTestImageRegistry
 /*
 PostImageRegistriesTest Test an image registry connection
 
-Live-validate registry identity (/v2/) and credentials using the same validators as create. Cloud modes decrypt via org vault when unlocked; otherwise identity + credential presence.
+Live-validate registry identity (/v2/) and credentials using the same validators as create. Linked cloud modes run the full check when the request pins an image_registry.verify rental of the linked credential (X-Vault-Rental-ID); otherwise identity + credential presence.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostImageRegistriesTestRequest

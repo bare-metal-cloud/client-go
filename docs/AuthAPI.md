@@ -4,17 +4,22 @@ All URIs are relative to *http://localhost:3001/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DeleteAuthSessions**](AuthAPI.md#DeleteAuthSessions) | **Delete** /auth/sessions | Logout from the current session
+[**DeleteAuthSessions**](AuthAPI.md#DeleteAuthSessions) | **Delete** /auth/sessions | Sign out everywhere
+[**GetApiV1AuthLoginEmailLink**](AuthAPI.md#GetApiV1AuthLoginEmailLink) | **Get** /api/v1/auth/login/email-link | Complete login via one-time emailed link
 [**GetAuthMe**](AuthAPI.md#GetAuthMe) | **Get** /auth/me | Get current authenticated user
+[**GetAuthMeLocalEcho**](AuthAPI.md#GetAuthMeLocalEcho) | **Get** /auth/me/local-echo | Get user&#39;s terminal local-echo preference
 [**GetAuthMeUiMode**](AuthAPI.md#GetAuthMeUiMode) | **Get** /auth/me/ui-mode | Get user&#39;s UI mode preference
 [**GetAuthOauthDiagnostics**](AuthAPI.md#GetAuthOauthDiagnostics) | **Get** /auth/oauth-diagnostics | Get OAuth configuration diagnostics
 [**PostApiV1AuthLoginMfa**](AuthAPI.md#PostApiV1AuthLoginMfa) | **Post** /api/v1/auth/login/mfa | MFA-Enforced Login Flow: complete MFA login
+[**PostApiV1AuthMfaEmailLink**](AuthAPI.md#PostApiV1AuthMfaEmailLink) | **Post** /api/v1/auth/mfa/email-link | MFA lockout escape hatch: email a one-time login link
 [**PostApiV1AuthMfaRecover**](AuthAPI.md#PostApiV1AuthMfaRecover) | **Post** /api/v1/auth/mfa/recover | MFA Backup Code Recovery
 [**PostAuthSessions**](AuthAPI.md#PostAuthSessions) | **Post** /auth/sessions | Login to an existing account
 [**PostAuthToken**](AuthAPI.md#PostAuthToken) | **Post** /auth/token | Generate a JWT token for the authenticated user
 [**PostAuthTokenRefresh**](AuthAPI.md#PostAuthTokenRefresh) | **Post** /auth/token/refresh | Refresh access token
 [**PostAuthUsers**](AuthAPI.md#PostAuthUsers) | **Post** /auth/users | Create a new user account
 [**PostAuthVerify**](AuthAPI.md#PostAuthVerify) | **Post** /auth/verify | Verify email address
+[**PutAuthMeLocalEcho**](AuthAPI.md#PutAuthMeLocalEcho) | **Put** /auth/me/local-echo | Update user&#39;s terminal local-echo preference
+[**PutAuthMePassword**](AuthAPI.md#PutAuthMePassword) | **Put** /auth/me/password | Set or change the account password
 [**PutAuthMeUiMode**](AuthAPI.md#PutAuthMeUiMode) | **Put** /auth/me/ui-mode | Update user&#39;s UI mode preference
 
 
@@ -23,7 +28,7 @@ Method | HTTP request | Description
 
 > map[string]bool DeleteAuthSessions(ctx).Execute()
 
-Logout from the current session
+Sign out everywhere
 
 
 
@@ -80,6 +85,70 @@ No authorization required
 [[Back to README]](../README.md)
 
 
+## GetApiV1AuthLoginEmailLink
+
+> GetApiV1AuthLoginEmailLink(ctx).Token(token).Execute()
+
+Complete login via one-time emailed link
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	token := "token_example" // string | Raw login link token
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.AuthAPI.GetApiV1AuthLoginEmailLink(context.Background()).Token(token).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AuthAPI.GetApiV1AuthLoginEmailLink``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetApiV1AuthLoginEmailLinkRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **token** | **string** | Raw login link token | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: text/html
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetAuthMe
 
 > ModelsUser GetAuthMe(ctx).Execute()
@@ -126,6 +195,67 @@ Other parameters are passed through a pointer to a apiGetAuthMeRequest struct vi
 ### Return type
 
 [**ModelsUser**](ModelsUser.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetAuthMeLocalEcho
+
+> map[string]bool GetAuthMeLocalEcho(ctx).Execute()
+
+Get user's terminal local-echo preference
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AuthAPI.GetAuthMeLocalEcho(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AuthAPI.GetAuthMeLocalEcho``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetAuthMeLocalEcho`: map[string]bool
+	fmt.Fprintf(os.Stdout, "Response from `AuthAPI.GetAuthMeLocalEcho`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetAuthMeLocalEchoRequest struct via the builder pattern
+
+
+### Return type
+
+**map[string]bool**
 
 ### Authorization
 
@@ -314,6 +444,72 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**HandlersMFALoginResponse**](HandlersMFALoginResponse.md)
+
+### Authorization
+
+No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostApiV1AuthMfaEmailLink
+
+> map[string]string PostApiV1AuthMfaEmailLink(ctx).Request(request).Execute()
+
+MFA lockout escape hatch: email a one-time login link
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	request := *openapiclient.NewHandlersMFAEmailLinkRequest("MfaToken_example") // HandlersMFAEmailLinkRequest | Pending MFA challenge token
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AuthAPI.PostApiV1AuthMfaEmailLink(context.Background()).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AuthAPI.PostApiV1AuthMfaEmailLink``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostApiV1AuthMfaEmailLink`: map[string]string
+	fmt.Fprintf(os.Stdout, "Response from `AuthAPI.PostApiV1AuthMfaEmailLink`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostApiV1AuthMfaEmailLinkRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **request** | [**HandlersMFAEmailLinkRequest**](HandlersMFAEmailLinkRequest.md) | Pending MFA challenge token | 
+
+### Return type
+
+**map[string]string**
 
 ### Authorization
 
@@ -709,6 +905,138 @@ Name | Type | Description  | Notes
 ### Authorization
 
 No authorization required
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PutAuthMeLocalEcho
+
+> map[string]interface{} PutAuthMeLocalEcho(ctx).Request(request).Execute()
+
+Update user's terminal local-echo preference
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	request := *openapiclient.NewHandlersLocalEchoRequest() // HandlersLocalEchoRequest | Local echo enabled (true or false)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AuthAPI.PutAuthMeLocalEcho(context.Background()).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AuthAPI.PutAuthMeLocalEcho``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PutAuthMeLocalEcho`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `AuthAPI.PutAuthMeLocalEcho`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPutAuthMeLocalEchoRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **request** | [**HandlersLocalEchoRequest**](HandlersLocalEchoRequest.md) | Local echo enabled (true or false) | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PutAuthMePassword
+
+> HandlersUpdatePasswordResponse PutAuthMePassword(ctx).Request(request).Execute()
+
+Set or change the account password
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	request := *openapiclient.NewHandlersUpdatePasswordRequest("NewPassword_example") // HandlersUpdatePasswordRequest | Password payload
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AuthAPI.PutAuthMePassword(context.Background()).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AuthAPI.PutAuthMePassword``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PutAuthMePassword`: HandlersUpdatePasswordResponse
+	fmt.Fprintf(os.Stdout, "Response from `AuthAPI.PutAuthMePassword`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPutAuthMePasswordRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **request** | [**HandlersUpdatePasswordRequest**](HandlersUpdatePasswordRequest.md) | Password payload | 
+
+### Return type
+
+[**HandlersUpdatePasswordResponse**](HandlersUpdatePasswordResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
 
 ### HTTP request headers
 

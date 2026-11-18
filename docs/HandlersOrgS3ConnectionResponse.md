@@ -4,6 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Account** | Pointer to **string** | Issue #3576 — azblob fields (empty for the S3-family providers). | [optional] 
+**Container** | Pointer to **string** |  | [optional] 
 **CreatedAt** | Pointer to **string** |  | [optional] 
 **Credentials** | Pointer to **map[string]string** | Credentials is ALWAYS a masked view. The list path does not even decrypt (AC5); the create/edit paths return this same minimal placeholder. | [optional] 
 **DefaultBucket** | Pointer to **map[string]interface{}** |  | [optional] 
@@ -11,8 +13,10 @@ Name | Type | Description | Notes
 **HasVaultCredentials** | Pointer to **bool** | HasVaultCredentials tells the FE whether a \&quot;rotate\&quot; affordance applies (104.4). It does NOT leak the secret. | [optional] 
 **Id** | Pointer to **int32** |  | [optional] 
 **LastUsedAt** | Pointer to **map[string]interface{}** |  | [optional] 
+**LinkedCredentialId** | Pointer to **int32** | LinkedCredentialID is set on link-mode rows of every provider (issue #3874; azblob since #3576): the connection authenticates through that org cloud credential and stores no vault credentials of its own, so a key rotation does not apply to it. | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Provider** | Pointer to **string** |  | [optional] 
+**Region** | Pointer to **string** | Region is the S3-family region (issue #3874); empty for azblob rows. | [optional] 
 **UpdatedAt** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -33,6 +37,56 @@ will change when the set of required properties is changed
 NewHandlersOrgS3ConnectionResponseWithDefaults instantiates a new HandlersOrgS3ConnectionResponse object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetAccount
+
+`func (o *HandlersOrgS3ConnectionResponse) GetAccount() string`
+
+GetAccount returns the Account field if non-nil, zero value otherwise.
+
+### GetAccountOk
+
+`func (o *HandlersOrgS3ConnectionResponse) GetAccountOk() (*string, bool)`
+
+GetAccountOk returns a tuple with the Account field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAccount
+
+`func (o *HandlersOrgS3ConnectionResponse) SetAccount(v string)`
+
+SetAccount sets Account field to given value.
+
+### HasAccount
+
+`func (o *HandlersOrgS3ConnectionResponse) HasAccount() bool`
+
+HasAccount returns a boolean if a field has been set.
+
+### GetContainer
+
+`func (o *HandlersOrgS3ConnectionResponse) GetContainer() string`
+
+GetContainer returns the Container field if non-nil, zero value otherwise.
+
+### GetContainerOk
+
+`func (o *HandlersOrgS3ConnectionResponse) GetContainerOk() (*string, bool)`
+
+GetContainerOk returns a tuple with the Container field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetContainer
+
+`func (o *HandlersOrgS3ConnectionResponse) SetContainer(v string)`
+
+SetContainer sets Container field to given value.
+
+### HasContainer
+
+`func (o *HandlersOrgS3ConnectionResponse) HasContainer() bool`
+
+HasContainer returns a boolean if a field has been set.
 
 ### GetCreatedAt
 
@@ -209,6 +263,31 @@ SetLastUsedAt sets LastUsedAt field to given value.
 
 HasLastUsedAt returns a boolean if a field has been set.
 
+### GetLinkedCredentialId
+
+`func (o *HandlersOrgS3ConnectionResponse) GetLinkedCredentialId() int32`
+
+GetLinkedCredentialId returns the LinkedCredentialId field if non-nil, zero value otherwise.
+
+### GetLinkedCredentialIdOk
+
+`func (o *HandlersOrgS3ConnectionResponse) GetLinkedCredentialIdOk() (*int32, bool)`
+
+GetLinkedCredentialIdOk returns a tuple with the LinkedCredentialId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLinkedCredentialId
+
+`func (o *HandlersOrgS3ConnectionResponse) SetLinkedCredentialId(v int32)`
+
+SetLinkedCredentialId sets LinkedCredentialId field to given value.
+
+### HasLinkedCredentialId
+
+`func (o *HandlersOrgS3ConnectionResponse) HasLinkedCredentialId() bool`
+
+HasLinkedCredentialId returns a boolean if a field has been set.
+
 ### GetName
 
 `func (o *HandlersOrgS3ConnectionResponse) GetName() string`
@@ -258,6 +337,31 @@ SetProvider sets Provider field to given value.
 `func (o *HandlersOrgS3ConnectionResponse) HasProvider() bool`
 
 HasProvider returns a boolean if a field has been set.
+
+### GetRegion
+
+`func (o *HandlersOrgS3ConnectionResponse) GetRegion() string`
+
+GetRegion returns the Region field if non-nil, zero value otherwise.
+
+### GetRegionOk
+
+`func (o *HandlersOrgS3ConnectionResponse) GetRegionOk() (*string, bool)`
+
+GetRegionOk returns a tuple with the Region field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRegion
+
+`func (o *HandlersOrgS3ConnectionResponse) SetRegion(v string)`
+
+SetRegion sets Region field to given value.
+
+### HasRegion
+
+`func (o *HandlersOrgS3ConnectionResponse) HasRegion() bool`
+
+HasRegion returns a boolean if a field has been set.
 
 ### GetUpdatedAt
 

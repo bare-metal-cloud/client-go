@@ -22,10 +22,13 @@ var _ MappedNullable = &HandlersCreateClusterRequestData{}
 
 // HandlersCreateClusterRequestData struct for HandlersCreateClusterRequestData
 type HandlersCreateClusterRequestData struct {
+	// Addons is the wizard Add-ons step's checkbox set (epic app-platform story 3.4): the optional extras ticked at formation, from the CLOSED set models.ClusterAddons (monitoring, public_entry, databases, log_book). The omitted/empty field records none. An unknown key is a 400 caller error; the set is normalized again pre-row in the service and persisted as the clusters.addons JSON array. Installation honesty: only 'monitoring' has a real install path today (the formation-completion hook provisions the in-cluster monitoring stack); the other three keys persist as declared-but-not-yet-installing — the surfaces list them, nothing fake-installs them.
+	Addons []string `json:"addons,omitempty"`
 	// AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint 4): accept pre-existing, RUNNING, same-version k3s on the members instead of installing. Without it, a member with running k3s is 409 existing_k3s_running. The server verifies EVERY member via the contamination preflight before honoring it (verified adoption records cluster.adopted=true; an unverified opt-in is not honored).
 	AdoptExisting *bool `json:"adopt_existing,omitempty"`
 	// AgentDeployMethod selects how the k8s-agent is deployed inside the cluster after provisioning: \"kubectl\" (default, applies manifest via client-go) or \"helm\" (installs via Helm SDK from the chart repo).
 	AgentDeployMethod *string `json:"agent_deploy_method,omitempty"`
+	Backup *HandlersCreateClusterRequestDataBackup `json:"backup,omitempty"`
 	// FailurePolicy is the E5-7 LOCKED failure policy for multi-master creates (story 125.3): \"system_managed\" (per-master retries to the deadline, then the quorum-preconditioned auto-return ladder) or \"user_managed\" (hold + action_required on first failure, zero autonomous actions). Locked for the operation; persisted with the operation record (job payload + the D6 hold) — never a cluster column. Multi-master only; single-master ignores it.
 	FailurePolicy *string `json:"failure_policy,omitempty"`
 	// High availability mode (cloud providers)
@@ -65,6 +68,38 @@ func NewHandlersCreateClusterRequestData(stack string, version string) *Handlers
 func NewHandlersCreateClusterRequestDataWithDefaults() *HandlersCreateClusterRequestData {
 	this := HandlersCreateClusterRequestData{}
 	return &this
+}
+
+// GetAddons returns the Addons field value if set, zero value otherwise.
+func (o *HandlersCreateClusterRequestData) GetAddons() []string {
+	if o == nil || IsNil(o.Addons) {
+		var ret []string
+		return ret
+	}
+	return o.Addons
+}
+
+// GetAddonsOk returns a tuple with the Addons field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateClusterRequestData) GetAddonsOk() ([]string, bool) {
+	if o == nil || IsNil(o.Addons) {
+		return nil, false
+	}
+	return o.Addons, true
+}
+
+// HasAddons returns a boolean if a field has been set.
+func (o *HandlersCreateClusterRequestData) HasAddons() bool {
+	if o != nil && !IsNil(o.Addons) {
+		return true
+	}
+
+	return false
+}
+
+// SetAddons gets a reference to the given []string and assigns it to the Addons field.
+func (o *HandlersCreateClusterRequestData) SetAddons(v []string) {
+	o.Addons = v
 }
 
 // GetAdoptExisting returns the AdoptExisting field value if set, zero value otherwise.
@@ -129,6 +164,38 @@ func (o *HandlersCreateClusterRequestData) HasAgentDeployMethod() bool {
 // SetAgentDeployMethod gets a reference to the given string and assigns it to the AgentDeployMethod field.
 func (o *HandlersCreateClusterRequestData) SetAgentDeployMethod(v string) {
 	o.AgentDeployMethod = &v
+}
+
+// GetBackup returns the Backup field value if set, zero value otherwise.
+func (o *HandlersCreateClusterRequestData) GetBackup() HandlersCreateClusterRequestDataBackup {
+	if o == nil || IsNil(o.Backup) {
+		var ret HandlersCreateClusterRequestDataBackup
+		return ret
+	}
+	return *o.Backup
+}
+
+// GetBackupOk returns a tuple with the Backup field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateClusterRequestData) GetBackupOk() (*HandlersCreateClusterRequestDataBackup, bool) {
+	if o == nil || IsNil(o.Backup) {
+		return nil, false
+	}
+	return o.Backup, true
+}
+
+// HasBackup returns a boolean if a field has been set.
+func (o *HandlersCreateClusterRequestData) HasBackup() bool {
+	if o != nil && !IsNil(o.Backup) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackup gets a reference to the given HandlersCreateClusterRequestDataBackup and assigns it to the Backup field.
+func (o *HandlersCreateClusterRequestData) SetBackup(v HandlersCreateClusterRequestDataBackup) {
+	o.Backup = &v
 }
 
 // GetFailurePolicy returns the FailurePolicy field value if set, zero value otherwise.
@@ -445,11 +512,17 @@ func (o HandlersCreateClusterRequestData) MarshalJSON() ([]byte, error) {
 
 func (o HandlersCreateClusterRequestData) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Addons) {
+		toSerialize["addons"] = o.Addons
+	}
 	if !IsNil(o.AdoptExisting) {
 		toSerialize["adopt_existing"] = o.AdoptExisting
 	}
 	if !IsNil(o.AgentDeployMethod) {
 		toSerialize["agent_deploy_method"] = o.AgentDeployMethod
+	}
+	if !IsNil(o.Backup) {
+		toSerialize["backup"] = o.Backup
 	}
 	if !IsNil(o.FailurePolicy) {
 		toSerialize["failure_policy"] = o.FailurePolicy

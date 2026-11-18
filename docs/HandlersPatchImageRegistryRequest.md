@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **AwsRegion** | Pointer to **string** |  | [optional] 
 **AzureCredentialId** | Pointer to **int32** |  | [optional] 
 **CaCertificate** | Pointer to **string** |  | [optional] 
+**ClientEnvelope** | Pointer to [**HandlersClientEnvelopeDTO**](HandlersClientEnvelopeDTO.md) | ClientEnvelope is the browser-sealed stored copy of the new credentials JSON (issue #4424, B5) — required when the patch rotates userpass/token credentials. The plaintext password still rides the request for the one live check. | [optional] 
 **EcrRegion** | Pointer to **string** |  | [optional] 
 **GcpCredentialId** | Pointer to **int32** |  | [optional] 
 **LoginServer** | Pointer to **string** |  | [optional] 
@@ -159,6 +160,31 @@ SetCaCertificate sets CaCertificate field to given value.
 `func (o *HandlersPatchImageRegistryRequest) HasCaCertificate() bool`
 
 HasCaCertificate returns a boolean if a field has been set.
+
+### GetClientEnvelope
+
+`func (o *HandlersPatchImageRegistryRequest) GetClientEnvelope() HandlersClientEnvelopeDTO`
+
+GetClientEnvelope returns the ClientEnvelope field if non-nil, zero value otherwise.
+
+### GetClientEnvelopeOk
+
+`func (o *HandlersPatchImageRegistryRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool)`
+
+GetClientEnvelopeOk returns a tuple with the ClientEnvelope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClientEnvelope
+
+`func (o *HandlersPatchImageRegistryRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO)`
+
+SetClientEnvelope sets ClientEnvelope field to given value.
+
+### HasClientEnvelope
+
+`func (o *HandlersPatchImageRegistryRequest) HasClientEnvelope() bool`
+
+HasClientEnvelope returns a boolean if a field has been set.
 
 ### GetEcrRegion
 

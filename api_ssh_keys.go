@@ -26,7 +26,7 @@ type SshKeysAPI interface {
 	/*
 	DeleteSshKeysId Delete an SSH key
 
-	Delete an SSH key by ID
+	Delete an SSH key by ID. A key active references still point at refuses with 409; admin/owner can force with ?force=true, which clears the references and the stored versions in one transaction.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id SSH Key ID
@@ -88,6 +88,13 @@ type ApiDeleteSshKeysIdRequest struct {
 	ctx context.Context
 	ApiService SshKeysAPI
 	id string
+	force *bool
+}
+
+// Force the delete past the reference guard (admin/owner only)
+func (r ApiDeleteSshKeysIdRequest) Force(force bool) ApiDeleteSshKeysIdRequest {
+	r.force = &force
+	return r
 }
 
 func (r ApiDeleteSshKeysIdRequest) Execute() (*http.Response, error) {
@@ -97,7 +104,7 @@ func (r ApiDeleteSshKeysIdRequest) Execute() (*http.Response, error) {
 /*
 DeleteSshKeysId Delete an SSH key
 
-Delete an SSH key by ID
+Delete an SSH key by ID. A key active references still point at refuses with 409; admin/owner can force with ?force=true, which clears the references and the stored versions in one transaction.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id SSH Key ID
@@ -131,6 +138,9 @@ func (a *SshKeysAPIService) DeleteSshKeysIdExecute(r ApiDeleteSshKeysIdRequest) 
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.force != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -184,7 +194,29 @@ func (a *SshKeysAPIService) DeleteSshKeysIdExecute(r ApiDeleteSshKeysIdRequest) 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

@@ -6,6 +6,8 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteCloudProviderCredentialsId**](CloudProviderCredentialsAPI.md#DeleteCloudProviderCredentialsId) | **Delete** /cloud-provider-credentials/{id} | Delete cloud provider credentials
 [**GetCloudProviderCredentials**](CloudProviderCredentialsAPI.md#GetCloudProviderCredentials) | **Get** /cloud-provider-credentials | List all cloud provider credentials
+[**GetCloudProviderCredentialsIdBuckets**](CloudProviderCredentialsAPI.md#GetCloudProviderCredentialsIdBuckets) | **Get** /cloud-provider-credentials/{id}/buckets | List the bucket catalog captured for a cloud credential
+[**GetCloudProviderCredentialsIdRegistries**](CloudProviderCredentialsAPI.md#GetCloudProviderCredentialsIdRegistries) | **Get** /cloud-provider-credentials/{id}/registries | List the registry catalog captured for a cloud credential
 [**PostCloudProviderCredentials**](CloudProviderCredentialsAPI.md#PostCloudProviderCredentials) | **Post** /cloud-provider-credentials | Create cloud provider credentials
 [**PostCloudProviderCredentialsIdValidate**](CloudProviderCredentialsAPI.md#PostCloudProviderCredentialsIdValidate) | **Post** /cloud-provider-credentials/{id}/validate | Validate cloud provider credentials
 [**PostCloudProviderCredentialsValidate**](CloudProviderCredentialsAPI.md#PostCloudProviderCredentialsValidate) | **Post** /cloud-provider-credentials/validate | Validate credentials without saving
@@ -15,7 +17,7 @@ Method | HTTP request | Description
 
 ## DeleteCloudProviderCredentialsId
 
-> DeleteCloudProviderCredentialsId(ctx, id).Execute()
+> DeleteCloudProviderCredentialsId(ctx, id).Force(force).Execute()
 
 Delete cloud provider credentials
 
@@ -35,10 +37,11 @@ import (
 
 func main() {
 	id := "id_example" // string | Credential ID
+	force := true // bool | Force the delete past the reference guard (admin/owner only) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.CloudProviderCredentialsAPI.DeleteCloudProviderCredentialsId(context.Background(), id).Execute()
+	r, err := apiClient.CloudProviderCredentialsAPI.DeleteCloudProviderCredentialsId(context.Background(), id).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `CloudProviderCredentialsAPI.DeleteCloudProviderCredentialsId``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -62,6 +65,7 @@ Other parameters are passed through a pointer to a apiDeleteCloudProviderCredent
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force the delete past the reference guard (admin/owner only) | 
 
 ### Return type
 
@@ -127,6 +131,146 @@ Other parameters are passed through a pointer to a apiGetCloudProviderCredential
 ### Return type
 
 [**[]map[string]interface{}**](map.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetCloudProviderCredentialsIdBuckets
+
+> HandlersCredentialBucketCatalogResponse GetCloudProviderCredentialsIdBuckets(ctx, id).Execute()
+
+List the bucket catalog captured for a cloud credential
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | Credential ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdBuckets(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdBuckets``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetCloudProviderCredentialsIdBuckets`: HandlersCredentialBucketCatalogResponse
+	fmt.Fprintf(os.Stdout, "Response from `CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdBuckets`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | Credential ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetCloudProviderCredentialsIdBucketsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**HandlersCredentialBucketCatalogResponse**](HandlersCredentialBucketCatalogResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetCloudProviderCredentialsIdRegistries
+
+> HandlersCredentialRegistryCatalogResponse GetCloudProviderCredentialsIdRegistries(ctx, id).Execute()
+
+List the registry catalog captured for a cloud credential
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | Credential ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdRegistries(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdRegistries``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetCloudProviderCredentialsIdRegistries`: HandlersCredentialRegistryCatalogResponse
+	fmt.Fprintf(os.Stdout, "Response from `CloudProviderCredentialsAPI.GetCloudProviderCredentialsIdRegistries`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | Credential ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetCloudProviderCredentialsIdRegistriesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**HandlersCredentialRegistryCatalogResponse**](HandlersCredentialRegistryCatalogResponse.md)
 
 ### Authorization
 

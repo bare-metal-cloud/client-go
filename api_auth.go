@@ -23,9 +23,9 @@ import (
 type AuthAPI interface {
 
 	/*
-	DeleteAuthSessions Logout from the current session
+	DeleteAuthSessions Sign out everywhere
 
-	Destroy the current session and remove the current device
+	Global revocation: destroy the caller's session, revoke all of the user's refresh tokens, and invalidate every other live session (SEC-ID-01). Also removes the current device from the registry.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiDeleteAuthSessionsRequest
@@ -37,9 +37,22 @@ type AuthAPI interface {
 	DeleteAuthSessionsExecute(r ApiDeleteAuthSessionsRequest) (map[string]bool, *http.Response, error)
 
 	/*
+	GetApiV1AuthLoginEmailLink Complete login via one-time emailed link
+
+	Consumes a single-use email login link (sha256 match, unexpired, unused), mints the full session bypassing TOTP, and redirects to the frontend dashboard. Failures redirect to the login page with error=email_link_invalid.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetApiV1AuthLoginEmailLinkRequest
+	*/
+	GetApiV1AuthLoginEmailLink(ctx context.Context) ApiGetApiV1AuthLoginEmailLinkRequest
+
+	// GetApiV1AuthLoginEmailLinkExecute executes the request
+	GetApiV1AuthLoginEmailLinkExecute(r ApiGetApiV1AuthLoginEmailLinkRequest) (*http.Response, error)
+
+	/*
 	GetAuthMe Get current authenticated user
 
-	Get the currently authenticated user's information
+	Get the currently authenticated user's information. The user object carries has_password (derived from the stored credential, since Password itself is never serialized) so the client can tell a password login from an OAuth-only account.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetAuthMeRequest
@@ -49,6 +62,20 @@ type AuthAPI interface {
 	// GetAuthMeExecute executes the request
 	//  @return ModelsUser
 	GetAuthMeExecute(r ApiGetAuthMeRequest) (*ModelsUser, *http.Response, error)
+
+	/*
+	GetAuthMeLocalEcho Get user's terminal local-echo preference
+
+	Get the current user's terminal local-echo preference (opt-in predictive keystroke echo)
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAuthMeLocalEchoRequest
+	*/
+	GetAuthMeLocalEcho(ctx context.Context) ApiGetAuthMeLocalEchoRequest
+
+	// GetAuthMeLocalEchoExecute executes the request
+	//  @return map[string]bool
+	GetAuthMeLocalEchoExecute(r ApiGetAuthMeLocalEchoRequest) (map[string]bool, *http.Response, error)
 
 	/*
 	GetAuthMeUiMode Get user's UI mode preference
@@ -91,6 +118,20 @@ type AuthAPI interface {
 	// PostApiV1AuthLoginMfaExecute executes the request
 	//  @return HandlersMFALoginResponse
 	PostApiV1AuthLoginMfaExecute(r ApiPostApiV1AuthLoginMfaRequest) (*HandlersMFALoginResponse, *http.Response, error)
+
+	/*
+	PostApiV1AuthMfaEmailLink MFA lockout escape hatch: email a one-time login link
+
+	Verifies the pending MFA challenge token and emails a single-use login link (10-min TTL) to the user's verified account email. The challenge token is NOT consumed. Send budget: max 3 per rate-limit window per user.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPostApiV1AuthMfaEmailLinkRequest
+	*/
+	PostApiV1AuthMfaEmailLink(ctx context.Context) ApiPostApiV1AuthMfaEmailLinkRequest
+
+	// PostApiV1AuthMfaEmailLinkExecute executes the request
+	//  @return map[string]string
+	PostApiV1AuthMfaEmailLinkExecute(r ApiPostApiV1AuthMfaEmailLinkRequest) (map[string]string, *http.Response, error)
 
 	/*
 	PostApiV1AuthMfaRecover MFA Backup Code Recovery
@@ -177,6 +218,34 @@ type AuthAPI interface {
 	PostAuthVerifyExecute(r ApiPostAuthVerifyRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
+	PutAuthMeLocalEcho Update user's terminal local-echo preference
+
+	Update the current user's terminal local-echo preference (opt-in predictive keystroke echo)
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPutAuthMeLocalEchoRequest
+	*/
+	PutAuthMeLocalEcho(ctx context.Context) ApiPutAuthMeLocalEchoRequest
+
+	// PutAuthMeLocalEchoExecute executes the request
+	//  @return map[string]interface{}
+	PutAuthMeLocalEchoExecute(r ApiPutAuthMeLocalEchoRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PutAuthMePassword Set or change the account password
+
+	Set a first password (social-login accounts) or change the existing one. Changing requires current_password. A first-time set for an MFA-enabled user requires totp_code (a TOTP code or a backup code).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiPutAuthMePasswordRequest
+	*/
+	PutAuthMePassword(ctx context.Context) ApiPutAuthMePasswordRequest
+
+	// PutAuthMePasswordExecute executes the request
+	//  @return HandlersUpdatePasswordResponse
+	PutAuthMePasswordExecute(r ApiPutAuthMePasswordRequest) (*HandlersUpdatePasswordResponse, *http.Response, error)
+
+	/*
 	PutAuthMeUiMode Update user's UI mode preference
 
 	Update the current user's interface mode preference
@@ -204,9 +273,9 @@ func (r ApiDeleteAuthSessionsRequest) Execute() (map[string]bool, *http.Response
 }
 
 /*
-DeleteAuthSessions Logout from the current session
+DeleteAuthSessions Sign out everywhere
 
-Destroy the current session and remove the current device
+Global revocation: destroy the caller's session, revoke all of the user's refresh tokens, and invalidate every other live session (SEC-ID-01). Also removes the current device from the registry.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiDeleteAuthSessionsRequest
@@ -293,6 +362,115 @@ func (a *AuthAPIService) DeleteAuthSessionsExecute(r ApiDeleteAuthSessionsReques
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiGetApiV1AuthLoginEmailLinkRequest struct {
+	ctx context.Context
+	ApiService AuthAPI
+	token *string
+}
+
+// Raw login link token
+func (r ApiGetApiV1AuthLoginEmailLinkRequest) Token(token string) ApiGetApiV1AuthLoginEmailLinkRequest {
+	r.token = &token
+	return r
+}
+
+func (r ApiGetApiV1AuthLoginEmailLinkRequest) Execute() (*http.Response, error) {
+	return r.ApiService.GetApiV1AuthLoginEmailLinkExecute(r)
+}
+
+/*
+GetApiV1AuthLoginEmailLink Complete login via one-time emailed link
+
+Consumes a single-use email login link (sha256 match, unexpired, unused), mints the full session bypassing TOTP, and redirects to the frontend dashboard. Failures redirect to the login page with error=email_link_invalid.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetApiV1AuthLoginEmailLinkRequest
+*/
+func (a *AuthAPIService) GetApiV1AuthLoginEmailLink(ctx context.Context) ApiGetApiV1AuthLoginEmailLinkRequest {
+	return ApiGetApiV1AuthLoginEmailLinkRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+func (a *AuthAPIService) GetApiV1AuthLoginEmailLinkExecute(r ApiGetApiV1AuthLoginEmailLinkRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthAPIService.GetApiV1AuthLoginEmailLink")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/auth/login/email-link"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.token == nil {
+		return nil, reportError("token is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"text/html"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 302 {
+			var v string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ApiGetAuthMeRequest struct {
 	ctx context.Context
 	ApiService AuthAPI
@@ -305,7 +483,7 @@ func (r ApiGetAuthMeRequest) Execute() (*ModelsUser, *http.Response, error) {
 /*
 GetAuthMe Get current authenticated user
 
-Get the currently authenticated user's information
+Get the currently authenticated user's information. The user object carries has_password (derived from the stored credential, since Password itself is never serialized) so the client can tell a password login from an OAuth-only account.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGetAuthMeRequest
@@ -390,6 +568,129 @@ func (a *AuthAPIService) GetAuthMeExecute(r ApiGetAuthMeRequest) (*ModelsUser, *
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetAuthMeLocalEchoRequest struct {
+	ctx context.Context
+	ApiService AuthAPI
+}
+
+func (r ApiGetAuthMeLocalEchoRequest) Execute() (map[string]bool, *http.Response, error) {
+	return r.ApiService.GetAuthMeLocalEchoExecute(r)
+}
+
+/*
+GetAuthMeLocalEcho Get user's terminal local-echo preference
+
+Get the current user's terminal local-echo preference (opt-in predictive keystroke echo)
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetAuthMeLocalEchoRequest
+*/
+func (a *AuthAPIService) GetAuthMeLocalEcho(ctx context.Context) ApiGetAuthMeLocalEchoRequest {
+	return ApiGetAuthMeLocalEchoRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]bool
+func (a *AuthAPIService) GetAuthMeLocalEchoExecute(r ApiGetAuthMeLocalEchoRequest) (map[string]bool, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]bool
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthAPIService.GetAuthMeLocalEcho")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/auth/me/local-echo"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -782,6 +1083,171 @@ func (a *AuthAPIService) PostApiV1AuthLoginMfaExecute(r ApiPostApiV1AuthLoginMfa
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiPostApiV1AuthMfaEmailLinkRequest struct {
+	ctx context.Context
+	ApiService AuthAPI
+	request *HandlersMFAEmailLinkRequest
+}
+
+// Pending MFA challenge token
+func (r ApiPostApiV1AuthMfaEmailLinkRequest) Request(request HandlersMFAEmailLinkRequest) ApiPostApiV1AuthMfaEmailLinkRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPostApiV1AuthMfaEmailLinkRequest) Execute() (map[string]string, *http.Response, error) {
+	return r.ApiService.PostApiV1AuthMfaEmailLinkExecute(r)
+}
+
+/*
+PostApiV1AuthMfaEmailLink MFA lockout escape hatch: email a one-time login link
+
+Verifies the pending MFA challenge token and emails a single-use login link (10-min TTL) to the user's verified account email. The challenge token is NOT consumed. Send budget: max 3 per rate-limit window per user.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostApiV1AuthMfaEmailLinkRequest
+*/
+func (a *AuthAPIService) PostApiV1AuthMfaEmailLink(ctx context.Context) ApiPostApiV1AuthMfaEmailLinkRequest {
+	return ApiPostApiV1AuthMfaEmailLinkRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]string
+func (a *AuthAPIService) PostApiV1AuthMfaEmailLinkExecute(r ApiPostApiV1AuthMfaEmailLinkRequest) (map[string]string, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthAPIService.PostApiV1AuthMfaEmailLink")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/auth/mfa/email-link"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 502 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPostApiV1AuthMfaRecoverRequest struct {
 	ctx context.Context
 	ApiService AuthAPI
@@ -1063,6 +1529,17 @@ func (a *AuthAPIService) PostAuthSessionsExecute(r ApiPostAuthSessionsRequest) (
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -1318,6 +1795,17 @@ func (a *AuthAPIService) PostAuthTokenRefreshExecute(r ApiPostAuthTokenRefreshRe
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
 		}
 		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
@@ -1564,6 +2052,331 @@ func (a *AuthAPIService) PostAuthVerifyExecute(r ApiPostAuthVerifyRequest) (map[
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
 			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPutAuthMeLocalEchoRequest struct {
+	ctx context.Context
+	ApiService AuthAPI
+	request *HandlersLocalEchoRequest
+}
+
+// Local echo enabled (true or false)
+func (r ApiPutAuthMeLocalEchoRequest) Request(request HandlersLocalEchoRequest) ApiPutAuthMeLocalEchoRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPutAuthMeLocalEchoRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PutAuthMeLocalEchoExecute(r)
+}
+
+/*
+PutAuthMeLocalEcho Update user's terminal local-echo preference
+
+Update the current user's terminal local-echo preference (opt-in predictive keystroke echo)
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPutAuthMeLocalEchoRequest
+*/
+func (a *AuthAPIService) PutAuthMeLocalEcho(ctx context.Context) ApiPutAuthMeLocalEchoRequest {
+	return ApiPutAuthMeLocalEchoRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *AuthAPIService) PutAuthMeLocalEchoExecute(r ApiPutAuthMeLocalEchoRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthAPIService.PutAuthMeLocalEcho")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/auth/me/local-echo"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPutAuthMePasswordRequest struct {
+	ctx context.Context
+	ApiService AuthAPI
+	request *HandlersUpdatePasswordRequest
+}
+
+// Password payload
+func (r ApiPutAuthMePasswordRequest) Request(request HandlersUpdatePasswordRequest) ApiPutAuthMePasswordRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPutAuthMePasswordRequest) Execute() (*HandlersUpdatePasswordResponse, *http.Response, error) {
+	return r.ApiService.PutAuthMePasswordExecute(r)
+}
+
+/*
+PutAuthMePassword Set or change the account password
+
+Set a first password (social-login accounts) or change the existing one. Changing requires current_password. A first-time set for an MFA-enabled user requires totp_code (a TOTP code or a backup code).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPutAuthMePasswordRequest
+*/
+func (a *AuthAPIService) PutAuthMePassword(ctx context.Context) ApiPutAuthMePasswordRequest {
+	return ApiPutAuthMePasswordRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersUpdatePasswordResponse
+func (a *AuthAPIService) PutAuthMePasswordExecute(r ApiPutAuthMePasswordRequest) (*HandlersUpdatePasswordResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersUpdatePasswordResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "AuthAPIService.PutAuthMePassword")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/auth/me/password"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 429 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()

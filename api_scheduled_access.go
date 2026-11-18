@@ -24,52 +24,59 @@ import (
 type ScheduledAccessAPI interface {
 
 	/*
-	PostApiV1ServiceAccountsSaIdSealSecret Seal a service-account secret for worker consumption
+	PostServiceAccountsSaIdSealSecret Seal a service-account secret for consumption
 
-	Grant + seal-policy gated sealed delivery. Plaintext is never returned.
+	Grant + operation-rental gated sealed delivery (zero-trust A1 S5). A maintainer's browser mints the sa.secret.seal rental for the exact secret row (POST /orgs/{org_id}/vault/rentals, target_ref encrypted_data:<id>) and passes its id in the X-Vault-Rental-ID header; the rental is consumed one-time. Service-account tokens skip the grant/rental gates — the token IS the operation credential. Plaintext is never returned.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param saId Service Account ID
-	@return ApiPostApiV1ServiceAccountsSaIdSealSecretRequest
+	@return ApiPostServiceAccountsSaIdSealSecretRequest
 	*/
-	PostApiV1ServiceAccountsSaIdSealSecret(ctx context.Context, saId int32) ApiPostApiV1ServiceAccountsSaIdSealSecretRequest
+	PostServiceAccountsSaIdSealSecret(ctx context.Context, saId int32) ApiPostServiceAccountsSaIdSealSecretRequest
 
-	// PostApiV1ServiceAccountsSaIdSealSecretExecute executes the request
+	// PostServiceAccountsSaIdSealSecretExecute executes the request
 	//  @return map[string]interface{}
-	PostApiV1ServiceAccountsSaIdSealSecretExecute(r ApiPostApiV1ServiceAccountsSaIdSealSecretRequest) (map[string]interface{}, *http.Response, error)
+	PostServiceAccountsSaIdSealSecretExecute(r ApiPostServiceAccountsSaIdSealSecretRequest) (map[string]interface{}, *http.Response, error)
 }
 
 // ScheduledAccessAPIService ScheduledAccessAPI service
 type ScheduledAccessAPIService service
 
-type ApiPostApiV1ServiceAccountsSaIdSealSecretRequest struct {
+type ApiPostServiceAccountsSaIdSealSecretRequest struct {
 	ctx context.Context
 	ApiService ScheduledAccessAPI
 	saId int32
 	body *HandlersSealSecretRequest
+	xVaultRentalID *string
 }
 
 // Seal request
-func (r ApiPostApiV1ServiceAccountsSaIdSealSecretRequest) Body(body HandlersSealSecretRequest) ApiPostApiV1ServiceAccountsSaIdSealSecretRequest {
+func (r ApiPostServiceAccountsSaIdSealSecretRequest) Body(body HandlersSealSecretRequest) ApiPostServiceAccountsSaIdSealSecretRequest {
 	r.body = &body
 	return r
 }
 
-func (r ApiPostApiV1ServiceAccountsSaIdSealSecretRequest) Execute() (map[string]interface{}, *http.Response, error) {
-	return r.ApiService.PostApiV1ServiceAccountsSaIdSealSecretExecute(r)
+// Rental id (human path; the sa.secret.seal rental for this secret row)
+func (r ApiPostServiceAccountsSaIdSealSecretRequest) XVaultRentalID(xVaultRentalID string) ApiPostServiceAccountsSaIdSealSecretRequest {
+	r.xVaultRentalID = &xVaultRentalID
+	return r
+}
+
+func (r ApiPostServiceAccountsSaIdSealSecretRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostServiceAccountsSaIdSealSecretExecute(r)
 }
 
 /*
-PostApiV1ServiceAccountsSaIdSealSecret Seal a service-account secret for worker consumption
+PostServiceAccountsSaIdSealSecret Seal a service-account secret for consumption
 
-Grant + seal-policy gated sealed delivery. Plaintext is never returned.
+Grant + operation-rental gated sealed delivery (zero-trust A1 S5). A maintainer's browser mints the sa.secret.seal rental for the exact secret row (POST /orgs/{org_id}/vault/rentals, target_ref encrypted_data:<id>) and passes its id in the X-Vault-Rental-ID header; the rental is consumed one-time. Service-account tokens skip the grant/rental gates — the token IS the operation credential. Plaintext is never returned.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param saId Service Account ID
- @return ApiPostApiV1ServiceAccountsSaIdSealSecretRequest
+ @return ApiPostServiceAccountsSaIdSealSecretRequest
 */
-func (a *ScheduledAccessAPIService) PostApiV1ServiceAccountsSaIdSealSecret(ctx context.Context, saId int32) ApiPostApiV1ServiceAccountsSaIdSealSecretRequest {
-	return ApiPostApiV1ServiceAccountsSaIdSealSecretRequest{
+func (a *ScheduledAccessAPIService) PostServiceAccountsSaIdSealSecret(ctx context.Context, saId int32) ApiPostServiceAccountsSaIdSealSecretRequest {
+	return ApiPostServiceAccountsSaIdSealSecretRequest{
 		ApiService: a,
 		ctx: ctx,
 		saId: saId,
@@ -78,7 +85,7 @@ func (a *ScheduledAccessAPIService) PostApiV1ServiceAccountsSaIdSealSecret(ctx c
 
 // Execute executes the request
 //  @return map[string]interface{}
-func (a *ScheduledAccessAPIService) PostApiV1ServiceAccountsSaIdSealSecretExecute(r ApiPostApiV1ServiceAccountsSaIdSealSecretRequest) (map[string]interface{}, *http.Response, error) {
+func (a *ScheduledAccessAPIService) PostServiceAccountsSaIdSealSecretExecute(r ApiPostServiceAccountsSaIdSealSecretRequest) (map[string]interface{}, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -86,12 +93,12 @@ func (a *ScheduledAccessAPIService) PostApiV1ServiceAccountsSaIdSealSecretExecut
 		localVarReturnValue  map[string]interface{}
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScheduledAccessAPIService.PostApiV1ServiceAccountsSaIdSealSecret")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ScheduledAccessAPIService.PostServiceAccountsSaIdSealSecret")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/service-accounts/{sa_id}/seal-secret"
+	localVarPath := localBasePath + "/service-accounts/{sa_id}/seal-secret"
 	localVarPath = strings.Replace(localVarPath, "{"+"sa_id"+"}", url.PathEscape(parameterValueToString(r.saId, "saId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -118,8 +125,39 @@ func (a *ScheduledAccessAPIService) PostApiV1ServiceAccountsSaIdSealSecretExecut
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.xVaultRentalID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Vault-Rental-ID", r.xVaultRentalID, "", "")
+	}
 	// body params
 	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -142,7 +180,40 @@ func (a *ScheduledAccessAPIService) PostApiV1ServiceAccountsSaIdSealSecretExecut
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 410 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

@@ -22,6 +22,8 @@ var _ MappedNullable = &HandlersCreateMultipassHostRequest{}
 
 // HandlersCreateMultipassHostRequest struct for HandlersCreateMultipassHostRequest
 type HandlersCreateMultipassHostRequest struct {
+	// ClientEnvelope is the browser-sealed copy of PrivateSSHKey the server stores (issue #4424, B7); the plaintext is used for the availability probe only and never persisted.
+	ClientEnvelope *HandlersClientEnvelopeDTO `json:"client_envelope,omitempty"`
 	Description *string `json:"description,omitempty"`
 	// Remote connection details (required only if IsLocal is false)
 	IpAddress *string `json:"ip_address,omitempty"`
@@ -52,6 +54,38 @@ func NewHandlersCreateMultipassHostRequest(name string) *HandlersCreateMultipass
 func NewHandlersCreateMultipassHostRequestWithDefaults() *HandlersCreateMultipassHostRequest {
 	this := HandlersCreateMultipassHostRequest{}
 	return &this
+}
+
+// GetClientEnvelope returns the ClientEnvelope field value if set, zero value otherwise.
+func (o *HandlersCreateMultipassHostRequest) GetClientEnvelope() HandlersClientEnvelopeDTO {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		var ret HandlersClientEnvelopeDTO
+		return ret
+	}
+	return *o.ClientEnvelope
+}
+
+// GetClientEnvelopeOk returns a tuple with the ClientEnvelope field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateMultipassHostRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool) {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		return nil, false
+	}
+	return o.ClientEnvelope, true
+}
+
+// HasClientEnvelope returns a boolean if a field has been set.
+func (o *HandlersCreateMultipassHostRequest) HasClientEnvelope() bool {
+	if o != nil && !IsNil(o.ClientEnvelope) {
+		return true
+	}
+
+	return false
+}
+
+// SetClientEnvelope gets a reference to the given HandlersClientEnvelopeDTO and assigns it to the ClientEnvelope field.
+func (o *HandlersCreateMultipassHostRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO) {
+	o.ClientEnvelope = &v
 }
 
 // GetDescription returns the Description field value if set, zero value otherwise.
@@ -312,6 +346,9 @@ func (o HandlersCreateMultipassHostRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersCreateMultipassHostRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.ClientEnvelope) {
+		toSerialize["client_envelope"] = o.ClientEnvelope
+	}
 	if !IsNil(o.Description) {
 		toSerialize["description"] = o.Description
 	}

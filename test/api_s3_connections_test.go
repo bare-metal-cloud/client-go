@@ -50,19 +50,6 @@ func Test_bmc_S3ConnectionsAPIService(t *testing.T) {
 
 	})
 
-	t.Run("Test S3ConnectionsAPIService DeleteS3ConnectionsIdObjects", func(t *testing.T) {
-
-		t.Skip("skip test")  // remove to run test
-
-		var id int32
-
-		httpRes, err := apiClient.S3ConnectionsAPI.DeleteS3ConnectionsIdObjects(context.Background(), id).Execute()
-
-		require.Nil(t, err)
-		assert.Equal(t, 200, httpRes.StatusCode)
-
-	})
-
 	t.Run("Test S3ConnectionsAPIService GetS3Connections", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test

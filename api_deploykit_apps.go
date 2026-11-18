@@ -24,6 +24,175 @@ import (
 type DeploykitAppsAPI interface {
 
 	/*
+	DeleteClustersIdAppsInstall Tear down an app install (the engine's keep-data uninstall)
+
+	Enqueues the apps:uninstall task whose worker leg compiles the engine's teardown plan from the STORED record (stored plans validate on teardown — story 131.8) and starts the engine's uninstall workflow. An already-terminal install answers the named no-op; a busy install refuses with the named 409; a missing install is the 404 class. The keep-data policy is the route's contract — the purge arm needs a fresh, user-audited confirm token a bare DELETE cannot mint.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiDeleteClustersIdAppsInstallRequest
+	*/
+	DeleteClustersIdAppsInstall(ctx context.Context, id string, install string) ApiDeleteClustersIdAppsInstallRequest
+
+	// DeleteClustersIdAppsInstallExecute executes the request
+	//  @return map[string]interface{}
+	DeleteClustersIdAppsInstallExecute(r ApiDeleteClustersIdAppsInstallRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	DeleteClustersIdAppsInstallComponentsComponent Remove one component from a stack install (keep-data by default)
+
+	Removes one declared component from a live stack. The default is the KEEP-DATA removal: volumes, archives, and the record survive — the record lands uninstalled and a later re-add re-adopts the data. Retain Data off (retain_data=false) rides the purge chain instead, which requires the fresh confirm token a bare DELETE can never mint: the first request answers the purge dialog (409) and only the confirmed re-request dispatches. Retain Backup off (retain_backup=false, default on) additionally purges the final archive and destinations after verification. A component a remaining member still wires to refuses with the named dangling_consumer code — there is no force verb; the cure is removing the dependents first, the provider last. The parent stack does not flip to error: a successful removal leaves the remaining set healthy.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Stack install name
+	@param component Component name (as the capture declares it)
+	@return ApiDeleteClustersIdAppsInstallComponentsComponentRequest
+	*/
+	DeleteClustersIdAppsInstallComponentsComponent(ctx context.Context, id string, install string, component string) ApiDeleteClustersIdAppsInstallComponentsComponentRequest
+
+	// DeleteClustersIdAppsInstallComponentsComponentExecute executes the request
+	//  @return map[string]interface{}
+	DeleteClustersIdAppsInstallComponentsComponentExecute(r ApiDeleteClustersIdAppsInstallComponentsComponentRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetClustersIdApps List a cluster's app installs (the engine records)
+
+	Every install record in the caller's project scope on this
+cluster, in install-name order. Each entry carries the
+record's current state verbatim (the frozen v1 vocabulary)
+and the terminal-failure cause class where one exists; the
+per-install events window is the status route's to serve.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@return ApiGetClustersIdAppsRequest
+	*/
+	GetClustersIdApps(ctx context.Context, id string) ApiGetClustersIdAppsRequest
+
+	// GetClustersIdAppsExecute executes the request
+	//  @return []HandlersDeploykitInstallSummary
+	GetClustersIdAppsExecute(r ApiGetClustersIdAppsRequest) ([]HandlersDeploykitInstallSummary, *http.Response, error)
+
+	/*
+	GetClustersIdAppsDestinations List the org's viable backup destinations for app installs
+
+	The caller's org's vault-guarded S3 connections (plus the project's own) as the install wizard's destination picker serves them: one row per destination ref in the engine's grammar ("<connectionId>" or "<connectionId>/<defaultBucket>") with the display fields. The same list the resolve + install endpoints ground facts.Destinations from — the client's own facts list never decides the set.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@return ApiGetClustersIdAppsDestinationsRequest
+	*/
+	GetClustersIdAppsDestinations(ctx context.Context, id string) ApiGetClustersIdAppsDestinationsRequest
+
+	// GetClustersIdAppsDestinationsExecute executes the request
+	//  @return []HandlersInstallDestinationEntry
+	GetClustersIdAppsDestinationsExecute(r ApiGetClustersIdAppsDestinationsRequest) ([]HandlersInstallDestinationEntry, *http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallBlueprintDrift Check a blueprint stack's upstream drift (the standing hint)
+
+	At most once per stack per TTL (6h default) this spends
+the shared provider budget, re-resolves the pinned ref
+(repository-gone vs ref-moved as distinct named states),
+and re-HEADs each image service's tag against its
+baseline digest. Quota exhaustion or provider failure
+renders NO hint (degraded). Plan-drift rows are the
+vm-agent detect-only task's — absent without a connected
+machine. Never blocks the view, never auto-updates.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallBlueprintDriftRequest
+	*/
+	GetClustersIdAppsInstallBlueprintDrift(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallBlueprintDriftRequest
+
+	// GetClustersIdAppsInstallBlueprintDriftExecute executes the request
+	//  @return HandlersBlueprintDriftResponse
+	GetClustersIdAppsInstallBlueprintDriftExecute(r ApiGetClustersIdAppsInstallBlueprintDriftRequest) (*HandlersBlueprintDriftResponse, *http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallBlueprintUpdate Review a blueprint stack's update (the compiled-artifact diff)
+
+	Re-resolves the ORIGINALLY SELECTED source, recompiles
+through the current compiler, and renders the
+COMPILED-ARTIFACT diff (image digests, field set,
+resources, component set) with the upstream
+commit-compare link as context. The apply path's named
+refusals surface beside the diff; for a stack, a lawful
+component set change renders the shared transition
+review's delta (added/removed components, wiring edges,
+data fate, wave plan) instead of a refusal — the same
+review the confirmed apply runs, so the panel previews
+exactly what executes. Refusals name stable codes beside
+the diff: stack_mixed_set_change for a rename or mixed
+set change, dangling_consumer for a stranded consumer,
+stack_conflict for a wedged stack or an added name
+colliding with a live outside install, plus the
+per-component families (backup_gate_unverified and
+friends). A stack transition in flight defers the delta
+preview (preview_note) — the diff stays informational
+until it lands. The definition record's
+source lifecycle rides the payload; an orphaned source
+renders its named state with the reconnect-review path.
+Applying runs through the existing upgrade route on the
+owner's confirm — never automatically.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallBlueprintUpdateRequest
+	*/
+	GetClustersIdAppsInstallBlueprintUpdate(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallBlueprintUpdateRequest
+
+	// GetClustersIdAppsInstallBlueprintUpdateExecute executes the request
+	//  @return HandlersBlueprintUpdateResponse
+	GetClustersIdAppsInstallBlueprintUpdateExecute(r ApiGetClustersIdAppsInstallBlueprintUpdateRequest) (*HandlersBlueprintUpdateResponse, *http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallCliRedisWs Open the redis service CLI terminal
+
+	Resolves the install's running redis pod and starts an
+interactive redis-cli in it, authenticated with the pod's
+own password (never on the command line). Maintainer role
+or above; session and commands are audited; the session
+closes on disconnect or idle timeout.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallCliRedisWsRequest
+	*/
+	GetClustersIdAppsInstallCliRedisWs(ctx context.Context, id int32, install string) ApiGetClustersIdAppsInstallCliRedisWsRequest
+
+	// GetClustersIdAppsInstallCliRedisWsExecute executes the request
+	GetClustersIdAppsInstallCliRedisWsExecute(r ApiGetClustersIdAppsInstallCliRedisWsRequest) (*http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallDurability Get an install's durability read model
+
+	The install's (or, through the components section, a
+stack's per-component) durability facts: streaks (last
+backup age, next run), the recorded backup points with
+per-point drill truth (VERIFIED requires a passing recent
+exercise — the decay law badges a stamp beyond 2x the
+schedule interval as DECAYED), the run ledger (pass/fail
+rows with dates), and the computed badge state. Read-only.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallDurabilityRequest
+	*/
+	GetClustersIdAppsInstallDurability(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallDurabilityRequest
+
+	// GetClustersIdAppsInstallDurabilityExecute executes the request
+	//  @return HandlersDurabilitySection
+	GetClustersIdAppsInstallDurabilityExecute(r ApiGetClustersIdAppsInstallDurabilityRequest) (*HandlersDurabilitySection, *http.Response, error)
+
+	/*
 	GetClustersIdAppsInstallForm Render the deploy form (FormSpec) for an install's bundle
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -35,6 +204,114 @@ type DeploykitAppsAPI interface {
 
 	// GetClustersIdAppsInstallFormExecute executes the request
 	GetClustersIdAppsInstallFormExecute(r ApiGetClustersIdAppsInstallFormRequest) (*http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallInspect Inspect an install's declared insight collectors live
+
+	Runs the bundle's declared rich collectors read-only
+against the install (the engine's Inspect: record →
+current revision → pinned bundle → manifest) and serves
+the mapped panels: the floors' served facts plus one panel
+per collector, every state honest (ok / empty / degraded /
+unavailable, each degrade carrying its reason). Read-only:
+nothing is persisted and no install state changes. A
+collector that cannot run never fails the read — its panel
+renders the honest state instead.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallInspectRequest
+	*/
+	GetClustersIdAppsInstallInspect(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallInspectRequest
+
+	// GetClustersIdAppsInstallInspectExecute executes the request
+	//  @return EdgeinsightsInsightPanelBundle
+	GetClustersIdAppsInstallInspectExecute(r ApiGetClustersIdAppsInstallInspectRequest) (*EdgeinsightsInsightPanelBundle, *http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallPromoteTargets List the org's eligible promotion targets
+
+	The promotion picker's surface (story 143.6): the ACTIVE
+gitops enablements in the org whose install passes the 143.2
+eligibility classifier (wrapper-based, stateless,
+single-component, running), excluding the source install —
+scoped to the targets the caller MAINTAINS (the promote
+route's own target rule; an org-wide inventory would leak
+installs the caller can never promote into).
+Session tier (the promote ACTION is maintainer-gated; this
+listing is the read beside it).
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID (the source install's)
+	@param install Source install name
+	@return ApiGetClustersIdAppsInstallPromoteTargetsRequest
+	*/
+	GetClustersIdAppsInstallPromoteTargets(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallPromoteTargetsRequest
+
+	// GetClustersIdAppsInstallPromoteTargetsExecute executes the request
+	//  @return map[string]interface{}
+	GetClustersIdAppsInstallPromoteTargetsExecute(r ApiGetClustersIdAppsInstallPromoteTargetsRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallStatus Get one install's record status and progress events
+
+	The record's current state verbatim (the frozen v1 status
+vocabulary), the install's progress events (paginated,
+newest-last), and the named cause where one exists — a
+backoff names its reason, a terminal failure names its
+cause class. Read-only: the route never mutates the record.
+With ?job_id= (issue #3355), an install whose record never
+seeded serves the archived dispatch task's error as a
+status "error" payload with the named failed cause —
+instead of the lie of absence — when that task archived.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallStatusRequest
+	*/
+	GetClustersIdAppsInstallStatus(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallStatusRequest
+
+	// GetClustersIdAppsInstallStatusExecute executes the request
+	//  @return HandlersDeploykitInstallStatusResponse
+	GetClustersIdAppsInstallStatusExecute(r ApiGetClustersIdAppsInstallStatusRequest) (*HandlersDeploykitInstallStatusResponse, *http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallUpgradePark Get an install's active upgrade park
+
+	Returns the install's active parked upgrade (issue #2709): the plain-language migration summary, the proposed-vs-current volume delta, the transition review's verdicts, the plan fingerprint, and the target provenance. 404 when no upgrade is parked.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallUpgradeParkRequest
+	*/
+	GetClustersIdAppsInstallUpgradePark(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallUpgradeParkRequest
+
+	// GetClustersIdAppsInstallUpgradeParkExecute executes the request
+	//  @return HandlersUpgradeParkView
+	GetClustersIdAppsInstallUpgradeParkExecute(r ApiGetClustersIdAppsInstallUpgradeParkRequest) (*HandlersUpgradeParkView, *http.Response, error)
+
+	/*
+	GetClustersIdAppsInstallVerifyDb Verify an install component's database answers
+
+	Read-only proof: one SELECT 1 exec'd inside the component's pod
+through the agent tunnel (the engine probe's transport).
+Returns the psql outcome (stdout/stderr/exit code), the pod
+that answered, and the latency. Non-zero exit is a result —
+the database's own refusal — not a failed request.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiGetClustersIdAppsInstallVerifyDbRequest
+	*/
+	GetClustersIdAppsInstallVerifyDb(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallVerifyDbRequest
+
+	// GetClustersIdAppsInstallVerifyDbExecute executes the request
+	//  @return EngineportsVerifyResult
+	GetClustersIdAppsInstallVerifyDbExecute(r ApiGetClustersIdAppsInstallVerifyDbRequest) (*EngineportsVerifyResult, *http.Response, error)
 
 	/*
 	GetClustersIdAppsVersions List the catalog versions of one bundle this engine can run
@@ -49,6 +326,68 @@ type DeploykitAppsAPI interface {
 	GetClustersIdAppsVersionsExecute(r ApiGetClustersIdAppsVersionsRequest) (*http.Response, error)
 
 	/*
+	PostClustersIdAppsInstall Start an app install on a cluster (the resolved form payload)
+
+	Re-resolves the form payload server-side (a client-supplied plan or manifest is never trusted), refuses a live install with the same name by name (409), and enqueues the apps:install task whose worker leg prepares through the enginebridge (record seed, frozen-planner compile, secret escrow) and starts the engine's deploy workflow. The 202 body's provisioning status is the intent this route accepted: the install record itself is seeded when the dispatch lands on a worker. The durability destination (issue #4177) is grounded and enforced HERE: facts.Destinations is the org's vault-guarded S3 connections (the client's list never decides the set), and a stateful bundle installing with durability on and no destination refuses with the structured 409 backup_destination_required (the escape is an explicit durability.mode=off). The imported-cluster consent gate (story 133.3) stays in force: the workflow's gateway ensure consults the cluster's recorded ingress consent — this route adds no bypass.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiPostClustersIdAppsInstallRequest
+	*/
+	PostClustersIdAppsInstall(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallRequest
+
+	// PostClustersIdAppsInstallExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallExecute(r ApiPostClustersIdAppsInstallRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallBlueprintDriftDismiss Dismiss a blueprint stack's drift hint instance
+
+	Persists the per-stack dismissal keyed by the upstream
+SHA range the served hint carried. The SAME upstream
+state stays dismissed; a NEW upstream change (new SHA
+range) re-arms a fresh hint.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest
+	*/
+	PostClustersIdAppsInstallBlueprintDriftDismiss(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest
+
+	// PostClustersIdAppsInstallBlueprintDriftDismissExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallBlueprintDriftDismissExecute(r ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallPromote Promote an install's current CI digest to another install
+
+	The multi-env promotion affordance (story 143.6): dispatches the SAME
+digest-swap upgrade path (the apps:upgrade task) on the TARGET install,
+pinned to the SOURCE install's current revision's recorded CI digest —
+resolved from the record, never the request. Session tier, maintainer
+role; gitops deploy tokens refuse by name (the scope law). The target
+must be an eligible, gitops-enabled install (the 143.2 classifier); a
+cross-registry promotion refuses with named guidance; the source digest
+is verified against the TARGET's declared registry (the tri-state
+precheck); a same-digest target answers the honest no-op; the SOURCE
+build's run id orders the dispatch (the run-ID CAS). The target's new
+revision carries the source build's provenance with the promotion
+lineage in DeployedBy; the audit trail names the full linkage.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID (the source install's)
+	@param install Source install name
+	@return ApiPostClustersIdAppsInstallPromoteRequest
+	*/
+	PostClustersIdAppsInstallPromote(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallPromoteRequest
+
+	// PostClustersIdAppsInstallPromoteExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallPromoteExecute(r ApiPostClustersIdAppsInstallPromoteRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
 	PostClustersIdAppsInstallResolve Resolve the form against user input and platform context facts
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -60,16 +399,1325 @@ type DeploykitAppsAPI interface {
 
 	// PostClustersIdAppsInstallResolveExecute executes the request
 	PostClustersIdAppsInstallResolveExecute(r ApiPostClustersIdAppsInstallResolveRequest) (*http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallRestore Restore an install from a recorded backup point
+
+	Drives the engine's restore verb (story 150.1): the point's
+archive handle is pinned against the verified-backup ledger
+(the digest comes from the ledger row, never the request),
+a busy install refuses with the named 409, and the first
+POST answers the confirm dialog (409) with the point's age
+and verification facts plus the environment's backup policy.
+The dispatch happens only on the confirmed re-post. Target
+is in_place (default) or parallel (a named sibling install
+whose record already exists). A stack component refuses —
+the stack lane governs the component order.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiPostClustersIdAppsInstallRestoreRequest
+	*/
+	PostClustersIdAppsInstallRestore(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallRestoreRequest
+
+	// PostClustersIdAppsInstallRestoreExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallRestoreExecute(r ApiPostClustersIdAppsInstallRestoreRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallRollback Re-pin an install to a previous revision's CI build digest
+
+	The rollback re-pin affordance (story 143.3): dispatches the SAME
+digest-swap upgrade path (the apps:upgrade task) pinned to the named
+revision's recorded image digest. Session tier, maintainer role. The
+source digest is verified against the declared registry first (the
+tri-state precheck): a digest the user's registry compacted refuses
+with the named honest boundary — unfixable platform-side. A busy
+install refuses with the retryable busy. The new revision carries the
+manual subject (BuildInfo nil); the audit trail names the source
+revision and digest.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiPostClustersIdAppsInstallRollbackRequest
+	*/
+	PostClustersIdAppsInstallRollback(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallRollbackRequest
+
+	// PostClustersIdAppsInstallRollbackExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallRollbackExecute(r ApiPostClustersIdAppsInstallRollbackRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallSlotsSlotRotate Rotate one managed slot's credential (the slot and every component of the stack re-apply)
+
+	Replaces the managed slot's password and re-applies the slot AND every component of the owning stack (the set-equal roll re-plans all kept members, not only the binding consumers): the slot re-applies with a fresh password (keep-data uninstall, then adopt-in-place — the fresh value materializes into the slot's Secret), then every kept component re-plans through the stack upgrade lane and its re-compile renders the fresh composed credential (the rotation persists what the lane's delta escrow skips). Destructive-action family: the first POST (no confirm) answers the dialog; the confirmed re-POST enqueues the apps:slot-rotate task. v1 is per-slot — one credential per managed install, shared by that stack's consumers; per-consumer user templates stay out of scope. Manage-rights tier (maintainer, the destructive-verb convention). 404 when the stack declares no such slot; 409 when the slot is not ready or the confirm is missing.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Stack install name
+	@param slot The slot's service name (the managed_slots key)
+	@return ApiPostClustersIdAppsInstallSlotsSlotRotateRequest
+	*/
+	PostClustersIdAppsInstallSlotsSlotRotate(ctx context.Context, id string, install string, slot string) ApiPostClustersIdAppsInstallSlotsSlotRotateRequest
+
+	// PostClustersIdAppsInstallSlotsSlotRotateExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallSlotsSlotRotateExecute(r ApiPostClustersIdAppsInstallSlotsSlotRotateRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallUpgrade Upgrade an app install to a target catalog version
+
+	Drives the transition machinery (ADR-090 D8): the target is resolved through the capability-filtered versions listing, a busy install refuses with the named 409 (the in-flight guard), and the component-set / data-format laws refuse with named guidance (422). A migrating upgrade answers the first POST with the confirm dialog (409) and dispatches only on the confirmed re-post. The backup policy is resolved backend-side per environment and is never a request field. Progress rides the existing status route.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiPostClustersIdAppsInstallUpgradeRequest
+	*/
+	PostClustersIdAppsInstallUpgrade(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallUpgradeRequest
+
+	// PostClustersIdAppsInstallUpgradeExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallUpgradeExecute(r ApiPostClustersIdAppsInstallUpgradeRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallUpgradeParkConfirm Confirm (grant) an install's parked upgrade
+
+	The panel grant (issue #2709 §2.5): binds to the park_id (and plan_fingerprint) the panel rendered, dispatches the PARKED plan's exact bytes with a fresh confirm token — never a re-compile from the live repo — and flips the park dispatched (the worker's outcome hop advances it applied when the plan runs). The flip is conditional on the row still being parked: a newer push landing first answers 409 park-no-longer-active. Manage-rights tier (maintainer, the destructive-panel-verb convention). 404 when no such park; 409 when the park moved or the fingerprint mismatches; 409 when the parked bytes left the org namespace.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest
+	*/
+	PostClustersIdAppsInstallUpgradeParkConfirm(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest
+
+	// PostClustersIdAppsInstallUpgradeParkConfirmExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallUpgradeParkConfirmExecute(r ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostClustersIdAppsInstallUpgradeParkWithdraw Withdraw an install's parked upgrade
+
+	The panel withdraw (issue #2709 D3): binds to the park_id the panel rendered and clears THAT park without running the upgrade — the app keeps running the current image, and a later push re-reviews. The flip is conditional on the row still being parked: a superseding push or another session answering first answers 409 park-no-longer-active. Manage-rights tier (maintainer, the destructive-panel-verb convention). 404 when no such park; 400 without the park_id.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Cluster ID
+	@param install Install name
+	@return ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest
+	*/
+	PostClustersIdAppsInstallUpgradeParkWithdraw(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest
+
+	// PostClustersIdAppsInstallUpgradeParkWithdrawExecute executes the request
+	//  @return map[string]interface{}
+	PostClustersIdAppsInstallUpgradeParkWithdrawExecute(r ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest) (map[string]interface{}, *http.Response, error)
 }
 
 // DeploykitAppsAPIService DeploykitAppsAPI service
 type DeploykitAppsAPIService service
+
+type ApiDeleteClustersIdAppsInstallRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+}
+
+func (r ApiDeleteClustersIdAppsInstallRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.DeleteClustersIdAppsInstallExecute(r)
+}
+
+/*
+DeleteClustersIdAppsInstall Tear down an app install (the engine's keep-data uninstall)
+
+Enqueues the apps:uninstall task whose worker leg compiles the engine's teardown plan from the STORED record (stored plans validate on teardown — story 131.8) and starts the engine's uninstall workflow. An already-terminal install answers the named no-op; a busy install refuses with the named 409; a missing install is the 404 class. The keep-data policy is the route's contract — the purge arm needs a fresh, user-audited confirm token a bare DELETE cannot mint.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiDeleteClustersIdAppsInstallRequest
+*/
+func (a *DeploykitAppsAPIService) DeleteClustersIdAppsInstall(ctx context.Context, id string, install string) ApiDeleteClustersIdAppsInstallRequest {
+	return ApiDeleteClustersIdAppsInstallRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) DeleteClustersIdAppsInstallExecute(r ApiDeleteClustersIdAppsInstallRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.DeleteClustersIdAppsInstall")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteClustersIdAppsInstallComponentsComponentRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	component string
+	body *HandlersAppsStackRemoveRequest
+}
+
+// Data-fate toggles (both default to retain) and, for a purge, the fresh confirm
+func (r ApiDeleteClustersIdAppsInstallComponentsComponentRequest) Body(body HandlersAppsStackRemoveRequest) ApiDeleteClustersIdAppsInstallComponentsComponentRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiDeleteClustersIdAppsInstallComponentsComponentRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.DeleteClustersIdAppsInstallComponentsComponentExecute(r)
+}
+
+/*
+DeleteClustersIdAppsInstallComponentsComponent Remove one component from a stack install (keep-data by default)
+
+Removes one declared component from a live stack. The default is the KEEP-DATA removal: volumes, archives, and the record survive — the record lands uninstalled and a later re-add re-adopts the data. Retain Data off (retain_data=false) rides the purge chain instead, which requires the fresh confirm token a bare DELETE can never mint: the first request answers the purge dialog (409) and only the confirmed re-request dispatches. Retain Backup off (retain_backup=false, default on) additionally purges the final archive and destinations after verification. A component a remaining member still wires to refuses with the named dangling_consumer code — there is no force verb; the cure is removing the dependents first, the provider last. The parent stack does not flip to error: a successful removal leaves the remaining set healthy.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Stack install name
+ @param component Component name (as the capture declares it)
+ @return ApiDeleteClustersIdAppsInstallComponentsComponentRequest
+*/
+func (a *DeploykitAppsAPIService) DeleteClustersIdAppsInstallComponentsComponent(ctx context.Context, id string, install string, component string) ApiDeleteClustersIdAppsInstallComponentsComponentRequest {
+	return ApiDeleteClustersIdAppsInstallComponentsComponentRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+		component: component,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) DeleteClustersIdAppsInstallComponentsComponentExecute(r ApiDeleteClustersIdAppsInstallComponentsComponentRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.DeleteClustersIdAppsInstallComponentsComponent")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/components/{component}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"component"+"}", url.PathEscape(parameterValueToString(r.component, "component")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+}
+
+func (r ApiGetClustersIdAppsRequest) Execute() ([]HandlersDeploykitInstallSummary, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsExecute(r)
+}
+
+/*
+GetClustersIdApps List a cluster's app installs (the engine records)
+
+Every install record in the caller's project scope on this
+cluster, in install-name order. Each entry carries the
+record's current state verbatim (the frozen v1 vocabulary)
+and the terminal-failure cause class where one exists; the
+per-install events window is the status route's to serve.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @return ApiGetClustersIdAppsRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdApps(ctx context.Context, id string) ApiGetClustersIdAppsRequest {
+	return ApiGetClustersIdAppsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return []HandlersDeploykitInstallSummary
+func (a *DeploykitAppsAPIService) GetClustersIdAppsExecute(r ApiGetClustersIdAppsRequest) ([]HandlersDeploykitInstallSummary, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []HandlersDeploykitInstallSummary
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdApps")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsDestinationsRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+}
+
+func (r ApiGetClustersIdAppsDestinationsRequest) Execute() ([]HandlersInstallDestinationEntry, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsDestinationsExecute(r)
+}
+
+/*
+GetClustersIdAppsDestinations List the org's viable backup destinations for app installs
+
+The caller's org's vault-guarded S3 connections (plus the project's own) as the install wizard's destination picker serves them: one row per destination ref in the engine's grammar ("<connectionId>" or "<connectionId>/<defaultBucket>") with the display fields. The same list the resolve + install endpoints ground facts.Destinations from — the client's own facts list never decides the set.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @return ApiGetClustersIdAppsDestinationsRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsDestinations(ctx context.Context, id string) ApiGetClustersIdAppsDestinationsRequest {
+	return ApiGetClustersIdAppsDestinationsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return []HandlersInstallDestinationEntry
+func (a *DeploykitAppsAPIService) GetClustersIdAppsDestinationsExecute(r ApiGetClustersIdAppsDestinationsRequest) ([]HandlersInstallDestinationEntry, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  []HandlersInstallDestinationEntry
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsDestinations")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/destinations"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallBlueprintDriftRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+}
+
+func (r ApiGetClustersIdAppsInstallBlueprintDriftRequest) Execute() (*HandlersBlueprintDriftResponse, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallBlueprintDriftExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallBlueprintDrift Check a blueprint stack's upstream drift (the standing hint)
+
+At most once per stack per TTL (6h default) this spends
+the shared provider budget, re-resolves the pinned ref
+(repository-gone vs ref-moved as distinct named states),
+and re-HEADs each image service's tag against its
+baseline digest. Quota exhaustion or provider failure
+renders NO hint (degraded). Plan-drift rows are the
+vm-agent detect-only task's — absent without a connected
+machine. Never blocks the view, never auto-updates.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallBlueprintDriftRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallBlueprintDrift(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallBlueprintDriftRequest {
+	return ApiGetClustersIdAppsInstallBlueprintDriftRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersBlueprintDriftResponse
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallBlueprintDriftExecute(r ApiGetClustersIdAppsInstallBlueprintDriftRequest) (*HandlersBlueprintDriftResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersBlueprintDriftResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallBlueprintDrift")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/blueprint/drift"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallBlueprintUpdateRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+}
+
+func (r ApiGetClustersIdAppsInstallBlueprintUpdateRequest) Execute() (*HandlersBlueprintUpdateResponse, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallBlueprintUpdateExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallBlueprintUpdate Review a blueprint stack's update (the compiled-artifact diff)
+
+Re-resolves the ORIGINALLY SELECTED source, recompiles
+through the current compiler, and renders the
+COMPILED-ARTIFACT diff (image digests, field set,
+resources, component set) with the upstream
+commit-compare link as context. The apply path's named
+refusals surface beside the diff; for a stack, a lawful
+component set change renders the shared transition
+review's delta (added/removed components, wiring edges,
+data fate, wave plan) instead of a refusal — the same
+review the confirmed apply runs, so the panel previews
+exactly what executes. Refusals name stable codes beside
+the diff: stack_mixed_set_change for a rename or mixed
+set change, dangling_consumer for a stranded consumer,
+stack_conflict for a wedged stack or an added name
+colliding with a live outside install, plus the
+per-component families (backup_gate_unverified and
+friends). A stack transition in flight defers the delta
+preview (preview_note) — the diff stays informational
+until it lands. The definition record's
+source lifecycle rides the payload; an orphaned source
+renders its named state with the reconnect-review path.
+Applying runs through the existing upgrade route on the
+owner's confirm — never automatically.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallBlueprintUpdateRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallBlueprintUpdate(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallBlueprintUpdateRequest {
+	return ApiGetClustersIdAppsInstallBlueprintUpdateRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersBlueprintUpdateResponse
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallBlueprintUpdateExecute(r ApiGetClustersIdAppsInstallBlueprintUpdateRequest) (*HandlersBlueprintUpdateResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersBlueprintUpdateResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallBlueprintUpdate")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/blueprint/update"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallCliRedisWsRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id int32
+	install string
+}
+
+func (r ApiGetClustersIdAppsInstallCliRedisWsRequest) Execute() (*http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallCliRedisWsExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallCliRedisWs Open the redis service CLI terminal
+
+Resolves the install's running redis pod and starts an
+interactive redis-cli in it, authenticated with the pod's
+own password (never on the command line). Maintainer role
+or above; session and commands are audited; the session
+closes on disconnect or idle timeout.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallCliRedisWsRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallCliRedisWs(ctx context.Context, id int32, install string) ApiGetClustersIdAppsInstallCliRedisWsRequest {
+	return ApiGetClustersIdAppsInstallCliRedisWsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallCliRedisWsExecute(r ApiGetClustersIdAppsInstallCliRedisWsRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallCliRedisWs")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/cli/redis/ws"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"*/*"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallDurabilityRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	limit *int32
+}
+
+// Maximum run-ledger rows served (1-200, default 50)
+func (r ApiGetClustersIdAppsInstallDurabilityRequest) Limit(limit int32) ApiGetClustersIdAppsInstallDurabilityRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetClustersIdAppsInstallDurabilityRequest) Execute() (*HandlersDurabilitySection, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallDurabilityExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallDurability Get an install's durability read model
+
+The install's (or, through the components section, a
+stack's per-component) durability facts: streaks (last
+backup age, next run), the recorded backup points with
+per-point drill truth (VERIFIED requires a passing recent
+exercise — the decay law badges a stamp beyond 2x the
+schedule interval as DECAYED), the run ledger (pass/fail
+rows with dates), and the computed badge state. Read-only.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallDurabilityRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallDurability(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallDurabilityRequest {
+	return ApiGetClustersIdAppsInstallDurabilityRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersDurabilitySection
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallDurabilityExecute(r ApiGetClustersIdAppsInstallDurabilityRequest) (*HandlersDurabilitySection, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersDurabilitySection
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallDurability")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/durability"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiGetClustersIdAppsInstallFormRequest struct {
 	ctx context.Context
 	ApiService DeploykitAppsAPI
 	id string
 	install string
+	bundle *string
+	version *string
+	digest *string
+}
+
+// Bundle name — the pre-create branch: render the form for this catalog bundle before any install record exists (the panel wizard); omit to render the install record&#39;s deployed bundle
+func (r ApiGetClustersIdAppsInstallFormRequest) Bundle(bundle string) ApiGetClustersIdAppsInstallFormRequest {
+	r.bundle = &bundle
+	return r
+}
+
+// Bundle version (with bundle)
+func (r ApiGetClustersIdAppsInstallFormRequest) Version(version string) ApiGetClustersIdAppsInstallFormRequest {
+	r.version = &version
+	return r
+}
+
+// Pinned bundle digest (with bundle and version)
+func (r ApiGetClustersIdAppsInstallFormRequest) Digest(digest string) ApiGetClustersIdAppsInstallFormRequest {
+	r.digest = &digest
+	return r
 }
 
 func (r ApiGetClustersIdAppsInstallFormRequest) Execute() (*http.Response, error) {
@@ -114,6 +1762,15 @@ func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallFormExecute(r ApiGetCl
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.bundle != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "bundle", r.bundle, "", "")
+	}
+	if r.version != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "version", r.version, "", "")
+	}
+	if r.digest != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "digest", r.digest, "", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -171,6 +1828,797 @@ func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallFormExecute(r ApiGetCl
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallInspectRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+}
+
+func (r ApiGetClustersIdAppsInstallInspectRequest) Execute() (*EdgeinsightsInsightPanelBundle, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallInspectExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallInspect Inspect an install's declared insight collectors live
+
+Runs the bundle's declared rich collectors read-only
+against the install (the engine's Inspect: record →
+current revision → pinned bundle → manifest) and serves
+the mapped panels: the floors' served facts plus one panel
+per collector, every state honest (ok / empty / degraded /
+unavailable, each degrade carrying its reason). Read-only:
+nothing is persisted and no install state changes. A
+collector that cannot run never fails the read — its panel
+renders the honest state instead.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallInspectRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallInspect(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallInspectRequest {
+	return ApiGetClustersIdAppsInstallInspectRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return EdgeinsightsInsightPanelBundle
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallInspectExecute(r ApiGetClustersIdAppsInstallInspectRequest) (*EdgeinsightsInsightPanelBundle, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *EdgeinsightsInsightPanelBundle
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallInspect")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/inspect"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 502 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallPromoteTargetsRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+}
+
+func (r ApiGetClustersIdAppsInstallPromoteTargetsRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallPromoteTargetsExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallPromoteTargets List the org's eligible promotion targets
+
+The promotion picker's surface (story 143.6): the ACTIVE
+gitops enablements in the org whose install passes the 143.2
+eligibility classifier (wrapper-based, stateless,
+single-component, running), excluding the source install —
+scoped to the targets the caller MAINTAINS (the promote
+route's own target rule; an org-wide inventory would leak
+installs the caller can never promote into).
+Session tier (the promote ACTION is maintainer-gated; this
+listing is the read beside it).
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID (the source install's)
+ @param install Source install name
+ @return ApiGetClustersIdAppsInstallPromoteTargetsRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallPromoteTargets(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallPromoteTargetsRequest {
+	return ApiGetClustersIdAppsInstallPromoteTargetsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallPromoteTargetsExecute(r ApiGetClustersIdAppsInstallPromoteTargetsRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallPromoteTargets")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/promote/targets"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallStatusRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	jobId *string
+	limit *int32
+}
+
+// The dispatch&#39;s job id (the 202&#39;s job_id): surfaces the archived task&#39;s error when no record exists
+func (r ApiGetClustersIdAppsInstallStatusRequest) JobId(jobId string) ApiGetClustersIdAppsInstallStatusRequest {
+	r.jobId = &jobId
+	return r
+}
+
+// Maximum progress events served (1-500, default 100); the newest events are kept
+func (r ApiGetClustersIdAppsInstallStatusRequest) Limit(limit int32) ApiGetClustersIdAppsInstallStatusRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetClustersIdAppsInstallStatusRequest) Execute() (*HandlersDeploykitInstallStatusResponse, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallStatusExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallStatus Get one install's record status and progress events
+
+The record's current state verbatim (the frozen v1 status
+vocabulary), the install's progress events (paginated,
+newest-last), and the named cause where one exists — a
+backoff names its reason, a terminal failure names its
+cause class. Read-only: the route never mutates the record.
+With ?job_id= (issue #3355), an install whose record never
+seeded serves the archived dispatch task's error as a
+status "error" payload with the named failed cause —
+instead of the lie of absence — when that task archived.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallStatusRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallStatus(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallStatusRequest {
+	return ApiGetClustersIdAppsInstallStatusRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersDeploykitInstallStatusResponse
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallStatusExecute(r ApiGetClustersIdAppsInstallStatusRequest) (*HandlersDeploykitInstallStatusResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersDeploykitInstallStatusResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallStatus")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/status"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.jobId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "job_id", r.jobId, "", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallUpgradeParkRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+}
+
+func (r ApiGetClustersIdAppsInstallUpgradeParkRequest) Execute() (*HandlersUpgradeParkView, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallUpgradeParkExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallUpgradePark Get an install's active upgrade park
+
+Returns the install's active parked upgrade (issue #2709): the plain-language migration summary, the proposed-vs-current volume delta, the transition review's verdicts, the plan fingerprint, and the target provenance. 404 when no upgrade is parked.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallUpgradeParkRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallUpgradePark(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallUpgradeParkRequest {
+	return ApiGetClustersIdAppsInstallUpgradeParkRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersUpgradeParkView
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallUpgradeParkExecute(r ApiGetClustersIdAppsInstallUpgradeParkRequest) (*HandlersUpgradeParkView, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersUpgradeParkView
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallUpgradePark")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/upgrade/park"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetClustersIdAppsInstallVerifyDbRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	component *string
+}
+
+// Component name (the bundle&#39;s stateful component)
+func (r ApiGetClustersIdAppsInstallVerifyDbRequest) Component(component string) ApiGetClustersIdAppsInstallVerifyDbRequest {
+	r.component = &component
+	return r
+}
+
+func (r ApiGetClustersIdAppsInstallVerifyDbRequest) Execute() (*EngineportsVerifyResult, *http.Response, error) {
+	return r.ApiService.GetClustersIdAppsInstallVerifyDbExecute(r)
+}
+
+/*
+GetClustersIdAppsInstallVerifyDb Verify an install component's database answers
+
+Read-only proof: one SELECT 1 exec'd inside the component's pod
+through the agent tunnel (the engine probe's transport).
+Returns the psql outcome (stdout/stderr/exit code), the pod
+that answered, and the latency. Non-zero exit is a result —
+the database's own refusal — not a failed request.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiGetClustersIdAppsInstallVerifyDbRequest
+*/
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallVerifyDb(ctx context.Context, id string, install string) ApiGetClustersIdAppsInstallVerifyDbRequest {
+	return ApiGetClustersIdAppsInstallVerifyDbRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return EngineportsVerifyResult
+func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallVerifyDbExecute(r ApiGetClustersIdAppsInstallVerifyDbRequest) (*EngineportsVerifyResult, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *EngineportsVerifyResult
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.GetClustersIdAppsInstallVerifyDb")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/verify-db"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.component == nil {
+		return localVarReturnValue, nil, reportError("component is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "component", r.component, "", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 502 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiGetClustersIdAppsVersionsRequest struct {
@@ -286,6 +2734,505 @@ func (a *DeploykitAppsAPIService) GetClustersIdAppsVersionsExecute(r ApiGetClust
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersDeploykitResolveRequest
+}
+
+// Resolved form payload (bundle ref, target, input, facts)
+func (r ApiPostClustersIdAppsInstallRequest) Body(body HandlersDeploykitResolveRequest) ApiPostClustersIdAppsInstallRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallExecute(r)
+}
+
+/*
+PostClustersIdAppsInstall Start an app install on a cluster (the resolved form payload)
+
+Re-resolves the form payload server-side (a client-supplied plan or manifest is never trusted), refuses a live install with the same name by name (409), and enqueues the apps:install task whose worker leg prepares through the enginebridge (record seed, frozen-planner compile, secret escrow) and starts the engine's deploy workflow. The 202 body's provisioning status is the intent this route accepted: the install record itself is seeded when the dispatch lands on a worker. The durability destination (issue #4177) is grounded and enforced HERE: facts.Destinations is the org's vault-guarded S3 connections (the client's list never decides the set), and a stateful bundle installing with durability on and no destination refuses with the structured 409 backup_destination_required (the escape is an explicit durability.mode=off). The imported-cluster consent gate (story 133.3) stays in force: the workflow's gateway ensure consults the cluster's recorded ingress consent — this route adds no bypass.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiPostClustersIdAppsInstallRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstall(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallRequest {
+	return ApiPostClustersIdAppsInstallRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallExecute(r ApiPostClustersIdAppsInstallRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstall")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersBlueprintDismissRequest
+}
+
+// The dismissed instance&#39;s key
+func (r ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest) Body(body HandlersBlueprintDismissRequest) ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallBlueprintDriftDismissExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallBlueprintDriftDismiss Dismiss a blueprint stack's drift hint instance
+
+Persists the per-stack dismissal keyed by the upstream
+SHA range the served hint carried. The SAME upstream
+state stays dismissed; a NEW upstream change (new SHA
+range) re-arms a fresh hint.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallBlueprintDriftDismiss(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest {
+	return ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallBlueprintDriftDismissExecute(r ApiPostClustersIdAppsInstallBlueprintDriftDismissRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallBlueprintDriftDismiss")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/blueprint/drift/dismiss"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallPromoteRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersAppsPromoteRequest
+}
+
+// The target install and cluster
+func (r ApiPostClustersIdAppsInstallPromoteRequest) Body(body HandlersAppsPromoteRequest) ApiPostClustersIdAppsInstallPromoteRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallPromoteRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallPromoteExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallPromote Promote an install's current CI digest to another install
+
+The multi-env promotion affordance (story 143.6): dispatches the SAME
+digest-swap upgrade path (the apps:upgrade task) on the TARGET install,
+pinned to the SOURCE install's current revision's recorded CI digest —
+resolved from the record, never the request. Session tier, maintainer
+role; gitops deploy tokens refuse by name (the scope law). The target
+must be an eligible, gitops-enabled install (the 143.2 classifier); a
+cross-registry promotion refuses with named guidance; the source digest
+is verified against the TARGET's declared registry (the tri-state
+precheck); a same-digest target answers the honest no-op; the SOURCE
+build's run id orders the dispatch (the run-ID CAS). The target's new
+revision carries the source build's provenance with the promotion
+lineage in DeployedBy; the audit trail names the full linkage.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID (the source install's)
+ @param install Source install name
+ @return ApiPostClustersIdAppsInstallPromoteRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallPromote(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallPromoteRequest {
+	return ApiPostClustersIdAppsInstallPromoteRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallPromoteExecute(r ApiPostClustersIdAppsInstallPromoteRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallPromote")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/promote"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiPostClustersIdAppsInstallResolveRequest struct {
@@ -406,4 +3353,1089 @@ func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallResolveExecute(r ApiP
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallRestoreRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersAppsRestoreRequest
+}
+
+// The point&#39;s archive handle, the target mode, and (on the confirmed re-post) the fresh confirm
+func (r ApiPostClustersIdAppsInstallRestoreRequest) Body(body HandlersAppsRestoreRequest) ApiPostClustersIdAppsInstallRestoreRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallRestoreRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallRestoreExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallRestore Restore an install from a recorded backup point
+
+Drives the engine's restore verb (story 150.1): the point's
+archive handle is pinned against the verified-backup ledger
+(the digest comes from the ledger row, never the request),
+a busy install refuses with the named 409, and the first
+POST answers the confirm dialog (409) with the point's age
+and verification facts plus the environment's backup policy.
+The dispatch happens only on the confirmed re-post. Target
+is in_place (default) or parallel (a named sibling install
+whose record already exists). A stack component refuses —
+the stack lane governs the component order.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiPostClustersIdAppsInstallRestoreRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallRestore(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallRestoreRequest {
+	return ApiPostClustersIdAppsInstallRestoreRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallRestoreExecute(r ApiPostClustersIdAppsInstallRestoreRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallRestore")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/restore"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallRollbackRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersAppsRollbackRequest
+}
+
+// The revision number to re-pin to
+func (r ApiPostClustersIdAppsInstallRollbackRequest) Body(body HandlersAppsRollbackRequest) ApiPostClustersIdAppsInstallRollbackRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallRollbackRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallRollbackExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallRollback Re-pin an install to a previous revision's CI build digest
+
+The rollback re-pin affordance (story 143.3): dispatches the SAME
+digest-swap upgrade path (the apps:upgrade task) pinned to the named
+revision's recorded image digest. Session tier, maintainer role. The
+source digest is verified against the declared registry first (the
+tri-state precheck): a digest the user's registry compacted refuses
+with the named honest boundary — unfixable platform-side. A busy
+install refuses with the retryable busy. The new revision carries the
+manual subject (BuildInfo nil); the audit trail names the source
+revision and digest.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiPostClustersIdAppsInstallRollbackRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallRollback(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallRollbackRequest {
+	return ApiPostClustersIdAppsInstallRollbackRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallRollbackExecute(r ApiPostClustersIdAppsInstallRollbackRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallRollback")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/rollback"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallSlotsSlotRotateRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	slot string
+	body *HandlersAppsSlotRotateRequest
+}
+
+// The fresh confirm (omit for the dialog)
+func (r ApiPostClustersIdAppsInstallSlotsSlotRotateRequest) Body(body HandlersAppsSlotRotateRequest) ApiPostClustersIdAppsInstallSlotsSlotRotateRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallSlotsSlotRotateRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallSlotsSlotRotateExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallSlotsSlotRotate Rotate one managed slot's credential (the slot and every component of the stack re-apply)
+
+Replaces the managed slot's password and re-applies the slot AND every component of the owning stack (the set-equal roll re-plans all kept members, not only the binding consumers): the slot re-applies with a fresh password (keep-data uninstall, then adopt-in-place — the fresh value materializes into the slot's Secret), then every kept component re-plans through the stack upgrade lane and its re-compile renders the fresh composed credential (the rotation persists what the lane's delta escrow skips). Destructive-action family: the first POST (no confirm) answers the dialog; the confirmed re-POST enqueues the apps:slot-rotate task. v1 is per-slot — one credential per managed install, shared by that stack's consumers; per-consumer user templates stay out of scope. Manage-rights tier (maintainer, the destructive-verb convention). 404 when the stack declares no such slot; 409 when the slot is not ready or the confirm is missing.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Stack install name
+ @param slot The slot's service name (the managed_slots key)
+ @return ApiPostClustersIdAppsInstallSlotsSlotRotateRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallSlotsSlotRotate(ctx context.Context, id string, install string, slot string) ApiPostClustersIdAppsInstallSlotsSlotRotateRequest {
+	return ApiPostClustersIdAppsInstallSlotsSlotRotateRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+		slot: slot,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallSlotsSlotRotateExecute(r ApiPostClustersIdAppsInstallSlotsSlotRotateRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallSlotsSlotRotate")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/slots/{slot}/rotate"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"slot"+"}", url.PathEscape(parameterValueToString(r.slot, "slot")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallUpgradeRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersAppsUpgradeRequest
+}
+
+// Target version (and, for a migrating upgrade, the fresh confirm)
+func (r ApiPostClustersIdAppsInstallUpgradeRequest) Body(body HandlersAppsUpgradeRequest) ApiPostClustersIdAppsInstallUpgradeRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallUpgradeRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallUpgradeExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallUpgrade Upgrade an app install to a target catalog version
+
+Drives the transition machinery (ADR-090 D8): the target is resolved through the capability-filtered versions listing, a busy install refuses with the named 409 (the in-flight guard), and the component-set / data-format laws refuse with named guidance (422). A migrating upgrade answers the first POST with the confirm dialog (409) and dispatches only on the confirmed re-post. The backup policy is resolved backend-side per environment and is never a request field. Progress rides the existing status route.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiPostClustersIdAppsInstallUpgradeRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallUpgrade(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallUpgradeRequest {
+	return ApiPostClustersIdAppsInstallUpgradeRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallUpgradeExecute(r ApiPostClustersIdAppsInstallUpgradeRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallUpgrade")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/upgrade"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersParkActionRequest
+}
+
+// The park_id (and plan_fingerprint) the panel rendered
+func (r ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest) Body(body HandlersParkActionRequest) ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallUpgradeParkConfirmExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallUpgradeParkConfirm Confirm (grant) an install's parked upgrade
+
+The panel grant (issue #2709 §2.5): binds to the park_id (and plan_fingerprint) the panel rendered, dispatches the PARKED plan's exact bytes with a fresh confirm token — never a re-compile from the live repo — and flips the park dispatched (the worker's outcome hop advances it applied when the plan runs). The flip is conditional on the row still being parked: a newer push landing first answers 409 park-no-longer-active. Manage-rights tier (maintainer, the destructive-panel-verb convention). 404 when no such park; 409 when the park moved or the fingerprint mismatches; 409 when the parked bytes left the org namespace.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallUpgradeParkConfirm(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest {
+	return ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallUpgradeParkConfirmExecute(r ApiPostClustersIdAppsInstallUpgradeParkConfirmRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallUpgradeParkConfirm")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/upgrade/park/confirm"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest struct {
+	ctx context.Context
+	ApiService DeploykitAppsAPI
+	id string
+	install string
+	body *HandlersParkActionRequest
+}
+
+// The park_id the panel rendered
+func (r ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest) Body(body HandlersParkActionRequest) ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostClustersIdAppsInstallUpgradeParkWithdrawExecute(r)
+}
+
+/*
+PostClustersIdAppsInstallUpgradeParkWithdraw Withdraw an install's parked upgrade
+
+The panel withdraw (issue #2709 D3): binds to the park_id the panel rendered and clears THAT park without running the upgrade — the app keeps running the current image, and a later push re-reviews. The flip is conditional on the row still being parked: a superseding push or another session answering first answers 409 park-no-longer-active. Manage-rights tier (maintainer, the destructive-panel-verb convention). 404 when no such park; 400 without the park_id.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Cluster ID
+ @param install Install name
+ @return ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest
+*/
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallUpgradeParkWithdraw(ctx context.Context, id string, install string) ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest {
+	return ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		install: install,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DeploykitAppsAPIService) PostClustersIdAppsInstallUpgradeParkWithdrawExecute(r ApiPostClustersIdAppsInstallUpgradeParkWithdrawRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DeploykitAppsAPIService.PostClustersIdAppsInstallUpgradeParkWithdraw")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/clusters/{id}/apps/{install}/upgrade/park/withdraw"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"install"+"}", url.PathEscape(parameterValueToString(r.install, "install")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }

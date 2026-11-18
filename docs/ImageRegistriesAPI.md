@@ -21,7 +21,7 @@ Method | HTTP request | Description
 
 ## DeleteImageRegistriesId
 
-> DeleteImageRegistriesId(ctx, id).Execute()
+> DeleteImageRegistriesId(ctx, id).Force(force).Execute()
 
 Delete an image registry
 
@@ -41,10 +41,11 @@ import (
 
 func main() {
 	id := "id_example" // string | Registry ID
+	force := true // bool | Force the delete past the reference guard (admin/owner only) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ImageRegistriesAPI.DeleteImageRegistriesId(context.Background(), id).Execute()
+	r, err := apiClient.ImageRegistriesAPI.DeleteImageRegistriesId(context.Background(), id).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ImageRegistriesAPI.DeleteImageRegistriesId``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -68,6 +69,7 @@ Other parameters are passed through a pointer to a apiDeleteImageRegistriesIdReq
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **force** | **bool** | Force the delete past the reference guard (admin/owner only) | 
 
 ### Return type
 
@@ -754,7 +756,7 @@ import (
 )
 
 func main() {
-	request := *openapiclient.NewHandlersCreateImageRegistryRequest("Name_example", "Type_example", "Url_example") // HandlersCreateImageRegistryRequest | Registry details
+	request := *openapiclient.NewHandlersCreateImageRegistryRequest("Name_example", "Type_example") // HandlersCreateImageRegistryRequest | Registry details
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -787,7 +789,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth), [EncryptionKeyAuth](../README.md#EncryptionKeyAuth)
+[CookieAuth](../README.md#CookieAuth)
 
 ### HTTP request headers
 

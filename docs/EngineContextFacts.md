@@ -4,14 +4,20 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ActivityBudget** | Pointer to [**EngineActivityBudgetFact**](EngineActivityBudgetFact.md) | ActivityBudget is the restore-activity budget pair (the dk64 ledger, R7 — the member&#39;s schema is Story A&#39;s, its production and transport the backend plumbing&#39;s): Budget is the workflow activity budget the gate&#39;s budgeted phases price against, ApplyAllowance is the backend&#39;s apply-time allowance for the unbudgeted seconds-scale phases. EITHER figure absent, unparseable, negative, or zero refuses at compile (a negative allowance under-counts the gate&#39;s budget sum). Nil on facts collected before dk64 Story A; omitempty keeps pre-dk64 facts byte-identical. | [optional] 
 **Arch** | Pointer to **string** | Arch is the node architecture: amd64 | arm64. | [optional] 
+**Arrivals** | Pointer to [**[]EngineArrivalFact**](EngineArrivalFact.md) | Arrivals are the cluster&#39;s installed ingress arrival addons (epic 154, §4.2 — the additive growth after Gateway, following the ClaimedHosts/Datastore precedent): one entry per arrival addon instance, naming the arrival kind, its instance id, the address traffic arrives at (the full tunnel CNAME for cloudflare; a provider-native endpoint for the other shapes), and its health. The Gateway field above stays THE PLATFORM ENTRY — arrival-aware consumers (the plan-time binding resolution, the WAF gate, the backend&#39;s appurls classifier) read both, never one instead of the other. A route bound to an arrival this list does not show installed AND healthy refuses at plan (ErrArrivalNotHealthy — intent vs facts). omitempty keeps pre-154 facts byte-identical. | [optional] 
 **ClaimedHosts** | Pointer to [**[]EngineHostClaim**](EngineHostClaim.md) | ClaimedHosts are the route hostnames other installs on this cluster already claim — the fact the hostname-uniqueness preflight (EDGE.md §4 rule 1) checks route hosts against; a collision refuses naming the conflicting install. The HOST keeps this registry authoritative (record on provision, release on uninstall); omitempty keeps legacy facts byte-identical. | [optional] 
+**ClassCapacities** | Pointer to [**[]EngineClassCapacity**](EngineClassCapacity.md) | ClassCapacities are the per-class free-capacity facts the platform&#39;s node agents assembled (the dk64 ledger, R12 — free-space facts: &#x60;df&#x60; plus thin-pool free via lvs/vgs): per-node classes carry one free figure per eligible node, network-backed classes one system figure. Capacity facts reach the restore compile through this member; ClassCapacity.Validate enforces the R12 shape at every consume point — a malformed or missing fact refuses by name, never a vacuous minimum. omitempty keeps pre-dk64 facts byte-identical. | [optional] 
 **ClusterSize** | Pointer to **int32** | ClusterSize is the node count. | [optional] 
 **DataDiskFs** | Pointer to [**EngineDataDiskFS**](EngineDataDiskFS.md) | DataDiskFS is the host data-disk filesystem (the frozen DataDiskFS vocabulary). Continuous FILE sync requires a CoW snapshot layer — on plain ext4 the resolve-time check refuses it (STORAGE.md §3). | [optional] 
+**Datastore** | Pointer to [**EngineDatastoreFact**](EngineDatastoreFact.md) | Datastore is the cluster&#39;s k3s datastore fact (story 132.5, STORAGE.md §10.3 addition 3 — cluster facts as plan inputs): the datastore kind (sqlite | etcd), the server members, and the normalized server flag set. The etcd-conversion plan refuses without it (the planner never plans on hope) and its quorum + flag-match preflights read it. Nil on every cluster that has not recorded the fact yet; omitempty keeps pre-132.5 facts byte-identical. | [optional] 
 **Destinations** | Pointer to **[]string** | Destinations are the backup destinations the platform&#39;s destination registry offers as viable for this install (user&#39;s buckets, probed reachable). A durability.destination outside this set is refused at resolve (ErrCapabilityUnavailable). | [optional] 
 **Domains** | Pointer to **[]string** | Domains are the manageable zones for env_local hostnames. | [optional] 
 **Gateway** | Pointer to [**EngineGatewayFact**](EngineGatewayFact.md) | Gateway is the cluster&#39;s edge-gateway publish fact (story 130.2, EDGE.md §2) — the flavor the cluster runs and the address its edge publishes. The web-class compile targets it instead of guessing: the dns-apply instructions point here, dns-verify expects it, and route-apply renders for its flavor. Nil when the cluster has no gateway addon yet — a web compile refuses without it. omitempty so pre-130.2 persisted facts re-marshal byte-identically. | [optional] 
 **NodeTier** | Pointer to [**EngineNodeTier**](EngineNodeTier.md) | NodeTier is the node&#39;s memory tier (the frozen NodeTier vocabulary). The 1gb tier narrows durability to off/scheduled only (STORAGE.md §7). | [optional] 
+**Provides** | Pointer to [**[]EngineProvideFact**](EngineProvideFact.md) | Provides are the target context&#39;s OFFER-SIDE facts (story 135-5, GH #2957 — the move-time re-resolution surface the v1 deferral named): one entry per provider the target offers an incoming binding — an install exposing a runtime context or a registered shared endpoint — with the offered type, version, and free capacity. The archived bindings&#39; re-resolution (unpark/move/import) consumes these offers: a descriptor&#39;s linked binding re-resolves against the TARGET&#39;s offers, never the origin&#39;s records (a move purges the origin long before the restore runs), and a declared requires fact the offers cannot answer refuses at resolve with the named gap — never a half-import. omitempty keeps pre-135-5 facts byte-identical (the Arrivals pattern). | [optional] 
+**StorageClassDefaults** | Pointer to [**EngineStorageClassDefaults**](EngineStorageClassDefaults.md) | StorageClassDefaults is the cluster&#39;s default-StorageClass pair (the dk64 ledger, R11&#39;s schema home): Observed is the class the cluster&#39;s k8s default-storage-class annotation named at collection — the CLUSTER-OBSERVED default — and Declared is the platform&#39;s own declaration (empty &#x3D; the platform declares nothing, and the observed default governs). The restore compile renders the observed default into the payload and refuses a disagreement between the two naming both. Nil on facts collected before dk64 Story A; omitempty keeps pre-dk64 facts byte-identical. | [optional] 
 **StorageClasses** | Pointer to [**[]EngineStorageClassFact**](EngineStorageClassFact.md) | StorageClasses are the storage classes the platform declared on this cluster (STORAGE.md §7 tiering is compiled FROM these). A storage.class value outside this set is refused at resolve (ErrCapabilityUnavailable). | [optional] 
 
 ## Methods
@@ -32,6 +38,31 @@ will change when the set of required properties is changed
 NewEngineContextFactsWithDefaults instantiates a new EngineContextFacts object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetActivityBudget
+
+`func (o *EngineContextFacts) GetActivityBudget() EngineActivityBudgetFact`
+
+GetActivityBudget returns the ActivityBudget field if non-nil, zero value otherwise.
+
+### GetActivityBudgetOk
+
+`func (o *EngineContextFacts) GetActivityBudgetOk() (*EngineActivityBudgetFact, bool)`
+
+GetActivityBudgetOk returns a tuple with the ActivityBudget field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetActivityBudget
+
+`func (o *EngineContextFacts) SetActivityBudget(v EngineActivityBudgetFact)`
+
+SetActivityBudget sets ActivityBudget field to given value.
+
+### HasActivityBudget
+
+`func (o *EngineContextFacts) HasActivityBudget() bool`
+
+HasActivityBudget returns a boolean if a field has been set.
 
 ### GetArch
 
@@ -58,6 +89,31 @@ SetArch sets Arch field to given value.
 
 HasArch returns a boolean if a field has been set.
 
+### GetArrivals
+
+`func (o *EngineContextFacts) GetArrivals() []EngineArrivalFact`
+
+GetArrivals returns the Arrivals field if non-nil, zero value otherwise.
+
+### GetArrivalsOk
+
+`func (o *EngineContextFacts) GetArrivalsOk() (*[]EngineArrivalFact, bool)`
+
+GetArrivalsOk returns a tuple with the Arrivals field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetArrivals
+
+`func (o *EngineContextFacts) SetArrivals(v []EngineArrivalFact)`
+
+SetArrivals sets Arrivals field to given value.
+
+### HasArrivals
+
+`func (o *EngineContextFacts) HasArrivals() bool`
+
+HasArrivals returns a boolean if a field has been set.
+
 ### GetClaimedHosts
 
 `func (o *EngineContextFacts) GetClaimedHosts() []EngineHostClaim`
@@ -82,6 +138,31 @@ SetClaimedHosts sets ClaimedHosts field to given value.
 `func (o *EngineContextFacts) HasClaimedHosts() bool`
 
 HasClaimedHosts returns a boolean if a field has been set.
+
+### GetClassCapacities
+
+`func (o *EngineContextFacts) GetClassCapacities() []EngineClassCapacity`
+
+GetClassCapacities returns the ClassCapacities field if non-nil, zero value otherwise.
+
+### GetClassCapacitiesOk
+
+`func (o *EngineContextFacts) GetClassCapacitiesOk() (*[]EngineClassCapacity, bool)`
+
+GetClassCapacitiesOk returns a tuple with the ClassCapacities field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetClassCapacities
+
+`func (o *EngineContextFacts) SetClassCapacities(v []EngineClassCapacity)`
+
+SetClassCapacities sets ClassCapacities field to given value.
+
+### HasClassCapacities
+
+`func (o *EngineContextFacts) HasClassCapacities() bool`
+
+HasClassCapacities returns a boolean if a field has been set.
 
 ### GetClusterSize
 
@@ -132,6 +213,31 @@ SetDataDiskFs sets DataDiskFs field to given value.
 `func (o *EngineContextFacts) HasDataDiskFs() bool`
 
 HasDataDiskFs returns a boolean if a field has been set.
+
+### GetDatastore
+
+`func (o *EngineContextFacts) GetDatastore() EngineDatastoreFact`
+
+GetDatastore returns the Datastore field if non-nil, zero value otherwise.
+
+### GetDatastoreOk
+
+`func (o *EngineContextFacts) GetDatastoreOk() (*EngineDatastoreFact, bool)`
+
+GetDatastoreOk returns a tuple with the Datastore field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDatastore
+
+`func (o *EngineContextFacts) SetDatastore(v EngineDatastoreFact)`
+
+SetDatastore sets Datastore field to given value.
+
+### HasDatastore
+
+`func (o *EngineContextFacts) HasDatastore() bool`
+
+HasDatastore returns a boolean if a field has been set.
 
 ### GetDestinations
 
@@ -232,6 +338,56 @@ SetNodeTier sets NodeTier field to given value.
 `func (o *EngineContextFacts) HasNodeTier() bool`
 
 HasNodeTier returns a boolean if a field has been set.
+
+### GetProvides
+
+`func (o *EngineContextFacts) GetProvides() []EngineProvideFact`
+
+GetProvides returns the Provides field if non-nil, zero value otherwise.
+
+### GetProvidesOk
+
+`func (o *EngineContextFacts) GetProvidesOk() (*[]EngineProvideFact, bool)`
+
+GetProvidesOk returns a tuple with the Provides field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProvides
+
+`func (o *EngineContextFacts) SetProvides(v []EngineProvideFact)`
+
+SetProvides sets Provides field to given value.
+
+### HasProvides
+
+`func (o *EngineContextFacts) HasProvides() bool`
+
+HasProvides returns a boolean if a field has been set.
+
+### GetStorageClassDefaults
+
+`func (o *EngineContextFacts) GetStorageClassDefaults() EngineStorageClassDefaults`
+
+GetStorageClassDefaults returns the StorageClassDefaults field if non-nil, zero value otherwise.
+
+### GetStorageClassDefaultsOk
+
+`func (o *EngineContextFacts) GetStorageClassDefaultsOk() (*EngineStorageClassDefaults, bool)`
+
+GetStorageClassDefaultsOk returns a tuple with the StorageClassDefaults field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStorageClassDefaults
+
+`func (o *EngineContextFacts) SetStorageClassDefaults(v EngineStorageClassDefaults)`
+
+SetStorageClassDefaults sets StorageClassDefaults field to given value.
+
+### HasStorageClassDefaults
+
+`func (o *EngineContextFacts) HasStorageClassDefaults() bool`
+
+HasStorageClassDefaults returns a boolean if a field has been set.
 
 ### GetStorageClasses
 

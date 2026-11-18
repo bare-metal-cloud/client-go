@@ -4,15 +4,15 @@ All URIs are relative to *http://localhost:3001/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**PostApiV1ServiceAccountsSaIdSealSecret**](ScheduledAccessAPI.md#PostApiV1ServiceAccountsSaIdSealSecret) | **Post** /api/v1/service-accounts/{sa_id}/seal-secret | Seal a service-account secret for worker consumption
+[**PostServiceAccountsSaIdSealSecret**](ScheduledAccessAPI.md#PostServiceAccountsSaIdSealSecret) | **Post** /service-accounts/{sa_id}/seal-secret | Seal a service-account secret for consumption
 
 
 
-## PostApiV1ServiceAccountsSaIdSealSecret
+## PostServiceAccountsSaIdSealSecret
 
-> map[string]interface{} PostApiV1ServiceAccountsSaIdSealSecret(ctx, saId).Body(body).Execute()
+> map[string]interface{} PostServiceAccountsSaIdSealSecret(ctx, saId).Body(body).XVaultRentalID(xVaultRentalID).Execute()
 
-Seal a service-account secret for worker consumption
+Seal a service-account secret for consumption
 
 
 
@@ -31,16 +31,17 @@ import (
 func main() {
 	saId := int32(56) // int32 | Service Account ID
 	body := *openapiclient.NewHandlersSealSecretRequest() // HandlersSealSecretRequest | Seal request
+	xVaultRentalID := "xVaultRentalID_example" // string | Rental id (human path; the sa.secret.seal rental for this secret row) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ScheduledAccessAPI.PostApiV1ServiceAccountsSaIdSealSecret(context.Background(), saId).Body(body).Execute()
+	resp, r, err := apiClient.ScheduledAccessAPI.PostServiceAccountsSaIdSealSecret(context.Background(), saId).Body(body).XVaultRentalID(xVaultRentalID).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ScheduledAccessAPI.PostApiV1ServiceAccountsSaIdSealSecret``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `ScheduledAccessAPI.PostServiceAccountsSaIdSealSecret``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `PostApiV1ServiceAccountsSaIdSealSecret`: map[string]interface{}
-	fmt.Fprintf(os.Stdout, "Response from `ScheduledAccessAPI.PostApiV1ServiceAccountsSaIdSealSecret`: %v\n", resp)
+	// response from `PostServiceAccountsSaIdSealSecret`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `ScheduledAccessAPI.PostServiceAccountsSaIdSealSecret`: %v\n", resp)
 }
 ```
 
@@ -54,13 +55,14 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiPostApiV1ServiceAccountsSaIdSealSecretRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiPostServiceAccountsSaIdSealSecretRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **body** | [**HandlersSealSecretRequest**](HandlersSealSecretRequest.md) | Seal request | 
+ **xVaultRentalID** | **string** | Rental id (human path; the sa.secret.seal rental for this secret row) | 
 
 ### Return type
 
@@ -68,7 +70,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-No authorization required
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

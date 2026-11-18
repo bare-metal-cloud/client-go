@@ -5,13 +5,13 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **DeviceName** | Pointer to **string** | Optional: update device name | [optional] 
-**EncryptionKey** | **string** |  | 
+**EncryptionKey** | Pointer to **string** | EncryptionKey is accepted for caller compatibility and ignored: the trust proof is the device.trust rental&#39;s vault-key payload. | [optional] 
 
 ## Methods
 
 ### NewHandlersTrustCurrentDeviceRequest
 
-`func NewHandlersTrustCurrentDeviceRequest(encryptionKey string, ) *HandlersTrustCurrentDeviceRequest`
+`func NewHandlersTrustCurrentDeviceRequest() *HandlersTrustCurrentDeviceRequest`
 
 NewHandlersTrustCurrentDeviceRequest instantiates a new HandlersTrustCurrentDeviceRequest object
 This constructor will assign default values to properties that have it defined,
@@ -70,6 +70,11 @@ and a boolean to check if the value has been set.
 
 SetEncryptionKey sets EncryptionKey field to given value.
 
+### HasEncryptionKey
+
+`func (o *HandlersTrustCurrentDeviceRequest) HasEncryptionKey() bool`
+
+HasEncryptionKey returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

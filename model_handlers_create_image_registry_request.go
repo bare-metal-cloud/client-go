@@ -28,6 +28,8 @@ type HandlersCreateImageRegistryRequest struct {
 	AzureCredentialId *int32 `json:"azure_credential_id,omitempty"`
 	// For private registries
 	CaCertificate *string `json:"ca_certificate,omitempty"`
+	// ClientEnvelope is the browser-sealed stored copy of the credentials JSON ({username, password, login_server, ca_certificate} — the keys present in the request). Required whenever the request carries any of those fields (issue #4424, B5): the server stores the bytes and never encrypts. The plaintext fields still ride the request for the one live check (registry design RC5, create half).
+	ClientEnvelope *HandlersClientEnvelopeDTO `json:"client_envelope,omitempty"`
 	// legacy alias
 	EcrRegion *string `json:"ecr_region,omitempty"`
 	GcpCredentialId *int32 `json:"gcp_credential_id,omitempty"`
@@ -37,7 +39,8 @@ type HandlersCreateImageRegistryRequest struct {
 	Password *string `json:"password,omitempty"`
 	Scope *string `json:"scope,omitempty"`
 	Type string `json:"type"`
-	Url string `json:"url"`
+	// URL is enforced in the handler, not here: docker-hub-public creates may omit it (issue #3577 — the endpoint auto-fills to the Hub API URL), while every other type still requires it.
+	Url *string `json:"url,omitempty"`
 	Username *string `json:"username,omitempty"`
 }
 
@@ -47,11 +50,10 @@ type _HandlersCreateImageRegistryRequest HandlersCreateImageRegistryRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewHandlersCreateImageRegistryRequest(name string, type_ string, url string) *HandlersCreateImageRegistryRequest {
+func NewHandlersCreateImageRegistryRequest(name string, type_ string) *HandlersCreateImageRegistryRequest {
 	this := HandlersCreateImageRegistryRequest{}
 	this.Name = name
 	this.Type = type_
-	this.Url = url
 	return &this
 }
 
@@ -221,6 +223,38 @@ func (o *HandlersCreateImageRegistryRequest) HasCaCertificate() bool {
 // SetCaCertificate gets a reference to the given string and assigns it to the CaCertificate field.
 func (o *HandlersCreateImageRegistryRequest) SetCaCertificate(v string) {
 	o.CaCertificate = &v
+}
+
+// GetClientEnvelope returns the ClientEnvelope field value if set, zero value otherwise.
+func (o *HandlersCreateImageRegistryRequest) GetClientEnvelope() HandlersClientEnvelopeDTO {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		var ret HandlersClientEnvelopeDTO
+		return ret
+	}
+	return *o.ClientEnvelope
+}
+
+// GetClientEnvelopeOk returns a tuple with the ClientEnvelope field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateImageRegistryRequest) GetClientEnvelopeOk() (*HandlersClientEnvelopeDTO, bool) {
+	if o == nil || IsNil(o.ClientEnvelope) {
+		return nil, false
+	}
+	return o.ClientEnvelope, true
+}
+
+// HasClientEnvelope returns a boolean if a field has been set.
+func (o *HandlersCreateImageRegistryRequest) HasClientEnvelope() bool {
+	if o != nil && !IsNil(o.ClientEnvelope) {
+		return true
+	}
+
+	return false
+}
+
+// SetClientEnvelope gets a reference to the given HandlersClientEnvelopeDTO and assigns it to the ClientEnvelope field.
+func (o *HandlersCreateImageRegistryRequest) SetClientEnvelope(v HandlersClientEnvelopeDTO) {
+	o.ClientEnvelope = &v
 }
 
 // GetEcrRegion returns the EcrRegion field value if set, zero value otherwise.
@@ -431,28 +465,36 @@ func (o *HandlersCreateImageRegistryRequest) SetType(v string) {
 	o.Type = v
 }
 
-// GetUrl returns the Url field value
+// GetUrl returns the Url field value if set, zero value otherwise.
 func (o *HandlersCreateImageRegistryRequest) GetUrl() string {
-	if o == nil {
+	if o == nil || IsNil(o.Url) {
 		var ret string
 		return ret
 	}
-
-	return o.Url
+	return *o.Url
 }
 
-// GetUrlOk returns a tuple with the Url field value
+// GetUrlOk returns a tuple with the Url field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *HandlersCreateImageRegistryRequest) GetUrlOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Url) {
 		return nil, false
 	}
-	return &o.Url, true
+	return o.Url, true
 }
 
-// SetUrl sets field value
+// HasUrl returns a boolean if a field has been set.
+func (o *HandlersCreateImageRegistryRequest) HasUrl() bool {
+	if o != nil && !IsNil(o.Url) {
+		return true
+	}
+
+	return false
+}
+
+// SetUrl gets a reference to the given string and assigns it to the Url field.
 func (o *HandlersCreateImageRegistryRequest) SetUrl(v string) {
-	o.Url = v
+	o.Url = &v
 }
 
 // GetUsername returns the Username field value if set, zero value otherwise.
@@ -512,6 +554,9 @@ func (o HandlersCreateImageRegistryRequest) ToMap() (map[string]interface{}, err
 	if !IsNil(o.CaCertificate) {
 		toSerialize["ca_certificate"] = o.CaCertificate
 	}
+	if !IsNil(o.ClientEnvelope) {
+		toSerialize["client_envelope"] = o.ClientEnvelope
+	}
 	if !IsNil(o.EcrRegion) {
 		toSerialize["ecr_region"] = o.EcrRegion
 	}
@@ -529,7 +574,9 @@ func (o HandlersCreateImageRegistryRequest) ToMap() (map[string]interface{}, err
 		toSerialize["scope"] = o.Scope
 	}
 	toSerialize["type"] = o.Type
-	toSerialize["url"] = o.Url
+	if !IsNil(o.Url) {
+		toSerialize["url"] = o.Url
+	}
 	if !IsNil(o.Username) {
 		toSerialize["username"] = o.Username
 	}
@@ -543,7 +590,6 @@ func (o *HandlersCreateImageRegistryRequest) UnmarshalJSON(data []byte) (err err
 	requiredProperties := []string{
 		"name",
 		"type",
-		"url",
 	}
 
 	allProperties := make(map[string]interface{})
