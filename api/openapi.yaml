@@ -12808,105 +12808,98 @@ paths:
       x-codegen-request-body-name: request
   /me/tokens:
     get:
-      description: "Return the caller's active (not revoked, not expired) PATs. Never\
-        \ returns the token secret."
+      description: "Lists the caller's live tokens: name, display prefix, scopes,\
+        \ expiry and last use. Never returns a token value."
       operationId: GetMeTokens
       responses:
         "200":
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-          description: "{tokens: [...]}"
+                $ref: '#/components/schemas/handlers.patListResponse'
+          description: OK
         "401":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Not authenticated
+          description: Unauthorized
         "500":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Failed to list tokens
+          description: Internal Server Error
       security:
       - CookieAuth: []
       - BearerAuth: []
-      summary: List my personal access tokens
+      summary: List the caller's personal access tokens
       tags:
-      - me
+      - tokens
     post:
-      description: Create a PAT for the caller. Requires a fresh sudo window (POST
-        /me/sudo). The plaintext token is returned once.
+      description: "Mints a personal access token for the caller. The plaintext token\
+        \ is returned once, in this response, and never again. Sudo-gated: the caller\
+        \ needs an active sudo window or an X-BMC-Sudo TOTP."
       operationId: PostMeTokens
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/handlers.patRequest'
-        description: "Token name, expires_in_days (0 = no expiry, default 90), scopes\
-          \ (default [\\"
+        description: "Token name, expiry in days (0 = no expiry, absent = 90) and\
+          \ scopes (absent = full trust)"
         required: true
       responses:
         "201":
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-          description: Created token; token is shown only in this response
+                $ref: '#/components/schemas/handlers.patCreatedResponse'
+          description: Created
         "400":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
           description: "Invalid name, expiry or scopes"
         "401":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Not authenticated
+          description: Unauthorized
         "403":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Sudo window expired or not open
+          description: sudo_required or mfa_enrollment_required
         "500":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Failed to create token
+          description: Internal Server Error
       security:
       - CookieAuth: []
       - BearerAuth: []
-      summary: Mint a personal access token
+      summary: Create a personal access token
       tags:
-      - me
-      x-codegen-request-body-name: request
+      - tokens
+      x-codegen-request-body-name: body
   /me/tokens/{id}:
     delete:
-      description: "Revoke one of the caller's PATs. Ownership is enforced: another\
-        \ user's token id returns 404."
+      description: Revokes one of the caller's tokens. The token stops working on
+        its next use. A token that is not the caller's answers 404.
       operationId: DeleteMeTokensId
       parameters:
-      - description: Token id
+      - description: Token ID
         in: path
         name: id
         required: true
@@ -12917,48 +12910,42 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
-                type: object
-          description: Token revoked
+                $ref: '#/components/schemas/handlers.patMessageResponse'
+          description: OK
         "400":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
           description: Invalid token id
         "401":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Not authenticated
+          description: Unauthorized
         "404":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
           description: Token not found
         "500":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Failed to revoke token
+          description: Internal Server Error
       security:
       - CookieAuth: []
       - BearerAuth: []
       summary: Revoke a personal access token
       tags:
-      - me
+      - tokens
   /multipass-hosts:
     get:
       description: Get all Multipass hosts owned by the authenticated user
@@ -21195,6 +21182,8 @@ paths:
       x-codegen-request-body-name: request
   /orgs/{org_id}/vault/received-shares:
     get:
+      description: "Lists the caller's active shares in this org: the secrets they\
+        \ can use right now. Metadata only."
       operationId: GetOrgsOrg_idVaultReceived-shares
       parameters:
       - description: Organization ID
@@ -21208,21 +21197,19 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-          description: "shares: [secretShareView]"
-        "400":
+                $ref: '#/components/schemas/handlers.secretShareListResponse'
+          description: OK
+        "500":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Bad Request
+          description: Internal Server Error
       security:
       - CookieAuth: []
       - BearerAuth: []
-      summary: List shares sent to me in an org
+      summary: List the shares you received
       tags:
       - vault
   /orgs/{org_id}/vault/rentals:
@@ -21504,6 +21491,8 @@ paths:
       - vault
   /orgs/{org_id}/vault/shares:
     get:
+      description: "Lists every share in the org, optionally narrowed to one secret.\
+        \ Metadata only: never a value, a code or a key."
       operationId: GetOrgsOrg_idVaultShares
       parameters:
       - description: Organization ID
@@ -21512,12 +21501,12 @@ paths:
         required: true
         schema:
           type: integer
-      - description: Filter by secret type
+      - description: Only shares of this secret type
         in: query
         name: secret_type
         schema:
           type: string
-      - description: Filter by secret ID
+      - description: Only shares of this secret id
         in: query
         name: secret_id
         schema:
@@ -21527,27 +21516,34 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-          description: "shares: [secretShareView]"
+                $ref: '#/components/schemas/handlers.secretShareListResponse'
+          description: OK
         "400":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Bad Request
+          description: Invalid secret_id
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
       security:
       - CookieAuth: []
       - BearerAuth: []
-      summary: List shares I have sent in an org
+      summary: List the org's secret shares
       tags:
       - vault
     post:
-      description: "Sharer creates a time-bound share of a vault secret to a recipient\
-        \ in the org. Needs a fresh sudo window (X-BMC-Sudo or session marker). Releases\
-        \ the secret's own value (and linked registry credential) once, per ADR-104."
+      description: "Creates a time-limited share of one secret. The recipient uses\
+        \ it through the platform and never sees the value. A released type (cloud_credential,\
+        \ image_registry, ssh_connection) carries the sharer's one-time release: the\
+        \ server seals it and keeps it until the share ends. Sudo-gated for the sharer;\
+        \ an Owner or Admin may share."
       operationId: PostOrgsOrg_idVaultShares
       parameters:
       - description: Organization ID
@@ -21561,7 +21557,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/handlers.createShareRequest'
-        description: Share
+        description: "The share: client id, secret, recipient, lifetime and the one-time\
+          \ release"
         required: true
       responses:
         "201":
@@ -21583,21 +21580,30 @@ paths:
               schema:
                 additionalProperties: true
                 type: object
-          description: Forbidden
+          description: "sudo_required, or the caller is not an Owner or Admin"
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: secret not found
         "409":
           content:
             application/json:
               schema:
                 additionalProperties: true
                 type: object
-          description: Conflict
+          description: "share_conflict, not_shareable or release_stale"
         "422":
           content:
             application/json:
               schema:
                 additionalProperties: true
                 type: object
-          description: Unprocessable Entity
+          description: "recipient_not_eligible, expires_at_out_of_range, release_required,\
+            \ release_not_allowed, linked_release_required, release_empty, release_too_large\
+            \ or release_limit"
         "500":
           content:
             application/json:
@@ -21605,15 +21611,24 @@ paths:
                 additionalProperties: true
                 type: object
           description: Internal Server Error
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: release_unavailable
       security:
       - CookieAuth: []
       - BearerAuth: []
-      summary: Share a vault secret with a recipient
+      summary: Share a secret with a member
       tags:
       - vault
-      x-codegen-request-body-name: request
+      x-codegen-request-body-name: body
   /orgs/{org_id}/vault/shares/{share_id}:
     delete:
+      description: "Ends a share now. The sharer, or any other Owner or Admin, may\
+        \ end it. The recipient's next use is refused from then on."
       operationId: DeleteOrgsOrg_idVaultSharesShare_id
       parameters:
       - description: Organization ID
@@ -21622,7 +21637,7 @@ paths:
         required: true
         schema:
           type: integer
-      - description: Share ID
+      - description: Share ID (lower-case UUID)
         in: path
         name: share_id
         required: true
@@ -21635,26 +21650,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/handlers.secretShareView'
           description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-          description: Bad Request
         "404":
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
+                additionalProperties: true
                 type: object
-          description: Not Found
+          description: share not found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: share_ended
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
       security:
       - CookieAuth: []
       - BearerAuth: []
-      summary: End a share I sent
+      summary: End a secret share
       tags:
       - vault
   /orgs/{org_id}/vault/slots/{slot}:
@@ -40071,6 +40091,69 @@ components:
         plan_fingerprint:
           type: string
       type: object
+    handlers.patCreatedResponse:
+      example:
+        expires_at: expires_at
+        name: name
+        token_prefix: token_prefix
+        created_at: created_at
+        id: 0
+        scopes:
+        - scopes
+        - scopes
+        token: token
+      properties:
+        created_at:
+          type: string
+        expires_at:
+          type: string
+        id:
+          type: integer
+        name:
+          type: string
+        scopes:
+          items:
+            type: string
+          type: array
+        token:
+          type: string
+        token_prefix:
+          type: string
+      type: object
+    handlers.patListResponse:
+      example:
+        tokens:
+        - last_used_at: last_used_at
+          expires_at: expires_at
+          name: name
+          token_prefix: token_prefix
+          created_at: created_at
+          id: 0
+          scopes:
+          - scopes
+          - scopes
+        - last_used_at: last_used_at
+          expires_at: expires_at
+          name: name
+          token_prefix: token_prefix
+          created_at: created_at
+          id: 0
+          scopes:
+          - scopes
+          - scopes
+      properties:
+        tokens:
+          items:
+            $ref: '#/components/schemas/handlers.patView'
+          type: array
+      type: object
+    handlers.patMessageResponse:
+      example:
+        message: message
+      properties:
+        message:
+          type: string
+      type: object
     handlers.patRequest:
       properties:
         expires_in_days:
@@ -40082,6 +40165,35 @@ components:
           items:
             type: string
           type: array
+      type: object
+    handlers.patView:
+      example:
+        last_used_at: last_used_at
+        expires_at: expires_at
+        name: name
+        token_prefix: token_prefix
+        created_at: created_at
+        id: 0
+        scopes:
+        - scopes
+        - scopes
+      properties:
+        created_at:
+          type: string
+        expires_at:
+          type: string
+        id:
+          type: integer
+        last_used_at:
+          type: string
+        name:
+          type: string
+        scopes:
+          items:
+            type: string
+          type: array
+        token_prefix:
+          type: string
       type: object
     handlers.runnerPoolGateWire:
       properties:
@@ -40109,6 +40221,41 @@ components:
           description: hex-encoded target worker identity (audit label for the sealed
             blob's consumer)
           type: string
+      type: object
+    handlers.secretShareListResponse:
+      example:
+        shares:
+        - recipient_user_id: 5
+          secret_id: 2
+          secret_type: secret_type
+          sharer_user_id: 7
+          end_reason: end_reason
+          ended_by_user_id: 0
+          created_at: created_at
+          open_count: 1
+          organization_id: 5
+          id: id
+          ended_at: ended_at
+          first_opened_at: first_opened_at
+          expires_at_unix: 6
+        - recipient_user_id: 5
+          secret_id: 2
+          secret_type: secret_type
+          sharer_user_id: 7
+          end_reason: end_reason
+          ended_by_user_id: 0
+          created_at: created_at
+          open_count: 1
+          organization_id: 5
+          id: id
+          ended_at: ended_at
+          first_opened_at: first_opened_at
+          expires_at_unix: 6
+      properties:
+        shares:
+          items:
+            $ref: '#/components/schemas/handlers.secretShareView'
+          type: array
       type: object
     handlers.secretShareView:
       example:

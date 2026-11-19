@@ -200,6 +200,8 @@ type APIClient struct {
 
 	TestErrorPreviewAPI TestErrorPreviewAPI
 
+	TokensAPI TokensAPI
+
 	UserAPI UserAPI
 
 	VaultAPI VaultAPI
@@ -300,6 +302,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.SshKeysAPI = (*SshKeysAPIService)(&c.common)
 	c.StacksAPI = (*StacksAPIService)(&c.common)
 	c.TestErrorPreviewAPI = (*TestErrorPreviewAPIService)(&c.common)
+	c.TokensAPI = (*TokensAPIService)(&c.common)
 	c.UserAPI = (*UserAPIService)(&c.common)
 	c.VaultAPI = (*VaultAPIService)(&c.common)
 	c.VirtualMachinesAPI = (*VirtualMachinesAPIService)(&c.common)

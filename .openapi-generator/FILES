@@ -76,6 +76,7 @@ api_ssh_connections.go
 api_ssh_keys.go
 api_stacks.go
 api_test_error_preview.go
+api_tokens.go
 api_user.go
 api_vault.go
 api_virtual_machines.go
@@ -415,7 +416,11 @@ docs/HandlersOverviewDeadmanCandidate.md
 docs/HandlersOverviewSensorStamp.md
 docs/HandlersOverviewServiceHealth.md
 docs/HandlersParkActionRequest.md
+docs/HandlersPatCreatedResponse.md
+docs/HandlersPatListResponse.md
+docs/HandlersPatMessageResponse.md
 docs/HandlersPatRequest.md
+docs/HandlersPatView.md
 docs/HandlersPatchImageRegistryRequest.md
 docs/HandlersPeerProbePayload.md
 docs/HandlersPendingReapprovalAsk.md
@@ -526,6 +531,7 @@ docs/HandlersSaveConnectionMappingBodyRepositoriesInner.md
 docs/HandlersScaleResourcesRequest.md
 docs/HandlersScaleStorageRequest.md
 docs/HandlersSealSecretRequest.md
+docs/HandlersSecretShareListResponse.md
 docs/HandlersSecretShareView.md
 docs/HandlersSecretTestConnectionResponse.md
 docs/HandlersSecretValueEnvelope.md
@@ -740,6 +746,7 @@ docs/SshConnectionsAPI.md
 docs/SshKeysAPI.md
 docs/StacksAPI.md
 docs/TestErrorPreviewAPI.md
+docs/TokensAPI.md
 docs/UserAPI.md
 docs/VaultAPI.md
 docs/VerifyrelayRequest.md
@@ -1049,7 +1056,11 @@ model_handlers_overview_deadman_candidate.go
 model_handlers_overview_sensor_stamp.go
 model_handlers_overview_service_health.go
 model_handlers_park_action_request.go
+model_handlers_pat_created_response.go
+model_handlers_pat_list_response.go
+model_handlers_pat_message_response.go
 model_handlers_pat_request.go
+model_handlers_pat_view.go
 model_handlers_patch_image_registry_request.go
 model_handlers_peer_probe_payload.go
 model_handlers_pending_reapproval_ask.go
@@ -1158,6 +1169,7 @@ model_handlers_save_connection_mapping_body_repositories_inner.go
 model_handlers_scale_resources_request.go
 model_handlers_scale_storage_request.go
 model_handlers_seal_secret_request.go
+model_handlers_secret_share_list_response.go
 model_handlers_secret_share_view.go
 model_handlers_secret_test_connection_response.go
 model_handlers_secret_value_envelope.go
@@ -1410,6 +1422,7 @@ test/api_ssh_connections_test.go
 test/api_ssh_keys_test.go
 test/api_stacks_test.go
 test/api_test_error_preview_test.go
+test/api_tokens_test.go
 test/api_user_test.go
 test/api_vault_test.go
 test/api_virtual_machines_test.go
