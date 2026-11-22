@@ -54,14 +54,17 @@ with 422 (no unpinned-latest fallback exists on the update
 path). Refusals: 404 when the agent is not in the CALLER'S
 org (the ownership law — the id alone is never enough); 422
 for a v1/null-version agent (manual reinstall required — its
-binary predates the signature gate) or a malformed/off-rail
-target; 409 for a terminal-status (revoked/terminated/
-uninstalled) or key-rotation-pending agent, an in-flight
-lifecycle op, or a machine with no dispatch route; 503 when
-the signed rail is unavailable (fail closed). Success is 202:
-the handoff is accepted and the final outcome (confirmed /
-failed / restored / no-confirm) lands in the org's audit
-trail as the machine reports it.
+binary predates the signature gate), a malformed/off-rail
+target, or a machine that RAN the handoff script and refused
+it (code manual_reinstall_required with the attempt_id — the
+install does not run as root with systemd; only a reinstall
+with the systemd installer fixes it); 409 for a terminal-
+status (revoked/terminated/uninstalled) or key-rotation-
+pending agent, an in-flight lifecycle op, or a machine with
+no dispatch route; 503 when the signed rail is unavailable
+(fail closed). Success is 202: the handoff is accepted and
+the final outcome (confirmed / failed / restored / no-confirm)
+lands in the org's audit trail as the machine reports it.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Agent DB id
@@ -291,14 +294,17 @@ with 422 (no unpinned-latest fallback exists on the update
 path). Refusals: 404 when the agent is not in the CALLER'S
 org (the ownership law — the id alone is never enough); 422
 for a v1/null-version agent (manual reinstall required — its
-binary predates the signature gate) or a malformed/off-rail
-target; 409 for a terminal-status (revoked/terminated/
-uninstalled) or key-rotation-pending agent, an in-flight
-lifecycle op, or a machine with no dispatch route; 503 when
-the signed rail is unavailable (fail closed). Success is 202:
-the handoff is accepted and the final outcome (confirmed /
-failed / restored / no-confirm) lands in the org's audit
-trail as the machine reports it.
+binary predates the signature gate), a malformed/off-rail
+target, or a machine that RAN the handoff script and refused
+it (code manual_reinstall_required with the attempt_id — the
+install does not run as root with systemd; only a reinstall
+with the systemd installer fixes it); 409 for a terminal-
+status (revoked/terminated/uninstalled) or key-rotation-
+pending agent, an in-flight lifecycle op, or a machine with
+no dispatch route; 503 when the signed rail is unavailable
+(fail closed). Success is 202: the handoff is accepted and
+the final outcome (confirmed / failed / restored / no-confirm)
+lands in the org's audit trail as the machine reports it.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Agent DB id

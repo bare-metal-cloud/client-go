@@ -1673,7 +1673,7 @@
             "CookieAuth": []
           }
         ],
-        "description": "Drives the agent's machine to the requested agent version over\nthe signed tunnel (the survivor-pattern update handoff). The\ntarget version must exact-match a version on the signed\nartifact rail; when the body omits target_version the org's\npinned version is the target, and an org with no pin refuses\nwith 422 (no unpinned-latest fallback exists on the update\npath). Refusals: 404 when the agent is not in the CALLER'S\norg (the ownership law \u2014 the id alone is never enough); 422\nfor a v1/null-version agent (manual reinstall required \u2014 its\nbinary predates the signature gate) or a malformed/off-rail\ntarget; 409 for a terminal-status (revoked/terminated/\nuninstalled) or key-rotation-pending agent, an in-flight\nlifecycle op, or a machine with no dispatch route; 503 when\nthe signed rail is unavailable (fail closed). Success is 202:\nthe handoff is accepted and the final outcome (confirmed /\nfailed / restored / no-confirm) lands in the org's audit\ntrail as the machine reports it.",
+        "description": "Drives the agent's machine to the requested agent version over\nthe signed tunnel (the survivor-pattern update handoff). The\ntarget version must exact-match a version on the signed\nartifact rail; when the body omits target_version the org's\npinned version is the target, and an org with no pin refuses\nwith 422 (no unpinned-latest fallback exists on the update\npath). Refusals: 404 when the agent is not in the CALLER'S\norg (the ownership law \u2014 the id alone is never enough); 422\nfor a v1/null-version agent (manual reinstall required \u2014 its\nbinary predates the signature gate), a malformed/off-rail\ntarget, or a machine that RAN the handoff script and refused\nit (code manual_reinstall_required with the attempt_id \u2014 the\ninstall does not run as root with systemd; only a reinstall\nwith the systemd installer fixes it); 409 for a terminal-\nstatus (revoked/terminated/uninstalled) or key-rotation-\npending agent, an in-flight lifecycle op, or a machine with\nno dispatch route; 503 when the signed rail is unavailable\n(fail closed). Success is 202: the handoff is accepted and\nthe final outcome (confirmed / failed / restored / no-confirm)\nlands in the org's audit trail as the machine reports it.",
         "consumes": [
           "application/json"
         ],
@@ -1724,7 +1724,7 @@
             }
           },
           "422": {
-            "description": "manual reinstall required, no target, or off-rail target",
+            "description": "manual reinstall required (v1 agent, no/off-rail target, or machine refused handoff)",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -15735,38 +15735,33 @@
             "BearerAuth": []
           }
         ],
-        "description": "Return the caller's active (not revoked, not expired) PATs. Never returns the token secret.",
+        "description": "Lists the caller's live tokens: name, display prefix, scopes, expiry and last use. Never returns a token value.",
         "produces": [
           "application/json"
         ],
         "tags": [
-          "me"
+          "tokens"
         ],
-        "summary": "List my personal access tokens",
+        "summary": "List the caller's personal access tokens",
         "responses": {
           "200": {
-            "description": "{tokens: [...]}",
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.patListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "type": "object",
               "additionalProperties": true
             }
           },
-          "401": {
-            "description": "Not authenticated",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
           "500": {
-            "description": "Failed to list tokens",
+            "description": "Internal Server Error",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           }
         },
@@ -15781,7 +15776,7 @@
             "BearerAuth": []
           }
         ],
-        "description": "Create a PAT for the caller. Requires a fresh sudo window (POST /me/sudo). The plaintext token is returned once.",
+        "description": "Mints a personal access token for the caller. The plaintext token is returned once, in this response, and never again. Sudo-gated: the caller needs an active sudo window or an X-BMC-Sudo TOTP.",
         "consumes": [
           "application/json"
         ],
@@ -15789,13 +15784,13 @@
           "application/json"
         ],
         "tags": [
-          "me"
+          "tokens"
         ],
-        "summary": "Mint a personal access token",
+        "summary": "Create a personal access token",
         "parameters": [
           {
-            "description": "Token name, expires_in_days (0 = no expiry, default 90), scopes (default [\\",
-            "name": "request",
+            "description": "Token name, expiry in days (0 = no expiry, absent = 90) and scopes (absent = full trust)",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
@@ -15805,46 +15800,37 @@
         ],
         "responses": {
           "201": {
-            "description": "Created token; token is shown only in this response",
+            "description": "Created",
             "schema": {
-              "type": "object",
-              "additionalProperties": true
+              "$ref": "#/definitions/handlers.patCreatedResponse"
             }
           },
           "400": {
             "description": "Invalid name, expiry or scopes",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           },
           "401": {
-            "description": "Not authenticated",
+            "description": "Unauthorized",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           },
           "403": {
-            "description": "Sudo window expired or not open",
+            "description": "sudo_required or mfa_enrollment_required",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           },
           "500": {
-            "description": "Failed to create token",
+            "description": "Internal Server Error",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           }
         },
@@ -15861,18 +15847,18 @@
             "BearerAuth": []
           }
         ],
-        "description": "Revoke one of the caller's PATs. Ownership is enforced: another user's token id returns 404.",
+        "description": "Revokes one of the caller's tokens. The token stops working on its next use. A token that is not the caller's answers 404.",
         "produces": [
           "application/json"
         ],
         "tags": [
-          "me"
+          "tokens"
         ],
         "summary": "Revoke a personal access token",
         "parameters": [
           {
             "type": "integer",
-            "description": "Token id",
+            "description": "Token ID",
             "name": "id",
             "in": "path",
             "required": true
@@ -15880,48 +15866,37 @@
         ],
         "responses": {
           "200": {
-            "description": "Token revoked",
+            "description": "OK",
             "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "$ref": "#/definitions/handlers.patMessageResponse"
             }
           },
           "400": {
             "description": "Invalid token id",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           },
           "401": {
-            "description": "Not authenticated",
+            "description": "Unauthorized",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           },
           "404": {
             "description": "Token not found",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           },
           "500": {
-            "description": "Failed to revoke token",
+            "description": "Internal Server Error",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           }
         },
@@ -24820,6 +24795,76 @@
         "operationId": "DeleteOrgsOrg_idS3-connectionsId"
       }
     },
+    "/orgs/{org_id}/s3-connections/{id}/buckets/{bucket}/usage": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Latest bucket occupancy snapshot with its freshness stamp, partial flag, and the fill projection. bytes and object_count are null when the bucket was not measured (for example, the platform cannot read its credential), never 0. projection.days_to_full is null until a capacity is set for the bucket.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "org-s3-connections"
+        ],
+        "summary": "Get bucket usage for an org-scoped S3 connection",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Bucket name",
+            "name": "bucket",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/storagebucket.UsageView"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idS3-connectionsIdBucketsBucketUsage"
+      }
+    },
     "/orgs/{org_id}/s3-connections/{id}/rotate-credentials": {
       "post": {
         "security": [
@@ -25229,6 +25274,54 @@
           }
         },
         "operationId": "PostOrgsOrg_idStacksRollback"
+      }
+    },
+    "/orgs/{org_id}/storage/volumes": {
+      "get": {
+        "description": "Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.\nprojection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.\nOtherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "storage"
+        ],
+        "summary": "List PVC usage for an organization",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the volumes register",
+            "schema": {
+              "$ref": "#/definitions/handlers.StorageVolumesResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idStorageVolumes"
       }
     },
     "/orgs/{org_id}/vault/access-grants": {
@@ -25806,13 +25899,14 @@
             "BearerAuth": []
           }
         ],
+        "description": "Lists the caller's active shares in this org: the secrets they can use right now. Metadata only.",
         "produces": [
           "application/json"
         ],
         "tags": [
           "vault"
         ],
-        "summary": "List shares sent to me in an org",
+        "summary": "List the shares you received",
         "parameters": [
           {
             "type": "integer",
@@ -25824,19 +25918,16 @@
         ],
         "responses": {
           "200": {
-            "description": "shares: [secretShareView]",
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.secretShareListResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
             "schema": {
               "type": "object",
               "additionalProperties": true
-            }
-          },
-          "400": {
-            "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
             }
           }
         },
@@ -26191,13 +26282,14 @@
             "BearerAuth": []
           }
         ],
+        "description": "Lists every share in the org, optionally narrowed to one secret. Metadata only: never a value, a code or a key.",
         "produces": [
           "application/json"
         ],
         "tags": [
           "vault"
         ],
-        "summary": "List shares I have sent in an org",
+        "summary": "List the org's secret shares",
         "parameters": [
           {
             "type": "integer",
@@ -26208,32 +26300,36 @@
           },
           {
             "type": "string",
-            "description": "Filter by secret type",
+            "description": "Only shares of this secret type",
             "name": "secret_type",
             "in": "query"
           },
           {
             "type": "integer",
-            "description": "Filter by secret ID",
+            "description": "Only shares of this secret id",
             "name": "secret_id",
             "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "shares: [secretShareView]",
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.secretShareListResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid secret_id",
             "schema": {
               "type": "object",
               "additionalProperties": true
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "500": {
+            "description": "Internal Server Error",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           }
         },
@@ -26248,7 +26344,7 @@
             "BearerAuth": []
           }
         ],
-        "description": "Sharer creates a time-bound share of a vault secret to a recipient in the org. Needs a fresh sudo window (X-BMC-Sudo or session marker). Releases the secret's own value (and linked registry credential) once, per ADR-104.",
+        "description": "Creates a time-limited share of one secret. The recipient uses it through the platform and never sees the value. A released type (cloud_credential, image_registry, ssh_connection) carries the sharer's one-time release: the server seals it and keeps it until the share ends. Sudo-gated for the sharer; an Owner or Admin may share.",
         "consumes": [
           "application/json"
         ],
@@ -26258,7 +26354,7 @@
         "tags": [
           "vault"
         ],
-        "summary": "Share a vault secret with a recipient",
+        "summary": "Share a secret with a member",
         "parameters": [
           {
             "type": "integer",
@@ -26268,8 +26364,8 @@
             "required": true
           },
           {
-            "description": "Share",
-            "name": "request",
+            "description": "The share: client id, secret, recipient, lifetime and the one-time release",
+            "name": "body",
             "in": "body",
             "required": true,
             "schema": {
@@ -26292,21 +26388,28 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "sudo_required, or the caller is not an Owner or Admin",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "secret not found",
             "schema": {
               "type": "object",
               "additionalProperties": true
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "share_conflict, not_shareable or release_stale",
             "schema": {
               "type": "object",
               "additionalProperties": true
             }
           },
           "422": {
-            "description": "Unprocessable Entity",
+            "description": "recipient_not_eligible, expires_at_out_of_range, release_required, release_not_allowed, linked_release_required, release_empty, release_too_large or release_limit",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -26314,6 +26417,13 @@
           },
           "500": {
             "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "release_unavailable",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -26333,13 +26443,14 @@
             "BearerAuth": []
           }
         ],
+        "description": "Ends a share now. The sharer, or any other Owner or Admin, may end it. The recipient's next use is refused from then on.",
         "produces": [
           "application/json"
         ],
         "tags": [
           "vault"
         ],
-        "summary": "End a share I sent",
+        "summary": "End a secret share",
         "parameters": [
           {
             "type": "integer",
@@ -26350,7 +26461,7 @@
           },
           {
             "type": "string",
-            "description": "Share ID",
+            "description": "Share ID (lower-case UUID)",
             "name": "share_id",
             "in": "path",
             "required": true
@@ -26363,22 +26474,25 @@
               "$ref": "#/definitions/handlers.secretShareView"
             }
           },
-          "400": {
-            "description": "Bad Request",
+          "404": {
+            "description": "share not found",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
             }
           },
-          "404": {
-            "description": "Not Found",
+          "409": {
+            "description": "share_ended",
             "schema": {
               "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
             }
           }
         },
@@ -30134,6 +30248,13 @@
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Cluster agent unreachable \u2014 teardown cannot run; row retained (error_code: cluster_agent_unreachable)",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -42660,6 +42781,17 @@
         }
       }
     },
+    "handlers.StorageVolumesResponse": {
+      "type": "object",
+      "properties": {
+        "volumes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/storageusage.VolumeUsage"
+          }
+        }
+      }
+    },
     "handlers.StoreDelegationMandatesRequest": {
       "type": "object",
       "properties": {
@@ -45046,6 +45178,54 @@
         }
       }
     },
+    "handlers.patCreatedResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "token": {
+          "type": "string"
+        },
+        "token_prefix": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.patListResponse": {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/handlers.patView"
+          }
+        }
+      }
+    },
+    "handlers.patMessageResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.patRequest": {
       "type": "object",
       "properties": {
@@ -45061,6 +45241,35 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "handlers.patView": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "last_used_at": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "scopes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "token_prefix": {
+          "type": "string"
         }
       }
     },
@@ -45108,6 +45317,17 @@
         "worker_key": {
           "description": "hex-encoded target worker identity (audit label for the sealed blob's consumer)",
           "type": "string"
+        }
+      }
+    },
+    "handlers.secretShareListResponse": {
+      "type": "object",
+      "properties": {
+        "shares": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/handlers.secretShareView"
+          }
         }
       }
     },
@@ -49262,6 +49482,159 @@
         },
         "updated_at": {
           "type": "string"
+        }
+      }
+    },
+    "storagebucket.Confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "x-enum-varnames": [
+        "ConfidenceHigh",
+        "ConfidenceMedium",
+        "ConfidenceLow"
+      ]
+    },
+    "storagebucket.LatestView": {
+      "type": "object",
+      "properties": {
+        "bytes": {
+          "type": "integer"
+        },
+        "captured_at": {
+          "type": "string"
+        },
+        "object_count": {
+          "type": "integer"
+        },
+        "partial": {
+          "type": "boolean"
+        },
+        "unmeasured_reason": {
+          "type": "string"
+        }
+      }
+    },
+    "storagebucket.ProjectionView": {
+      "type": "object",
+      "properties": {
+        "confidence": {
+          "$ref": "#/definitions/storagebucket.Confidence"
+        },
+        "days_to_full": {
+          "type": "number"
+        },
+        "points": {
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/definitions/storagebucket.Status"
+        }
+      }
+    },
+    "storagebucket.Status": {
+      "type": "string",
+      "enum": [
+        "projected",
+        "not_enough_history",
+        "no_growth",
+        "no_capacity"
+      ],
+      "x-enum-varnames": [
+        "StatusProjected",
+        "StatusNotEnoughHistory",
+        "StatusNoGrowth",
+        "StatusNoCapacity"
+      ]
+    },
+    "storagebucket.UsageView": {
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "latest": {
+          "$ref": "#/definitions/storagebucket.LatestView"
+        },
+        "projection": {
+          "$ref": "#/definitions/storagebucket.ProjectionView"
+        }
+      }
+    },
+    "storageusage.ProjectionConfidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "x-enum-varnames": [
+        "ProjectionHigh",
+        "ProjectionMedium",
+        "ProjectionLow"
+      ]
+    },
+    "storageusage.ProjectionStatus": {
+      "type": "string",
+      "enum": [
+        "projected",
+        "not_enough_history",
+        "no_growth",
+        "no_capacity"
+      ],
+      "x-enum-varnames": [
+        "ProjectionProjected",
+        "ProjectionNotEnoughHistory",
+        "ProjectionNoGrowth",
+        "ProjectionNoCapacity"
+      ]
+    },
+    "storageusage.VolumeProjectionView": {
+      "type": "object",
+      "properties": {
+        "confidence": {
+          "$ref": "#/definitions/storageusage.ProjectionConfidence"
+        },
+        "days_to_full": {
+          "type": "number"
+        },
+        "points": {
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/definitions/storageusage.ProjectionStatus"
+        }
+      }
+    },
+    "storageusage.VolumeUsage": {
+      "type": "object",
+      "properties": {
+        "capacity_bytes": {
+          "type": "integer"
+        },
+        "cluster_id": {
+          "type": "integer"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "pod_name": {
+          "type": "string"
+        },
+        "projection": {
+          "$ref": "#/definitions/storageusage.VolumeProjectionView"
+        },
+        "pvc_name": {
+          "type": "string"
+        },
+        "sampled_at": {
+          "type": "string"
+        },
+        "used_bytes": {
+          "type": "integer"
         }
       }
     },

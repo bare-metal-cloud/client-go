@@ -7,7 +7,7 @@ Method | HTTP request | Description
 [**DeleteAccessGrantsGrantId**](VaultAPI.md#DeleteAccessGrantsGrantId) | **Delete** /access-grants/{grant_id} | Revoke a service-account access grant now
 [**DeleteOrgsOrgIdVaultAccessGrantsId**](VaultAPI.md#DeleteOrgsOrgIdVaultAccessGrantsId) | **Delete** /orgs/{org_id}/vault/access-grants/{id} | Revoke an org vault access grant now
 [**DeleteOrgsOrgIdVaultRentalsId**](VaultAPI.md#DeleteOrgsOrgIdVaultRentalsId) | **Delete** /orgs/{org_id}/vault/rentals/{id} | Revoke a vault rental (issue #4027)
-[**DeleteOrgsOrgIdVaultSharesShareId**](VaultAPI.md#DeleteOrgsOrgIdVaultSharesShareId) | **Delete** /orgs/{org_id}/vault/shares/{share_id} | End a share I sent
+[**DeleteOrgsOrgIdVaultSharesShareId**](VaultAPI.md#DeleteOrgsOrgIdVaultSharesShareId) | **Delete** /orgs/{org_id}/vault/shares/{share_id} | End a secret share
 [**GetAccessGrants**](VaultAPI.md#GetAccessGrants) | **Get** /access-grants | List active access grants in my org
 [**GetApiV1VaultJitRequests**](VaultAPI.md#GetApiV1VaultJitRequests) | **Get** /api/v1/vault/jit-requests | List JIT requests (admin)
 [**GetApiV1VaultJitStatusRequestToken**](VaultAPI.md#GetApiV1VaultJitStatusRequestToken) | **Get** /api/v1/vault/jit-status/{request_token} | Get JIT request status
@@ -16,10 +16,10 @@ Method | HTTP request | Description
 [**GetOrgsOrgIdVaultDeliveries**](VaultAPI.md#GetOrgsOrgIdVaultDeliveries) | **Get** /orgs/{org_id}/vault/deliveries | Read the org vault&#39;s delivery ledger (issue #4030, A7)
 [**GetOrgsOrgIdVaultKeys**](VaultAPI.md#GetOrgsOrgIdVaultKeys) | **Get** /orgs/{org_id}/vault/keys | Read the org vault&#39;s dual key slots (issue #4026)
 [**GetOrgsOrgIdVaultMachines**](VaultAPI.md#GetOrgsOrgIdVaultMachines) | **Get** /orgs/{org_id}/vault/machines | List the org vault&#39;s machines (issue #4030, A11)
-[**GetOrgsOrgIdVaultReceivedShares**](VaultAPI.md#GetOrgsOrgIdVaultReceivedShares) | **Get** /orgs/{org_id}/vault/received-shares | List shares sent to me in an org
+[**GetOrgsOrgIdVaultReceivedShares**](VaultAPI.md#GetOrgsOrgIdVaultReceivedShares) | **Get** /orgs/{org_id}/vault/received-shares | List the shares you received
 [**GetOrgsOrgIdVaultRentalsId**](VaultAPI.md#GetOrgsOrgIdVaultRentalsId) | **Get** /orgs/{org_id}/vault/rentals/{id} | Read a vault rental&#39;s status (issue #4027)
 [**GetOrgsOrgIdVaultSalt**](VaultAPI.md#GetOrgsOrgIdVaultSalt) | **Get** /orgs/{org_id}/vault/salt | Read the org vault&#39;s KDF salt (transitional, issue #4025)
-[**GetOrgsOrgIdVaultShares**](VaultAPI.md#GetOrgsOrgIdVaultShares) | **Get** /orgs/{org_id}/vault/shares | List shares I have sent in an org
+[**GetOrgsOrgIdVaultShares**](VaultAPI.md#GetOrgsOrgIdVaultShares) | **Get** /orgs/{org_id}/vault/shares | List the org&#39;s secret shares
 [**GetServiceAccountsSaIdAccessGrants**](VaultAPI.md#GetServiceAccountsSaIdAccessGrants) | **Get** /service-accounts/{sa_id}/access-grants | List access grants for a service account
 [**GetServiceAccountsSaIdAccessGrantsMe**](VaultAPI.md#GetServiceAccountsSaIdAccessGrantsMe) | **Get** /service-accounts/{sa_id}/access-grants/me | Check my access to a service account
 [**PostApiV1VaultJitApprove**](VaultAPI.md#PostApiV1VaultJitApprove) | **Post** /api/v1/vault/jit-approve | Approve or deny JIT access request
@@ -28,7 +28,7 @@ Method | HTTP request | Description
 [**PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets**](VaultAPI.md#PostOrgsOrgIdVaultMachinesAgentIdRotateHeldSecrets) | **Post** /orgs/{org_id}/vault/machines/{agent_id}/rotate-held-secrets | Rotate the secrets a machine holds (issue #4030, A11 — the tab&#39;s only write)
 [**PostOrgsOrgIdVaultRentals**](VaultAPI.md#PostOrgsOrgIdVaultRentals) | **Post** /orgs/{org_id}/vault/rentals | Mint an operation-scoped vault secret rental (issue #4027, D3)
 [**PostOrgsOrgIdVaultRotatePassword**](VaultAPI.md#PostOrgsOrgIdVaultRotatePassword) | **Post** /orgs/{org_id}/vault/rotate-password | Rotate org vault password
-[**PostOrgsOrgIdVaultShares**](VaultAPI.md#PostOrgsOrgIdVaultShares) | **Post** /orgs/{org_id}/vault/shares | Share a vault secret with a recipient
+[**PostOrgsOrgIdVaultShares**](VaultAPI.md#PostOrgsOrgIdVaultShares) | **Post** /orgs/{org_id}/vault/shares | Share a secret with a member
 [**PostServiceAccountsSaIdAccessGrants**](VaultAPI.md#PostServiceAccountsSaIdAccessGrants) | **Post** /service-accounts/{sa_id}/access-grants | Grant a member time-bound access to a service account
 [**PutOrgsOrgIdVaultSlotsSlot**](VaultAPI.md#PutOrgsOrgIdVaultSlotsSlot) | **Put** /orgs/{org_id}/vault/slots/{slot} | Replace a wrapped org vault slot (issue #4026, A9; #4075 renamed the route)
 
@@ -250,7 +250,9 @@ Name | Type | Description  | Notes
 
 > HandlersSecretShareView DeleteOrgsOrgIdVaultSharesShareId(ctx, orgId, shareId).Execute()
 
-End a share I sent
+End a secret share
+
+
 
 ### Example
 
@@ -266,7 +268,7 @@ import (
 
 func main() {
 	orgId := int32(56) // int32 | Organization ID
-	shareId := "shareId_example" // string | Share ID
+	shareId := "shareId_example" // string | Share ID (lower-case UUID)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -287,7 +289,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **orgId** | **int32** | Organization ID | 
-**shareId** | **string** | Share ID | 
+**shareId** | **string** | Share ID (lower-case UUID) | 
 
 ### Other Parameters
 
@@ -866,9 +868,11 @@ Name | Type | Description  | Notes
 
 ## GetOrgsOrgIdVaultReceivedShares
 
-> map[string]interface{} GetOrgsOrgIdVaultReceivedShares(ctx, orgId).Execute()
+> HandlersSecretShareListResponse GetOrgsOrgIdVaultReceivedShares(ctx, orgId).Execute()
 
-List shares sent to me in an org
+List the shares you received
+
+
 
 ### Example
 
@@ -892,7 +896,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `VaultAPI.GetOrgsOrgIdVaultReceivedShares``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetOrgsOrgIdVaultReceivedShares`: map[string]interface{}
+	// response from `GetOrgsOrgIdVaultReceivedShares`: HandlersSecretShareListResponse
 	fmt.Fprintf(os.Stdout, "Response from `VaultAPI.GetOrgsOrgIdVaultReceivedShares`: %v\n", resp)
 }
 ```
@@ -916,7 +920,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**map[string]interface{}**
+[**HandlersSecretShareListResponse**](HandlersSecretShareListResponse.md)
 
 ### Authorization
 
@@ -1077,9 +1081,11 @@ Name | Type | Description  | Notes
 
 ## GetOrgsOrgIdVaultShares
 
-> map[string]interface{} GetOrgsOrgIdVaultShares(ctx, orgId).SecretType(secretType).SecretId(secretId).Execute()
+> HandlersSecretShareListResponse GetOrgsOrgIdVaultShares(ctx, orgId).SecretType(secretType).SecretId(secretId).Execute()
 
-List shares I have sent in an org
+List the org's secret shares
+
+
 
 ### Example
 
@@ -1095,8 +1101,8 @@ import (
 
 func main() {
 	orgId := int32(56) // int32 | Organization ID
-	secretType := "secretType_example" // string | Filter by secret type (optional)
-	secretId := int32(56) // int32 | Filter by secret ID (optional)
+	secretType := "secretType_example" // string | Only shares of this secret type (optional)
+	secretId := int32(56) // int32 | Only shares of this secret id (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -1105,7 +1111,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `VaultAPI.GetOrgsOrgIdVaultShares``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetOrgsOrgIdVaultShares`: map[string]interface{}
+	// response from `GetOrgsOrgIdVaultShares`: HandlersSecretShareListResponse
 	fmt.Fprintf(os.Stdout, "Response from `VaultAPI.GetOrgsOrgIdVaultShares`: %v\n", resp)
 }
 ```
@@ -1126,12 +1132,12 @@ Other parameters are passed through a pointer to a apiGetOrgsOrgIdVaultSharesReq
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **secretType** | **string** | Filter by secret type | 
- **secretId** | **int32** | Filter by secret ID | 
+ **secretType** | **string** | Only shares of this secret type | 
+ **secretId** | **int32** | Only shares of this secret id | 
 
 ### Return type
 
-**map[string]interface{}**
+[**HandlersSecretShareListResponse**](HandlersSecretShareListResponse.md)
 
 ### Authorization
 
@@ -1708,9 +1714,9 @@ No authorization required
 
 ## PostOrgsOrgIdVaultShares
 
-> HandlersSecretShareView PostOrgsOrgIdVaultShares(ctx, orgId).Request(request).Execute()
+> HandlersSecretShareView PostOrgsOrgIdVaultShares(ctx, orgId).Body(body).Execute()
 
-Share a vault secret with a recipient
+Share a secret with a member
 
 
 
@@ -1728,11 +1734,11 @@ import (
 
 func main() {
 	orgId := int32(56) // int32 | Organization ID
-	request := *openapiclient.NewHandlersCreateShareRequest() // HandlersCreateShareRequest | Share
+	body := *openapiclient.NewHandlersCreateShareRequest() // HandlersCreateShareRequest | The share: client id, secret, recipient, lifetime and the one-time release
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.VaultAPI.PostOrgsOrgIdVaultShares(context.Background(), orgId).Request(request).Execute()
+	resp, r, err := apiClient.VaultAPI.PostOrgsOrgIdVaultShares(context.Background(), orgId).Body(body).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `VaultAPI.PostOrgsOrgIdVaultShares``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1758,7 +1764,7 @@ Other parameters are passed through a pointer to a apiPostOrgsOrgIdVaultSharesRe
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **request** | [**HandlersCreateShareRequest**](HandlersCreateShareRequest.md) | Share | 
+ **body** | [**HandlersCreateShareRequest**](HandlersCreateShareRequest.md) | The share: client id, secret, recipient, lifetime and the one-time release | 
 
 ### Return type
 
