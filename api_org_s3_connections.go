@@ -51,6 +51,23 @@ type OrgS3ConnectionsAPI interface {
 	GetOrgsOrgIdS3ConnectionsExecute(r ApiGetOrgsOrgIdS3ConnectionsRequest) ([]HandlersOrgS3ConnectionResponse, *http.Response, error)
 
 	/*
+	GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsage Get bucket usage for an org-scoped S3 connection
+
+	Latest bucket occupancy snapshot with its freshness stamp, partial flag, and the fill projection. bytes and object_count are null when the bucket was not measured (for example, the platform cannot read its credential), never 0. projection.days_to_full is null until a capacity is set for the bucket.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@param id S3 Connection ID
+	@param bucket Bucket name
+	@return ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest
+	*/
+	GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsage(ctx context.Context, orgId int32, id int32, bucket string) ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest
+
+	// GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageExecute executes the request
+	//  @return StoragebucketUsageView
+	GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageExecute(r ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest) (*StoragebucketUsageView, *http.Response, error)
+
+	/*
 	PostOrgsOrgIdS3Connections Create an org-scoped S3 connection
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -369,6 +386,163 @@ func (a *OrgS3ConnectionsAPIService) GetOrgsOrgIdS3ConnectionsExecute(r ApiGetOr
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest struct {
+	ctx context.Context
+	ApiService OrgS3ConnectionsAPI
+	orgId int32
+	id int32
+	bucket string
+}
+
+func (r ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest) Execute() (*StoragebucketUsageView, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageExecute(r)
+}
+
+/*
+GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsage Get bucket usage for an org-scoped S3 connection
+
+Latest bucket occupancy snapshot with its freshness stamp, partial flag, and the fill projection. bytes and object_count are null when the bucket was not measured (for example, the platform cannot read its credential), never 0. projection.days_to_full is null until a capacity is set for the bucket.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @param id S3 Connection ID
+ @param bucket Bucket name
+ @return ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest
+*/
+func (a *OrgS3ConnectionsAPIService) GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsage(ctx context.Context, orgId int32, id int32, bucket string) ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest {
+	return ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		id: id,
+		bucket: bucket,
+	}
+}
+
+// Execute executes the request
+//  @return StoragebucketUsageView
+func (a *OrgS3ConnectionsAPIService) GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageExecute(r ApiGetOrgsOrgIdS3ConnectionsIdBucketsBucketUsageRequest) (*StoragebucketUsageView, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *StoragebucketUsageView
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrgS3ConnectionsAPIService.GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsage")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/s3-connections/{id}/buckets/{bucket}/usage"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"bucket"+"}", url.PathEscape(parameterValueToString(r.bucket, "bucket")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

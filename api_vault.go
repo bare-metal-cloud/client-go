@@ -68,11 +68,13 @@ type VaultAPI interface {
 	DeleteOrgsOrgIdVaultRentalsIdExecute(r ApiDeleteOrgsOrgIdVaultRentalsIdRequest) (*http.Response, error)
 
 	/*
-	DeleteOrgsOrgIdVaultSharesShareId End a share I sent
+	DeleteOrgsOrgIdVaultSharesShareId End a secret share
+
+	Ends a share now. The sharer, or any other Owner or Admin, may end it. The recipient's next use is refused from then on.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Organization ID
-	@param shareId Share ID
+	@param shareId Share ID (lower-case UUID)
 	@return ApiDeleteOrgsOrgIdVaultSharesShareIdRequest
 	*/
 	DeleteOrgsOrgIdVaultSharesShareId(ctx context.Context, orgId int32, shareId string) ApiDeleteOrgsOrgIdVaultSharesShareIdRequest
@@ -198,7 +200,9 @@ type VaultAPI interface {
 	GetOrgsOrgIdVaultMachinesExecute(r ApiGetOrgsOrgIdVaultMachinesRequest) (*HandlersOrgVaultMachinesResponse, *http.Response, error)
 
 	/*
-	GetOrgsOrgIdVaultReceivedShares List shares sent to me in an org
+	GetOrgsOrgIdVaultReceivedShares List the shares you received
+
+	Lists the caller's active shares in this org: the secrets they can use right now. Metadata only.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Organization ID
@@ -207,8 +211,8 @@ type VaultAPI interface {
 	GetOrgsOrgIdVaultReceivedShares(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultReceivedSharesRequest
 
 	// GetOrgsOrgIdVaultReceivedSharesExecute executes the request
-	//  @return map[string]interface{}
-	GetOrgsOrgIdVaultReceivedSharesExecute(r ApiGetOrgsOrgIdVaultReceivedSharesRequest) (map[string]interface{}, *http.Response, error)
+	//  @return HandlersSecretShareListResponse
+	GetOrgsOrgIdVaultReceivedSharesExecute(r ApiGetOrgsOrgIdVaultReceivedSharesRequest) (*HandlersSecretShareListResponse, *http.Response, error)
 
 	/*
 	GetOrgsOrgIdVaultRentalsId Read a vault rental's status (issue #4027)
@@ -242,7 +246,9 @@ type VaultAPI interface {
 	GetOrgsOrgIdVaultSaltExecute(r ApiGetOrgsOrgIdVaultSaltRequest) (map[string]string, *http.Response, error)
 
 	/*
-	GetOrgsOrgIdVaultShares List shares I have sent in an org
+	GetOrgsOrgIdVaultShares List the org's secret shares
+
+	Lists every share in the org, optionally narrowed to one secret. Metadata only: never a value, a code or a key.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Organization ID
@@ -251,8 +257,8 @@ type VaultAPI interface {
 	GetOrgsOrgIdVaultShares(ctx context.Context, orgId int32) ApiGetOrgsOrgIdVaultSharesRequest
 
 	// GetOrgsOrgIdVaultSharesExecute executes the request
-	//  @return map[string]interface{}
-	GetOrgsOrgIdVaultSharesExecute(r ApiGetOrgsOrgIdVaultSharesRequest) (map[string]interface{}, *http.Response, error)
+	//  @return HandlersSecretShareListResponse
+	GetOrgsOrgIdVaultSharesExecute(r ApiGetOrgsOrgIdVaultSharesRequest) (*HandlersSecretShareListResponse, *http.Response, error)
 
 	/*
 	GetServiceAccountsSaIdAccessGrants List access grants for a service account
@@ -370,9 +376,9 @@ type VaultAPI interface {
 	PostOrgsOrgIdVaultRotatePasswordExecute(r ApiPostOrgsOrgIdVaultRotatePasswordRequest) (*HandlersOrgVaultRotatePasswordResponse, *http.Response, error)
 
 	/*
-	PostOrgsOrgIdVaultShares Share a vault secret with a recipient
+	PostOrgsOrgIdVaultShares Share a secret with a member
 
-	Sharer creates a time-bound share of a vault secret to a recipient in the org. Needs a fresh sudo window (X-BMC-Sudo or session marker). Releases the secret's own value (and linked registry credential) once, per ADR-104.
+	Creates a time-limited share of one secret. The recipient uses it through the platform and never sees the value. A released type (cloud_credential, image_registry, ssh_connection) carries the sharer's one-time release: the server seals it and keeps it until the share ends. Sudo-gated for the sharer; an Owner or Admin may share.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Organization ID
@@ -866,11 +872,13 @@ func (r ApiDeleteOrgsOrgIdVaultSharesShareIdRequest) Execute() (*HandlersSecretS
 }
 
 /*
-DeleteOrgsOrgIdVaultSharesShareId End a share I sent
+DeleteOrgsOrgIdVaultSharesShareId End a secret share
+
+Ends a share now. The sharer, or any other Owner or Admin, may end it. The recipient's next use is refused from then on.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param orgId Organization ID
- @param shareId Share ID
+ @param shareId Share ID (lower-case UUID)
  @return ApiDeleteOrgsOrgIdVaultSharesShareIdRequest
 */
 func (a *VaultAPIService) DeleteOrgsOrgIdVaultSharesShareId(ctx context.Context, orgId int32, shareId string) ApiDeleteOrgsOrgIdVaultSharesShareIdRequest {
@@ -972,8 +980,8 @@ func (a *VaultAPIService) DeleteOrgsOrgIdVaultSharesShareIdExecute(r ApiDeleteOr
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v map[string]string
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -983,8 +991,19 @@ func (a *VaultAPIService) DeleteOrgsOrgIdVaultSharesShareIdExecute(r ApiDeleteOr
 					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
-		if localVarHTTPResponse.StatusCode == 404 {
-			var v map[string]string
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -2175,12 +2194,14 @@ type ApiGetOrgsOrgIdVaultReceivedSharesRequest struct {
 	orgId int32
 }
 
-func (r ApiGetOrgsOrgIdVaultReceivedSharesRequest) Execute() (map[string]interface{}, *http.Response, error) {
+func (r ApiGetOrgsOrgIdVaultReceivedSharesRequest) Execute() (*HandlersSecretShareListResponse, *http.Response, error) {
 	return r.ApiService.GetOrgsOrgIdVaultReceivedSharesExecute(r)
 }
 
 /*
-GetOrgsOrgIdVaultReceivedShares List shares sent to me in an org
+GetOrgsOrgIdVaultReceivedShares List the shares you received
+
+Lists the caller's active shares in this org: the secrets they can use right now. Metadata only.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param orgId Organization ID
@@ -2195,13 +2216,13 @@ func (a *VaultAPIService) GetOrgsOrgIdVaultReceivedShares(ctx context.Context, o
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
-func (a *VaultAPIService) GetOrgsOrgIdVaultReceivedSharesExecute(r ApiGetOrgsOrgIdVaultReceivedSharesRequest) (map[string]interface{}, *http.Response, error) {
+//  @return HandlersSecretShareListResponse
+func (a *VaultAPIService) GetOrgsOrgIdVaultReceivedSharesExecute(r ApiGetOrgsOrgIdVaultReceivedSharesRequest) (*HandlersSecretShareListResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarReturnValue  *HandlersSecretShareListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultReceivedShares")
@@ -2283,8 +2304,8 @@ func (a *VaultAPIService) GetOrgsOrgIdVaultReceivedSharesExecute(r ApiGetOrgsOrg
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v map[string]string
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -2629,24 +2650,26 @@ type ApiGetOrgsOrgIdVaultSharesRequest struct {
 	secretId *int32
 }
 
-// Filter by secret type
+// Only shares of this secret type
 func (r ApiGetOrgsOrgIdVaultSharesRequest) SecretType(secretType string) ApiGetOrgsOrgIdVaultSharesRequest {
 	r.secretType = &secretType
 	return r
 }
 
-// Filter by secret ID
+// Only shares of this secret id
 func (r ApiGetOrgsOrgIdVaultSharesRequest) SecretId(secretId int32) ApiGetOrgsOrgIdVaultSharesRequest {
 	r.secretId = &secretId
 	return r
 }
 
-func (r ApiGetOrgsOrgIdVaultSharesRequest) Execute() (map[string]interface{}, *http.Response, error) {
+func (r ApiGetOrgsOrgIdVaultSharesRequest) Execute() (*HandlersSecretShareListResponse, *http.Response, error) {
 	return r.ApiService.GetOrgsOrgIdVaultSharesExecute(r)
 }
 
 /*
-GetOrgsOrgIdVaultShares List shares I have sent in an org
+GetOrgsOrgIdVaultShares List the org's secret shares
+
+Lists every share in the org, optionally narrowed to one secret. Metadata only: never a value, a code or a key.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param orgId Organization ID
@@ -2661,13 +2684,13 @@ func (a *VaultAPIService) GetOrgsOrgIdVaultShares(ctx context.Context, orgId int
 }
 
 // Execute executes the request
-//  @return map[string]interface{}
-func (a *VaultAPIService) GetOrgsOrgIdVaultSharesExecute(r ApiGetOrgsOrgIdVaultSharesRequest) (map[string]interface{}, *http.Response, error) {
+//  @return HandlersSecretShareListResponse
+func (a *VaultAPIService) GetOrgsOrgIdVaultSharesExecute(r ApiGetOrgsOrgIdVaultSharesRequest) (*HandlersSecretShareListResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  map[string]interface{}
+		localVarReturnValue  *HandlersSecretShareListResponse
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VaultAPIService.GetOrgsOrgIdVaultShares")
@@ -2756,7 +2779,18 @@ func (a *VaultAPIService) GetOrgsOrgIdVaultSharesExecute(r ApiGetOrgsOrgIdVaultS
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
-			var v map[string]string
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -4084,12 +4118,12 @@ type ApiPostOrgsOrgIdVaultSharesRequest struct {
 	ctx context.Context
 	ApiService VaultAPI
 	orgId int32
-	request *HandlersCreateShareRequest
+	body *HandlersCreateShareRequest
 }
 
-// Share
-func (r ApiPostOrgsOrgIdVaultSharesRequest) Request(request HandlersCreateShareRequest) ApiPostOrgsOrgIdVaultSharesRequest {
-	r.request = &request
+// The share: client id, secret, recipient, lifetime and the one-time release
+func (r ApiPostOrgsOrgIdVaultSharesRequest) Body(body HandlersCreateShareRequest) ApiPostOrgsOrgIdVaultSharesRequest {
+	r.body = &body
 	return r
 }
 
@@ -4098,9 +4132,9 @@ func (r ApiPostOrgsOrgIdVaultSharesRequest) Execute() (*HandlersSecretShareView,
 }
 
 /*
-PostOrgsOrgIdVaultShares Share a vault secret with a recipient
+PostOrgsOrgIdVaultShares Share a secret with a member
 
-Sharer creates a time-bound share of a vault secret to a recipient in the org. Needs a fresh sudo window (X-BMC-Sudo or session marker). Releases the secret's own value (and linked registry credential) once, per ADR-104.
+Creates a time-limited share of one secret. The recipient uses it through the platform and never sees the value. A released type (cloud_credential, image_registry, ssh_connection) carries the sharer's one-time release: the server seals it and keeps it until the share ends. Sudo-gated for the sharer; an Owner or Admin may share.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param orgId Organization ID
@@ -4135,8 +4169,8 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultSharesExecute(r ApiPostOrgsOrgIdVaul
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.request == nil {
-		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -4157,7 +4191,7 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultSharesExecute(r ApiPostOrgsOrgIdVaul
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.request
+	localVarPostBody = r.body
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -4230,6 +4264,17 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultSharesExecute(r ApiPostOrgsOrgIdVaul
 					newErr.model = v
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
 		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
@@ -4253,6 +4298,17 @@ func (a *VaultAPIService) PostOrgsOrgIdVaultSharesExecute(r ApiPostOrgsOrgIdVaul
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
