@@ -1,7 +1,7 @@
 {
   "source_repo": "bare-metal-cloud/backend",
   "source_ref": "dev-release",
-  "source_sha": "3ca17534df1b6f46b823825c5c08c39236ac4056",
+  "source_sha": "d4f0a946c528e32b0557e06833bad45f4da81345",
   "spec_path": "web/backend/docs/swagger.json",
-  "raw_spec_sha256": "74b5a5b8e077f9714d3513ba31118751c6e32d99ad1e260105b1286b8d46adb8"
+  "raw_spec_sha256": "4bbaca35a6ef1f944ab5c6f2edf08b64e218541fb0983bae3905324a198ea6f5"
 }

@@ -217,6 +217,7 @@ docs/EngineStorageClassFact.md
 docs/EngineThresholdRange.md
 docs/EngineportsArrivalStrandRefusalDetail.md
 docs/EngineportsInstallProgressEvent.md
+docs/EngineportsPGExtension.md
 docs/EngineportsRecordCleanupOutcome.md
 docs/EngineportsStrandDeadTarget.md
 docs/EngineportsStrandRecordDiff.md
@@ -286,6 +287,8 @@ docs/HandlersCloneStatusResponse.md
 docs/HandlersClusterAgentUpdateRequest.md
 docs/HandlersClusterEdgeHostnameView.md
 docs/HandlersCreateAdminDatabaseRequest.md
+docs/HandlersCreateAdminGrantRequest.md
+docs/HandlersCreateAdminUserRequest.md
 docs/HandlersCreateCloudProviderCredentialRequest.md
 docs/HandlersCreateClusterRequest.md
 docs/HandlersCreateClusterRequestData.md
@@ -306,6 +309,8 @@ docs/HandlersCredentialBucketCatalogResponse.md
 docs/HandlersCredentialRegistryCatalogResponse.md
 docs/HandlersCurrentKeyState.md
 docs/HandlersCustomPortRule.md
+docs/HandlersDatabaseExtensionsResponse.md
+docs/HandlersDatabaseStatusResponse.md
 docs/HandlersDelegatedActionRequest.md
 docs/HandlersDelegationMandateRequest.md
 docs/HandlersDelegationMandateView.md
@@ -335,6 +340,8 @@ docs/HandlersDurabilityPoint.md
 docs/HandlersDurabilityRun.md
 docs/HandlersDurabilitySection.md
 docs/HandlersDurabilityStreaks.md
+docs/HandlersEditAdminGrantRequest.md
+docs/HandlersEditAdminUserRoleRequest.md
 docs/HandlersElevationUser.md
 docs/HandlersElevationView.md
 docs/HandlersEnableInstallRequest.md
@@ -873,6 +880,7 @@ model_engine_storage_class_fact.go
 model_engine_threshold_range.go
 model_engineports_arrival_strand_refusal_detail.go
 model_engineports_install_progress_event.go
+model_engineports_pg_extension.go
 model_engineports_record_cleanup_outcome.go
 model_engineports_strand_dead_target.go
 model_engineports_strand_record_diff.go
@@ -937,6 +945,8 @@ model_handlers_clone_status_response.go
 model_handlers_cluster_agent_update_request.go
 model_handlers_cluster_edge_hostname_view.go
 model_handlers_create_admin_database_request.go
+model_handlers_create_admin_grant_request.go
+model_handlers_create_admin_user_request.go
 model_handlers_create_cloud_provider_credential_request.go
 model_handlers_create_cluster_request.go
 model_handlers_create_cluster_request_data.go
@@ -957,6 +967,8 @@ model_handlers_credential_bucket_catalog_response.go
 model_handlers_credential_registry_catalog_response.go
 model_handlers_current_key_state.go
 model_handlers_custom_port_rule.go
+model_handlers_database_extensions_response.go
+model_handlers_database_status_response.go
 model_handlers_delegated_action_request.go
 model_handlers_delegation_mandate_request.go
 model_handlers_delegation_mandate_view.go
@@ -986,6 +998,8 @@ model_handlers_durability_point.go
 model_handlers_durability_run.go
 model_handlers_durability_section.go
 model_handlers_durability_streaks.go
+model_handlers_edit_admin_grant_request.go
+model_handlers_edit_admin_user_role_request.go
 model_handlers_elevation_user.go
 model_handlers_elevation_view.go
 model_handlers_enable_install_request.go

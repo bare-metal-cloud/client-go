@@ -28708,7 +28708,7 @@
           },
           {
             "type": "boolean",
-            "description": "Force the delete past the reference guard (admin/owner only)",
+            "description": "Force the delete past the secret-reference guard (admin/owner only); a backup-plan or managed-database consumer is never forceable",
             "name": "force",
             "in": "query"
           }
@@ -28746,7 +28746,7 @@
             }
           },
           "409": {
-            "description": "Connection in use",
+            "description": "Connection in use \u2014 referenced by a secret, or by a backup plan or managed database (the body lists the consumers)",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -30467,6 +30467,281 @@
         "operationId": "PostServicesDatabasesIdAdminDatabases"
       }
     },
+    "/services/databases/{id}/admin/grants": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The grants surface's read (FR-T-2): every current org member with their\nbaseline (org admins and the owner carry the read-only baseline without a\ngrant) and their granted axes \u2014 level \u00d7 kind \u00d7 scope \u2014 in plain language.\nMembers with neither baseline nor grants appear as not permitted. Engine-neutral;\nno grant syntax, no credentials.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "See who can do what on a database service",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetServicesDatabasesIdAdminGrants"
+      },
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Records one member's grant (FR-T-2): level (read, read_write) \u00d7 kind (data,\nschema, add_only) \u00d7 scope (one panel-created database, optionally one table\nfor data and add_only grants). The grant is effective immediately \u2014 panel\naccess, no apply lane, no revision. Invalid shapes (read+add_only, a table\nscope on schema, a non-member subject, an unknown or reserved scope) answer 422.",
+        "tags": [
+          "databases"
+        ],
+        "summary": "Grant a member access to a database service",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "The member id and the grant axes",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.CreateAdminGrantRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdAdminGrants"
+      }
+    },
+    "/services/databases/{id}/admin/grants/{grantId}": {
+      "delete": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Removes one grant (the row is deleted; the change log keeps the history with a\nverdict). Effective immediately.",
+        "tags": [
+          "databases"
+        ],
+        "summary": "Revoke a member's grant",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Grant ID",
+            "name": "grantId",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "DeleteServicesDatabasesIdAdminGrantsGrantId"
+      },
+      "patch": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Changes a grant's axes or scope (the before/after lands in the change log with\na verdict). The grant is effective immediately; the same verdict law as the\ncreate. Invalid shapes answer 422.",
+        "tags": [
+          "databases"
+        ],
+        "summary": "Edit a member's grant",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Grant ID",
+            "name": "grantId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "The member id and the new grant axes",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.EditAdminGrantRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PatchServicesDatabasesIdAdminGrantsGrantId"
+      }
+    },
     "/services/databases/{id}/admin/parameters": {
       "get": {
         "security": [
@@ -30711,6 +30986,370 @@
         "operationId": "PutServicesDatabasesIdAdminParametersName"
       }
     },
+    "/services/databases/{id}/admin/users": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The database admin panel's user list (FR-T-2): the bundle-owned install-time login\n(read-only) plus the panel-created overlay users, each with its target database,\nplain-language role and apply verdict. Revoked users stay listed (absent); deleted\nones leave the list. Engine-neutral (FR-T-3); no grant syntax, no credentials.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "List the users on a database service",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetServicesDatabasesIdAdminUsers"
+      },
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Adds one user to the install's admin overlay (FR-T-2), scoped to ONE panel-created\ndatabase with one of the four roles (read, write, read_write, schema_change). The\npassword is generated server-side and sealed in the install escrow \u2014 it never\nappears in the response, the overlay, the rows or any log. The change is recorded\nwith a verdict; until the overlay apply lane ships, the verdict is honestly pending.",
+        "tags": [
+          "databases"
+        ],
+        "summary": "Create a user on a database service",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "The user name, target database and role",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.CreateAdminUserRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdAdminUsers"
+      }
+    },
+    "/services/databases/{id}/admin/users/{name}": {
+      "delete": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Deletes a panel user: the role drops on the next apply, the entry becomes a hidden\ntombstone, and the sealed escrow entry is purged after that apply passes (ADR-103\nD6). Creating the same name again starts a fresh user.",
+        "tags": [
+          "databases"
+        ],
+        "summary": "Delete a user",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "User name",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "DeleteServicesDatabasesIdAdminUsersName"
+      },
+      "patch": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Changes a panel user's role to one of the four plain-language roles (FR-T-2). The\nchange is recorded with a verdict and before/after evidence; until the overlay\napply lane ships, the verdict is honestly pending.",
+        "tags": [
+          "databases"
+        ],
+        "summary": "Edit a user's role",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "User name",
+            "name": "name",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "The new role",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.EditAdminUserRoleRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PatchServicesDatabasesIdAdminUsersName"
+      }
+    },
+    "/services/databases/{id}/admin/users/{name}/revoke": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Drops a panel user's login (the role and its grants die with it on the next apply).\nThe entry and its sealed password stay \u2014 the reversible shape: creating the same\nname again re-grants it with a fresh password.",
+        "tags": [
+          "databases"
+        ],
+        "summary": "Revoke a user's login",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "User name",
+            "name": "name",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdAdminUsersNameRevoke"
+      }
+    },
     "/services/databases/{id}/connection": {
       "get": {
         "security": [
@@ -30808,6 +31447,83 @@
           }
         },
         "operationId": "PostServicesDatabasesIdConnectionReset-password"
+      }
+    },
+    "/services/databases/{id}/extensions": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The extensions inventory read from pg_extension through the\nagent tunnel. Absence is named, not fabricated: a database\nthat is not running or is not Postgres answers 200 with\navailable=false and a reason.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "List the Postgres extensions installed on a database",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.databaseExtensionsResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetServicesDatabasesIdExtensions"
       }
     },
     "/services/databases/{id}/recover-lane": {
@@ -31115,6 +31831,69 @@
           }
         },
         "operationId": "PostServicesDatabasesIdStart"
+      }
+    },
+    "/services/databases/{id}/status": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The database row (StatusMessage redacted in-handler) plus\nmax_replica_lag_seconds \u2014 the worst replica's lag, null when\nthere is no source (\"not reported\", never zero).",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Get database deployment status",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.databaseStatusResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetServicesDatabasesIdStatus"
       }
     },
     "/services/databases/{id}/stop": {
@@ -37167,6 +37946,20 @@
         }
       }
     },
+    "engineports.PGExtension": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "schema": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
     "engineports.RecordCleanupOutcome": {
       "type": "object",
       "properties": {
@@ -38079,6 +38872,40 @@
         }
       }
     },
+    "handlers.CreateAdminGrantRequest": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string"
+        },
+        "scope_database": {
+          "type": "string"
+        },
+        "scope_table": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "handlers.CreateAdminUserRequest": {
+      "type": "object",
+      "properties": {
+        "database": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.CreateCloudProviderCredentialRequest": {
       "type": "object",
       "required": [
@@ -38924,6 +39751,34 @@
           "type": "string"
         },
         "url": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.EditAdminGrantRequest": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "level": {
+          "type": "string"
+        },
+        "scope_database": {
+          "type": "string"
+        },
+        "scope_table": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer"
+        }
+      }
+    },
+    "handlers.EditAdminUserRoleRequest": {
+      "type": "object",
+      "properties": {
+        "role": {
           "type": "string"
         }
       }
@@ -43965,6 +44820,125 @@
           "type": "integer"
         },
         "secret_type": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.databaseExtensionsResponse": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/engineports.PGExtension"
+          }
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.databaseStatusResponse": {
+      "type": "object",
+      "properties": {
+        "backup_bucket_name": {
+          "type": "string"
+        },
+        "backup_enabled": {
+          "description": "Backups",
+          "type": "boolean"
+        },
+        "backup_schedule": {
+          "type": "string"
+        },
+        "cluster_id": {
+          "type": "integer"
+        },
+        "cpu_limit": {
+          "description": "e.g. 1000m",
+          "type": "string"
+        },
+        "cpu_request": {
+          "description": "Resource configuration",
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "created_by_user_id": {
+          "type": "integer"
+        },
+        "ha_enabled": {
+          "description": "High availability",
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "last_used_at": {
+          "type": "string"
+        },
+        "max_replica_lag_seconds": {
+          "type": "number"
+        },
+        "memory_limit": {
+          "description": "e.g. 1Gi",
+          "type": "string"
+        },
+        "memory_request": {
+          "description": "e.g. 128Mi",
+          "type": "string"
+        },
+        "name": {
+          "description": "Basic configuration",
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        },
+        "org_id": {
+          "type": "integer"
+        },
+        "project_id": {
+          "type": "integer"
+        },
+        "provisioned_at": {
+          "type": "string"
+        },
+        "replica_count": {
+          "type": "integer"
+        },
+        "s3_connection_id": {
+          "type": "integer"
+        },
+        "status": {
+          "description": "Status",
+          "allOf": [
+            {
+              "$ref": "#/definitions/models.DatabaseStatus"
+            }
+          ]
+        },
+        "status_message": {
+          "type": "string"
+        },
+        "storage_class": {
+          "type": "string"
+        },
+        "storage_size": {
+          "description": "Storage configuration",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/definitions/models.DatabaseType"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "version": {
           "type": "string"
         }
       }
