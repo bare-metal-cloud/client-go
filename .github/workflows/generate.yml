@@ -92,9 +92,10 @@ jobs:
 
       - name: Set up Go
         if: steps.watch.outputs.changed == 'true'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: stable
+          cache: false
 
       - name: Regenerate client
         if: steps.watch.outputs.changed == 'true'
