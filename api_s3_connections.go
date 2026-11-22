@@ -173,7 +173,7 @@ type ApiDeleteS3ConnectionsIdRequest struct {
 	force *bool
 }
 
-// Force the delete past the reference guard (admin/owner only)
+// Force the delete past the secret-reference guard (admin/owner only); a backup-plan or managed-database consumer is never forceable
 func (r ApiDeleteS3ConnectionsIdRequest) Force(force bool) ApiDeleteS3ConnectionsIdRequest {
 	r.force = &force
 	return r

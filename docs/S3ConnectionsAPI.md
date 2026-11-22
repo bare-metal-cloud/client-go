@@ -37,7 +37,7 @@ import (
 
 func main() {
 	id := "id_example" // string | S3 Connection ID
-	force := true // bool | Force the delete past the reference guard (admin/owner only) (optional)
+	force := true // bool | Force the delete past the secret-reference guard (admin/owner only); a backup-plan or managed-database consumer is never forceable (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -65,7 +65,7 @@ Other parameters are passed through a pointer to a apiDeleteS3ConnectionsIdReque
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **force** | **bool** | Force the delete past the reference guard (admin/owner only) | 
+ **force** | **bool** | Force the delete past the secret-reference guard (admin/owner only); a backup-plan or managed-database consumer is never forceable | 
 
 ### Return type
 

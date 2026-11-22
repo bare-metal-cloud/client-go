@@ -5,17 +5,28 @@ All URIs are relative to *http://localhost:3001/api/v1*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteServicesDatabasesId**](DatabasesAPI.md#DeleteServicesDatabasesId) | **Delete** /services/databases/{id} | Delete a database
+[**DeleteServicesDatabasesIdAdminGrantsGrantId**](DatabasesAPI.md#DeleteServicesDatabasesIdAdminGrantsGrantId) | **Delete** /services/databases/{id}/admin/grants/{grantId} | Revoke a member&#39;s grant
+[**DeleteServicesDatabasesIdAdminUsersName**](DatabasesAPI.md#DeleteServicesDatabasesIdAdminUsersName) | **Delete** /services/databases/{id}/admin/users/{name} | Delete a user
 [**GetServicesDatabases**](DatabasesAPI.md#GetServicesDatabases) | **Get** /services/databases | List all databases
 [**GetServicesDatabasesConfigSchema**](DatabasesAPI.md#GetServicesDatabasesConfigSchema) | **Get** /services/databases/config/schema | Get database configuration schema
 [**GetServicesDatabasesId**](DatabasesAPI.md#GetServicesDatabasesId) | **Get** /services/databases/{id} | Get database details
 [**GetServicesDatabasesIdAdminChanges**](DatabasesAPI.md#GetServicesDatabasesIdAdminChanges) | **Get** /services/databases/{id}/admin/changes | List the database service&#39;s admin change log
 [**GetServicesDatabasesIdAdminDatabases**](DatabasesAPI.md#GetServicesDatabasesIdAdminDatabases) | **Get** /services/databases/{id}/admin/databases | List the databases on a database service
+[**GetServicesDatabasesIdAdminGrants**](DatabasesAPI.md#GetServicesDatabasesIdAdminGrants) | **Get** /services/databases/{id}/admin/grants | See who can do what on a database service
 [**GetServicesDatabasesIdAdminParameters**](DatabasesAPI.md#GetServicesDatabasesIdAdminParameters) | **Get** /services/databases/{id}/admin/parameters | List the engine parameters on a database service
+[**GetServicesDatabasesIdAdminUsers**](DatabasesAPI.md#GetServicesDatabasesIdAdminUsers) | **Get** /services/databases/{id}/admin/users | List the users on a database service
 [**GetServicesDatabasesIdConnection**](DatabasesAPI.md#GetServicesDatabasesIdConnection) | **Get** /services/databases/{id}/connection | Get database connection info
+[**GetServicesDatabasesIdExtensions**](DatabasesAPI.md#GetServicesDatabasesIdExtensions) | **Get** /services/databases/{id}/extensions | List the Postgres extensions installed on a database
+[**GetServicesDatabasesIdStatus**](DatabasesAPI.md#GetServicesDatabasesIdStatus) | **Get** /services/databases/{id}/status | Get database deployment status
+[**PatchServicesDatabasesIdAdminGrantsGrantId**](DatabasesAPI.md#PatchServicesDatabasesIdAdminGrantsGrantId) | **Patch** /services/databases/{id}/admin/grants/{grantId} | Edit a member&#39;s grant
+[**PatchServicesDatabasesIdAdminUsersName**](DatabasesAPI.md#PatchServicesDatabasesIdAdminUsersName) | **Patch** /services/databases/{id}/admin/users/{name} | Edit a user&#39;s role
 [**PostServicesDatabases**](DatabasesAPI.md#PostServicesDatabases) | **Post** /services/databases | Create database configuration
 [**PostServicesDatabasesConfigValidate**](DatabasesAPI.md#PostServicesDatabasesConfigValidate) | **Post** /services/databases/config/validate | Validate database configuration
 [**PostServicesDatabasesIdAdminDatabases**](DatabasesAPI.md#PostServicesDatabasesIdAdminDatabases) | **Post** /services/databases/{id}/admin/databases | Create a database on a database service
+[**PostServicesDatabasesIdAdminGrants**](DatabasesAPI.md#PostServicesDatabasesIdAdminGrants) | **Post** /services/databases/{id}/admin/grants | Grant a member access to a database service
 [**PostServicesDatabasesIdAdminParametersApplyRestart**](DatabasesAPI.md#PostServicesDatabasesIdAdminParametersApplyRestart) | **Post** /services/databases/{id}/admin/parameters/apply-restart | Apply the staged parameter changes and restart
+[**PostServicesDatabasesIdAdminUsers**](DatabasesAPI.md#PostServicesDatabasesIdAdminUsers) | **Post** /services/databases/{id}/admin/users | Create a user on a database service
+[**PostServicesDatabasesIdAdminUsersNameRevoke**](DatabasesAPI.md#PostServicesDatabasesIdAdminUsersNameRevoke) | **Post** /services/databases/{id}/admin/users/{name}/revoke | Revoke a user&#39;s login
 [**PostServicesDatabasesIdConnectionResetPassword**](DatabasesAPI.md#PostServicesDatabasesIdConnectionResetPassword) | **Post** /services/databases/{id}/connection/reset-password | Reset database password
 [**PostServicesDatabasesIdRecoverLane**](DatabasesAPI.md#PostServicesDatabasesIdRecoverLane) | **Post** /services/databases/{id}/recover-lane | Recover a stranded backup lane (admin)
 [**PostServicesDatabasesIdRestart**](DatabasesAPI.md#PostServicesDatabasesIdRestart) | **Post** /services/databases/{id}/restart | Restart a database (graceful rolling restart)
@@ -80,6 +91,152 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **request** | [**HandlersDeleteDatabaseRequest**](HandlersDeleteDatabaseRequest.md) | Confirmation with database name | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeleteServicesDatabasesIdAdminGrantsGrantId
+
+> map[string]interface{} DeleteServicesDatabasesIdAdminGrantsGrantId(ctx, id, grantId).Execute()
+
+Revoke a member's grant
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	grantId := int32(56) // int32 | Grant ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.DeleteServicesDatabasesIdAdminGrantsGrantId(context.Background(), id, grantId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.DeleteServicesDatabasesIdAdminGrantsGrantId``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `DeleteServicesDatabasesIdAdminGrantsGrantId`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.DeleteServicesDatabasesIdAdminGrantsGrantId`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**grantId** | **int32** | Grant ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteServicesDatabasesIdAdminGrantsGrantIdRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeleteServicesDatabasesIdAdminUsersName
+
+> map[string]interface{} DeleteServicesDatabasesIdAdminUsersName(ctx, id, name).Execute()
+
+Delete a user
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	name := "name_example" // string | User name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.DeleteServicesDatabasesIdAdminUsersName(context.Background(), id, name).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.DeleteServicesDatabasesIdAdminUsersName``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `DeleteServicesDatabasesIdAdminUsersName`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.DeleteServicesDatabasesIdAdminUsersName`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**name** | **string** | User name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteServicesDatabasesIdAdminUsersNameRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
 
 ### Return type
 
@@ -426,6 +583,76 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## GetServicesDatabasesIdAdminGrants
+
+> map[string]interface{} GetServicesDatabasesIdAdminGrants(ctx, id).Execute()
+
+See who can do what on a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdAdminGrants(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdAdminGrants``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdAdminGrants`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdAdminGrants`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdAdminGrantsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetServicesDatabasesIdAdminParameters
 
 > map[string]interface{} GetServicesDatabasesIdAdminParameters(ctx, id).Execute()
@@ -472,6 +699,76 @@ Name | Type | Description  | Notes
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGetServicesDatabasesIdAdminParametersRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServicesDatabasesIdAdminUsers
+
+> map[string]interface{} GetServicesDatabasesIdAdminUsers(ctx, id).Execute()
+
+List the users on a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdAdminUsers(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdAdminUsers``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdAdminUsers`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdAdminUsers`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdAdminUsersRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -560,6 +857,296 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServicesDatabasesIdExtensions
+
+> HandlersDatabaseExtensionsResponse GetServicesDatabasesIdExtensions(ctx, id).Execute()
+
+List the Postgres extensions installed on a database
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdExtensions(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdExtensions``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdExtensions`: HandlersDatabaseExtensionsResponse
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdExtensions`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdExtensionsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**HandlersDatabaseExtensionsResponse**](HandlersDatabaseExtensionsResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServicesDatabasesIdStatus
+
+> HandlersDatabaseStatusResponse GetServicesDatabasesIdStatus(ctx, id).Execute()
+
+Get database deployment status
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdStatus(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdStatus``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdStatus`: HandlersDatabaseStatusResponse
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdStatus`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdStatusRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**HandlersDatabaseStatusResponse**](HandlersDatabaseStatusResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PatchServicesDatabasesIdAdminGrantsGrantId
+
+> map[string]interface{} PatchServicesDatabasesIdAdminGrantsGrantId(ctx, id, grantId).Request(request).Execute()
+
+Edit a member's grant
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	grantId := int32(56) // int32 | Grant ID
+	request := *openapiclient.NewHandlersEditAdminGrantRequest() // HandlersEditAdminGrantRequest | The member id and the new grant axes
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PatchServicesDatabasesIdAdminGrantsGrantId(context.Background(), id, grantId).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PatchServicesDatabasesIdAdminGrantsGrantId``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PatchServicesDatabasesIdAdminGrantsGrantId`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PatchServicesDatabasesIdAdminGrantsGrantId`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**grantId** | **int32** | Grant ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPatchServicesDatabasesIdAdminGrantsGrantIdRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **request** | [**HandlersEditAdminGrantRequest**](HandlersEditAdminGrantRequest.md) | The member id and the new grant axes | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PatchServicesDatabasesIdAdminUsersName
+
+> map[string]interface{} PatchServicesDatabasesIdAdminUsersName(ctx, id, name).Request(request).Execute()
+
+Edit a user's role
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	name := "name_example" // string | User name
+	request := *openapiclient.NewHandlersEditAdminUserRoleRequest() // HandlersEditAdminUserRoleRequest | The new role
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PatchServicesDatabasesIdAdminUsersName(context.Background(), id, name).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PatchServicesDatabasesIdAdminUsersName``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PatchServicesDatabasesIdAdminUsersName`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PatchServicesDatabasesIdAdminUsersName`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**name** | **string** | User name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPatchServicesDatabasesIdAdminUsersNameRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **request** | [**HandlersEditAdminUserRoleRequest**](HandlersEditAdminUserRoleRequest.md) | The new role | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -766,6 +1353,78 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## PostServicesDatabasesIdAdminGrants
+
+> map[string]interface{} PostServicesDatabasesIdAdminGrants(ctx, id).Request(request).Execute()
+
+Grant a member access to a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	request := *openapiclient.NewHandlersCreateAdminGrantRequest() // HandlersCreateAdminGrantRequest | The member id and the grant axes
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdAdminGrants(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdAdminGrants``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdAdminGrants`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdAdminGrants`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdAdminGrantsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersCreateAdminGrantRequest**](HandlersCreateAdminGrantRequest.md) | The member id and the grant axes | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## PostServicesDatabasesIdAdminParametersApplyRestart
 
 > map[string]interface{} PostServicesDatabasesIdAdminParametersApplyRestart(ctx, id).Execute()
@@ -816,6 +1475,151 @@ Other parameters are passed through a pointer to a apiPostServicesDatabasesIdAdm
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdAdminUsers
+
+> map[string]interface{} PostServicesDatabasesIdAdminUsers(ctx, id).Request(request).Execute()
+
+Create a user on a database service
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	request := *openapiclient.NewHandlersCreateAdminUserRequest() // HandlersCreateAdminUserRequest | The user name, target database and role
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdAdminUsers(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdAdminUsers``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdAdminUsers`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdAdminUsers`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdAdminUsersRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersCreateAdminUserRequest**](HandlersCreateAdminUserRequest.md) | The user name, target database and role | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdAdminUsersNameRevoke
+
+> map[string]interface{} PostServicesDatabasesIdAdminUsersNameRevoke(ctx, id, name).Execute()
+
+Revoke a user's login
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	name := "name_example" // string | User name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdAdminUsersNameRevoke(context.Background(), id, name).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdAdminUsersNameRevoke``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdAdminUsersNameRevoke`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdAdminUsersNameRevoke`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**name** | **string** | User name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdAdminUsersNameRevokeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 
 ### Return type

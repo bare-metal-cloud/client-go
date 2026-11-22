@@ -23549,7 +23549,8 @@ paths:
         required: true
         schema:
           type: string
-      - description: Force the delete past the reference guard (admin/owner only)
+      - description: Force the delete past the secret-reference guard (admin/owner
+          only); a backup-plan or managed-database consumer is never forceable
         in: query
         name: force
         schema:
@@ -23592,7 +23593,8 @@ paths:
               schema:
                 additionalProperties: true
                 type: object
-          description: Connection in use
+          description: "Connection in use — referenced by a secret, or by a backup\
+            \ plan or managed database (the body lists the consumers)"
       security:
       - CookieAuth: []
       summary: Delete an S3 connection
@@ -25045,6 +25047,255 @@ paths:
       tags:
       - databases
       x-codegen-request-body-name: request
+  /services/databases/{id}/admin/grants:
+    get:
+      description: |-
+        The grants surface's read (FR-T-2): every current org member with their
+        baseline (org admins and the owner carry the read-only baseline without a
+        grant) and their granted axes — level × kind × scope — in plain language.
+        Members with neither baseline nor grants appear as not permitted. Engine-neutral;
+        no grant syntax, no credentials.
+      operationId: GetServicesDatabasesIdAdminGrants
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: See who can do what on a database service
+      tags:
+      - databases
+    post:
+      description: |-
+        Records one member's grant (FR-T-2): level (read, read_write) × kind (data,
+        schema, add_only) × scope (one panel-created database, optionally one table
+        for data and add_only grants). The grant is effective immediately — panel
+        access, no apply lane, no revision. Invalid shapes (read+add_only, a table
+        scope on schema, a non-member subject, an unknown or reserved scope) answer 422.
+      operationId: PostServicesDatabasesIdAdminGrants
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/handlers.CreateAdminGrantRequest'
+        description: The member id and the grant axes
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Created
+        "401":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "422":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unprocessable Entity
+        "503":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: Grant a member access to a database service
+      tags:
+      - databases
+      x-codegen-request-body-name: request
+  /services/databases/{id}/admin/grants/{grantId}:
+    delete:
+      description: |-
+        Removes one grant (the row is deleted; the change log keeps the history with a
+        verdict). Effective immediately.
+      operationId: DeleteServicesDatabasesIdAdminGrantsGrantId
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Grant ID
+        in: path
+        name: grantId
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "401":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "500":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: Revoke a member's grant
+      tags:
+      - databases
+    patch:
+      description: |-
+        Changes a grant's axes or scope (the before/after lands in the change log with
+        a verdict). The grant is effective immediately; the same verdict law as the
+        create. Invalid shapes answer 422.
+      operationId: PatchServicesDatabasesIdAdminGrantsGrantId
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Grant ID
+        in: path
+        name: grantId
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/handlers.EditAdminGrantRequest'
+        description: The member id and the new grant axes
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "401":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "422":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unprocessable Entity
+      security:
+      - CookieAuth: []
+      summary: Edit a member's grant
+      tags:
+      - databases
+      x-codegen-request-body-name: request
   /services/databases/{id}/admin/parameters:
     get:
       description: |-
@@ -25269,6 +25520,337 @@ paths:
       tags:
       - databases
       x-codegen-request-body-name: request
+  /services/databases/{id}/admin/users:
+    get:
+      description: |-
+        The database admin panel's user list (FR-T-2): the bundle-owned install-time login
+        (read-only) plus the panel-created overlay users, each with its target database,
+        plain-language role and apply verdict. Revoked users stay listed (absent); deleted
+        ones leave the list. Engine-neutral (FR-T-3); no grant syntax, no credentials.
+      operationId: GetServicesDatabasesIdAdminUsers
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: List the users on a database service
+      tags:
+      - databases
+    post:
+      description: |-
+        Adds one user to the install's admin overlay (FR-T-2), scoped to ONE panel-created
+        database with one of the four roles (read, write, read_write, schema_change). The
+        password is generated server-side and sealed in the install escrow — it never
+        appears in the response, the overlay, the rows or any log. The change is recorded
+        with a verdict; until the overlay apply lane ships, the verdict is honestly pending.
+      operationId: PostServicesDatabasesIdAdminUsers
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/handlers.CreateAdminUserRequest'
+        description: "The user name, target database and role"
+        required: true
+      responses:
+        "202":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Accepted
+        "400":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+        "503":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: Create a user on a database service
+      tags:
+      - databases
+      x-codegen-request-body-name: request
+  /services/databases/{id}/admin/users/{name}:
+    delete:
+      description: |-
+        Deletes a panel user: the role drops on the next apply, the entry becomes a hidden
+        tombstone, and the sealed escrow entry is purged after that apply passes (ADR-103
+        D6). Creating the same name again starts a fresh user.
+      operationId: DeleteServicesDatabasesIdAdminUsersName
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: User name
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "401":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: Delete a user
+      tags:
+      - databases
+    patch:
+      description: |-
+        Changes a panel user's role to one of the four plain-language roles (FR-T-2). The
+        change is recorded with a verdict and before/after evidence; until the overlay
+        apply lane ships, the verdict is honestly pending.
+      operationId: PatchServicesDatabasesIdAdminUsersName
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: User name
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/handlers.EditAdminUserRoleRequest'
+        description: The new role
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "400":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: Edit a user's role
+      tags:
+      - databases
+      x-codegen-request-body-name: request
+  /services/databases/{id}/admin/users/{name}/revoke:
+    post:
+      description: |-
+        Drops a panel user's login (the role and its grants die with it on the next apply).
+        The entry and its sealed password stay — the reversible shape: creating the same
+        name again re-grants it with a fresh password.
+      operationId: PostServicesDatabasesIdAdminUsersNameRevoke
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: User name
+        in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "401":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "500":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: Revoke a user's login
+      tags:
+      - databases
   /services/databases/{id}/connection:
     get:
       description: Returns connection credentials and connection strings for a deployed
@@ -25343,6 +25925,75 @@ paths:
       security:
       - CookieAuth: []
       summary: Reset database password
+      tags:
+      - databases
+  /services/databases/{id}/extensions:
+    get:
+      description: |-
+        The extensions inventory read from pg_extension through the
+        agent tunnel. Absence is named, not fabricated: a database
+        that is not running or is not Postgres answers 200 with
+        available=false and a reason.
+      operationId: GetServicesDatabasesIdExtensions
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.databaseExtensionsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+        "502":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Gateway
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: List the Postgres extensions installed on a database
       tags:
       - databases
   /services/databases/{id}/recover-lane:
@@ -25601,6 +26252,60 @@ paths:
       security:
       - CookieAuth: []
       summary: Start a stopped database (restore replicas)
+      tags:
+      - databases
+  /services/databases/{id}/status:
+    get:
+      description: |-
+        The database row (StatusMessage redacted in-handler) plus
+        max_replica_lag_seconds — the worst replica's lag, null when
+        there is no source ("not reported", never zero).
+      operationId: GetServicesDatabasesIdStatus
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.databaseStatusResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: Get database deployment status
       tags:
       - databases
   /services/databases/{id}/stop:
@@ -31510,6 +32215,19 @@ components:
         type:
           type: string
       type: object
+    engineports.PGExtension:
+      example:
+        schema: schema
+        name: name
+        version: version
+      properties:
+        name:
+          type: string
+        schema:
+          type: string
+        version:
+          type: string
+      type: object
     engineports.RecordCleanupOutcome:
       example:
         zone: zone
@@ -32561,6 +33279,28 @@ components:
         name:
           type: string
       type: object
+    handlers.CreateAdminGrantRequest:
+      properties:
+        kind:
+          type: string
+        level:
+          type: string
+        scope_database:
+          type: string
+        scope_table:
+          type: string
+        user_id:
+          type: integer
+      type: object
+    handlers.CreateAdminUserRequest:
+      properties:
+        database:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+      type: object
     handlers.CreateCloudProviderCredentialRequest:
       properties:
         client_envelope:
@@ -33218,6 +33958,24 @@ components:
           description: "command, file, service, package, http"
           type: string
         url:
+          type: string
+      type: object
+    handlers.EditAdminGrantRequest:
+      properties:
+        kind:
+          type: string
+        level:
+          type: string
+        scope_database:
+          type: string
+        scope_table:
+          type: string
+        user_id:
+          type: integer
+      type: object
+    handlers.EditAdminUserRoleRequest:
+      properties:
+        role:
           type: string
       type: object
     handlers.ErrorResponse:
@@ -38810,6 +39568,126 @@ components:
         secret_id:
           type: integer
         secret_type:
+          type: string
+      type: object
+    handlers.databaseExtensionsResponse:
+      example:
+        reason: reason
+        extensions:
+        - schema: schema
+          name: name
+          version: version
+        - schema: schema
+          name: name
+          version: version
+        available: true
+      properties:
+        available:
+          type: boolean
+        extensions:
+          items:
+            $ref: '#/components/schemas/engineports.PGExtension'
+          type: array
+        reason:
+          type: string
+      type: object
+    handlers.databaseStatusResponse:
+      example:
+        status_message: status_message
+        created_at: created_at
+        memory_request: memory_request
+        type: postgresql
+        max_replica_lag_seconds: 5.962133916683182
+        s3_connection_id: 9
+        cpu_request: cpu_request
+        provisioned_at: provisioned_at
+        last_used_at: last_used_at
+        backup_schedule: backup_schedule
+        cluster_id: 0
+        backup_bucket_name: backup_bucket_name
+        updated_at: updated_at
+        project_id: 2
+        cpu_limit: cpu_limit
+        replica_count: 7
+        ha_enabled: true
+        id: 1
+        memory_limit: memory_limit
+        storage_class: storage_class
+        created_by_user_id: 6
+        version: version
+        backup_enabled: true
+        org_id: 5
+        name: name
+        namespace: namespace
+        storage_size: storage_size
+        status: "{}"
+      properties:
+        backup_bucket_name:
+          type: string
+        backup_enabled:
+          description: Backups
+          type: boolean
+        backup_schedule:
+          type: string
+        cluster_id:
+          type: integer
+        cpu_limit:
+          description: e.g. 1000m
+          type: string
+        cpu_request:
+          description: Resource configuration
+          type: string
+        created_at:
+          type: string
+        created_by_user_id:
+          type: integer
+        ha_enabled:
+          description: High availability
+          type: boolean
+        id:
+          type: integer
+        last_used_at:
+          type: string
+        max_replica_lag_seconds:
+          type: number
+        memory_limit:
+          description: e.g. 1Gi
+          type: string
+        memory_request:
+          description: e.g. 128Mi
+          type: string
+        name:
+          description: Basic configuration
+          type: string
+        namespace:
+          type: string
+        org_id:
+          type: integer
+        project_id:
+          type: integer
+        provisioned_at:
+          type: string
+        replica_count:
+          type: integer
+        s3_connection_id:
+          type: integer
+        status:
+          allOf:
+          - $ref: '#/components/schemas/models.DatabaseStatus'
+          description: Status
+          type: object
+        status_message:
+          type: string
+        storage_class:
+          type: string
+        storage_size:
+          description: Storage configuration
+          type: string
+        type:
+          $ref: '#/components/schemas/models.DatabaseType'
+        updated_at:
+          type: string
+        version:
           type: string
       type: object
     handlers.deploykitBuildBinding:
