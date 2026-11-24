@@ -5507,7 +5507,10 @@ paths:
           description: "Conflict — structured codes: direct_reachability_unproven\
             \ (reason: never_probed|expired|pairs_failed|unverifiable|duplicate_address|invalid_candidate|unsupported_address|vm_missing|size_bound),\
             \ vm_in_cluster, no_master_assigned, master_count_unsupported, policy_required,\
-            \ vm_starved, preflight rejections"
+            \ vm_starved, preflight rejections (existing_k3s_replace_required = the\
+            \ BAR-3685 ONE confirm over a pre-existing cluster; resubmit with data.replace_existing;\
+            \ the body carries affected_machines — every member the confirm covers,\
+            \ BAR-3821)"
       security:
       - CookieAuth: []
       summary: Create a new cluster
@@ -10242,7 +10245,9 @@ paths:
       description: |-
         Resolves the caller's explorer-grant state for one cluster:
         what exists (the cluster), why hidden (the named reason),
-        how to get it (pending request / one-click owner claim).
+        how to get it (a special request handled outside the
+        system; a BMC-admin grants — the in-product request door
+        is OFF at launch and can_request is always false).
       operationId: GetClustersIdK8s-viewAccess
       parameters:
       - description: Cluster ID
@@ -10290,11 +10295,12 @@ paths:
   /clusters/{id}/k8s-view/access/request:
     post:
       description: |-
-        Files an access request in the explorer grants ledger.
-        Idempotent while a request/grant is open. App owners of
-        installs on the cluster claim a standing grant instantly
-        (7-day window); other members queue for the BMC-admin
-        approver tier.
+        The in-product request door is OFF at launch: explorer
+        access is granted by a BMC-admin only, from a special
+        request handled outside the system. Nothing is filed —
+        the response is the teaching denial (code
+        explorer_grant_required + the boundary shape, with
+        can_request always false).
       operationId: PostClustersIdK8s-viewAccessRequest
       parameters:
       - description: Cluster ID
@@ -10308,23 +10314,9 @@ paths:
           application/json:
             schema:
               type: object
-        description: "{\\"
+        description: Ignored (nothing is filed)
         required: false
       responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/handlers.explorerAccessView'
-          description: OK
-        "400":
-          content:
-            application/json:
-              schema:
-                additionalProperties:
-                  type: string
-                type: object
-          description: Reason longer than 2000 characters
         "401":
           content:
             application/json:
@@ -10359,7 +10351,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
-      summary: Request K8s View access for a cluster
+      summary: Request K8s View access (disabled at launch)
       tags:
       - clusters
       x-codegen-request-body-name: body
@@ -20797,6 +20789,7 @@ paths:
     get:
       description: |-
         Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.
+        workload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.
         projection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.
         Otherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.
       operationId: GetOrgsOrg_idStorageVolumes
@@ -25996,6 +25989,83 @@ paths:
       summary: List the Postgres extensions installed on a database
       tags:
       - databases
+  /services/databases/{id}/query:
+    post:
+      description: |-
+        Runs one customer SELECT against the database through the read-only
+        runner: a server-set 10-second statement timeout, a 2000-row cap, a
+        2 MiB result envelope, and a permanent audit line for every attempt
+        (including refusals). Owner and org admins only. PostgreSQL, running
+        databases only — other engines answer the named refusal.
+      operationId: PostServicesDatabasesIdQuery
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/databasequery.QueryResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "429":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Too Many Requests
+        "502":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Gateway
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: Run one read-only query on a database
+      tags:
+      - databases
   /services/databases/{id}/recover-lane:
     post:
       description: "Force-closes an install's backup lane stranded in backing_up (the\
@@ -26231,6 +26301,164 @@ paths:
       tags:
       - databases
       x-codegen-request-body-name: request
+  /services/databases/{id}/schema:
+    get:
+      description: |-
+        The schema browser's tree: the schemas the read-only role can use
+        and, inside each, the relations it can read (privilege-filtered —
+        the server's own words, one fixed catalog read). Owner and org
+        admins only. PostgreSQL, running databases only.
+      operationId: GetServicesDatabasesIdSchema
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "429":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Too Many Requests
+        "502":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Gateway
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: Browse a database's schema
+      tags:
+      - databases
+  /services/databases/{id}/schema/{schema}/tables/{table}/columns:
+    get:
+      description: |-
+        The schema browser's column list for one relation (position order,
+        the engine's own type names). Owner and org admins only.
+        PostgreSQL, running databases only.
+      operationId: GetServicesDatabasesIdSchemaSchemaTablesTableColumns
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Schema name
+        in: path
+        name: schema
+        required: true
+        schema:
+          type: string
+      - description: Table name
+        in: path
+        name: table
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "429":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Too Many Requests
+        "502":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Gateway
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: List one relation's columns
+      tags:
+      - databases
   /services/databases/{id}/start:
     post:
       operationId: PostServicesDatabasesIdStart
@@ -31147,6 +31375,64 @@ components:
           type: array
         window:
           $ref: '#/components/schemas/contracts.MetricsWindow'
+      type: object
+    databasequery.Outcome:
+      enum:
+      - ok
+      - truncated
+      - timeout
+      - permission_denied
+      - refused
+      - busy
+      - error
+      type: string
+      x-enum-varnames:
+      - OutcomeOK
+      - OutcomeTruncated
+      - OutcomeTimeout
+      - OutcomePermissionDenied
+      - OutcomeRefused
+      - OutcomeBusy
+      - OutcomeError
+    databasequery.QueryResponse:
+      example:
+        columns:
+        - columns
+        - columns
+        truncated: true
+        rowCount: 6
+        truncatedBy: truncatedBy
+        message: message
+        rows:
+        - - "{}"
+          - "{}"
+        - - "{}"
+          - "{}"
+        durationMs: 0
+        outcome: ok
+      properties:
+        columns:
+          items:
+            type: string
+          type: array
+        durationMs:
+          type: integer
+        message:
+          type: string
+        outcome:
+          $ref: '#/components/schemas/databasequery.Outcome'
+        rowCount:
+          type: integer
+        rows:
+          items:
+            items:
+              type: object
+            type: array
+          type: array
+        truncated:
+          type: boolean
+        truncatedBy:
+          type: string
       type: object
     dnsregistry.AvailabilityResult:
       example:
@@ -38253,27 +38539,33 @@ components:
       example:
         volumes:
         - capacity_bytes: 0
+          install_name: install_name
           cluster_id: 6
           sampled_at: sampled_at
           used_bytes: 5
           namespace: namespace
+          workload_name: workload_name
           projection:
             confidence: high
             days_to_full: 1.4658129805029452
             points: 5
             status: projected
+          workload_kind: workload_kind
           pvc_name: pvc_name
           pod_name: pod_name
         - capacity_bytes: 0
+          install_name: install_name
           cluster_id: 6
           sampled_at: sampled_at
           used_bytes: 5
           namespace: namespace
+          workload_name: workload_name
           projection:
             confidence: high
             days_to_full: 1.4658129805029452
             points: 5
             status: projected
+          workload_kind: workload_kind
           pvc_name: pvc_name
           pod_name: pod_name
       properties:
@@ -40475,12 +40767,15 @@ components:
         can_request: true
         state: state
         grant: "{}"
-        owner_eligible: true
       properties:
         can_request:
           description: |-
-            CanRequest: the caller may file (or claim) — true whenever the view
-            is not already granted.
+            CanRequest is FALSE at launch: the in-product request door is part
+            of the strip (backend#4735 item 1), so the payload never advertises
+            a door it does not open. The field stays in the shape — the v1
+            console contract reads it, and false keeps the request affordance
+            hidden with no FE change; the field's removal rides the FE strip
+            card.
           type: boolean
         cluster:
           $ref: '#/components/schemas/handlers.explorerAccessClusterRef'
@@ -40491,17 +40786,12 @@ components:
             Grant is the ledger row that decided the state (any status) — the
             expiry clock the boundary renders from.
           type: object
-        owner_eligible:
-          description: |-
-            OwnerEligible: the caller passes the app-owner standing derivation —
-            the request POST becomes a one-click INSTANT claim.
-          type: boolean
         pending_request:
           allOf:
           - $ref: '#/components/schemas/handlers.explorerGrantView'
           description: |-
-            PendingRequest is set when a request is queued — "how to get it"
-            cites it (who is waiting, since when, why).
+            PendingRequest is set when a pre-launch request is still queued —
+            "how to get it" cites it (the approver tier still decides it).
           type: object
         reason:
           type: string
@@ -42296,6 +42586,7 @@ components:
         k8s_version: k8s_version
         project_id: 6
         provider: byov
+        replaced_existing: true
         managed_class: managed_class
         id: 4
         node_count: 7
@@ -42578,6 +42869,21 @@ components:
         provider_cluster_id:
           description: EKS/AKS/GKE cluster ID
           type: string
+        replaced_existing:
+          description: |-
+            ReplacedExisting records the customer's BAR-3685 replace confirmation
+            (BAR-3707): at creation the contamination preflight found pre-existing
+            Kubernetes on at least one member (newer, older, or matching; running
+            or stopped), the console showed the ONE confirm prompt, and the create
+            came back with replace_existing. True means formation CLEAN-INSTALLS
+            our pinned version over whatever was on the machines — SetupNode runs
+            its uninstall-then-probe leg first; it never silently keeps a foreign
+            install (that silent keep is exactly what install_k3s's
+            already_installed path would otherwise report on a matching-version
+            cluster). The column — not the job payload — is the durable truth the
+            install worker reads on every (re)dispatch, the same contract as the
+            sibling Adopted column.
+          type: boolean
         secondary_network_ids:
           items:
             type: integer
@@ -42657,6 +42963,7 @@ components:
             k8s_version: k8s_version
             project_id: 6
             provider: byov
+            replaced_existing: true
             managed_class: managed_class
             id: 4
             node_count: 7
@@ -43776,6 +44083,7 @@ components:
             k8s_version: k8s_version
             project_id: 6
             provider: byov
+            replaced_existing: true
             managed_class: managed_class
             id: 4
             node_count: 7
@@ -43950,6 +44258,7 @@ components:
             k8s_version: k8s_version
             project_id: 6
             provider: byov
+            replaced_existing: true
             managed_class: managed_class
             id: 4
             node_count: 7
@@ -44052,6 +44361,7 @@ components:
             k8s_version: k8s_version
             project_id: 6
             provider: byov
+            replaced_existing: true
             managed_class: managed_class
             id: 4
             node_count: 7
@@ -44881,6 +45191,7 @@ components:
               k8s_version: k8s_version
               project_id: 6
               provider: byov
+              replaced_existing: true
               managed_class: managed_class
               id: 4
               node_count: 7
@@ -44983,6 +45294,7 @@ components:
               k8s_version: k8s_version
               project_id: 6
               provider: byov
+              replaced_existing: true
               managed_class: managed_class
               id: 4
               node_count: 7
@@ -45112,6 +45424,7 @@ components:
               k8s_version: k8s_version
               project_id: 6
               provider: byov
+              replaced_existing: true
               managed_class: managed_class
               id: 4
               node_count: 7
@@ -45214,6 +45527,7 @@ components:
               k8s_version: k8s_version
               project_id: 6
               provider: byov
+              replaced_existing: true
               managed_class: managed_class
               id: 4
               node_count: 7
@@ -45356,6 +45670,7 @@ components:
           k8s_version: k8s_version
           project_id: 6
           provider: byov
+          replaced_existing: true
           managed_class: managed_class
           id: 4
           node_count: 7
@@ -47132,15 +47447,18 @@ components:
     storageusage.VolumeUsage:
       example:
         capacity_bytes: 0
+        install_name: install_name
         cluster_id: 6
         sampled_at: sampled_at
         used_bytes: 5
         namespace: namespace
+        workload_name: workload_name
         projection:
           confidence: high
           days_to_full: 1.4658129805029452
           points: 5
           status: projected
+        workload_kind: workload_kind
         pvc_name: pvc_name
         pod_name: pod_name
       properties:
@@ -47148,6 +47466,8 @@ components:
           type: integer
         cluster_id:
           type: integer
+        install_name:
+          type: string
         namespace:
           type: string
         pod_name:
@@ -47160,6 +47480,10 @@ components:
           type: string
         used_bytes:
           type: integer
+        workload_kind:
+          type: string
+        workload_name:
+          type: string
       type: object
     verifyrelay.Request:
       example:
@@ -47487,6 +47811,8 @@ components:
             existing_k3s_running. The server verifies EVERY member via the
             contamination preflight before honoring it (verified adoption
             records cluster.adopted=true; an unverified opt-in is not honored).
+            Mutually exclusive with ReplaceExisting (400) — adopting keeps the
+            user's install; replacing tears it out.
           type: boolean
         agent_deploy_method:
           description: |-
@@ -47529,6 +47855,15 @@ components:
             every member; violations surface as structured 409s
             (vm_not_in_network / vm_in_cluster).
           type: integer
+        replace_existing:
+          description: |-
+            ReplaceExisting is the BAR-3685 replace confirmation (BAR-3707):
+            the caller accepted the ONE confirm prompt over a pre-existing
+            cluster — ANY version, running or stopped — so the create proceeds
+            with a clean-install of the requested version (the flag rides the
+            cluster row; formation tears the existing install out first). The
+            import flow never sends it (import stays best-effort, unchanged).
+          type: boolean
         stack:
           enum:
           - k3s

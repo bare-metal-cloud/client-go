@@ -4,11 +4,10 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**CanRequest** | Pointer to **bool** | CanRequest: the caller may file (or claim) — true whenever the view is not already granted. | [optional] 
+**CanRequest** | Pointer to **bool** | CanRequest is FALSE at launch: the in-product request door is part of the strip (backend#4735 item 1), so the payload never advertises a door it does not open. The field stays in the shape — the v1 console contract reads it, and false keeps the request affordance hidden with no FE change; the field&#39;s removal rides the FE strip card. | [optional] 
 **Cluster** | Pointer to [**HandlersExplorerAccessClusterRef**](HandlersExplorerAccessClusterRef.md) |  | [optional] 
 **Grant** | Pointer to [**HandlersExplorerGrantView**](HandlersExplorerGrantView.md) | Grant is the ledger row that decided the state (any status) — the expiry clock the boundary renders from. | [optional] 
-**OwnerEligible** | Pointer to **bool** | OwnerEligible: the caller passes the app-owner standing derivation — the request POST becomes a one-click INSTANT claim. | [optional] 
-**PendingRequest** | Pointer to [**HandlersExplorerGrantView**](HandlersExplorerGrantView.md) | PendingRequest is set when a request is queued — \&quot;how to get it\&quot; cites it (who is waiting, since when, why). | [optional] 
+**PendingRequest** | Pointer to [**HandlersExplorerGrantView**](HandlersExplorerGrantView.md) | PendingRequest is set when a pre-launch request is still queued — \&quot;how to get it\&quot; cites it (the approver tier still decides it). | [optional] 
 **Reason** | Pointer to **string** |  | [optional] 
 **State** | Pointer to **string** | State: granted | requested | denied. | [optional] 
 
@@ -105,31 +104,6 @@ SetGrant sets Grant field to given value.
 `func (o *HandlersExplorerAccessView) HasGrant() bool`
 
 HasGrant returns a boolean if a field has been set.
-
-### GetOwnerEligible
-
-`func (o *HandlersExplorerAccessView) GetOwnerEligible() bool`
-
-GetOwnerEligible returns the OwnerEligible field if non-nil, zero value otherwise.
-
-### GetOwnerEligibleOk
-
-`func (o *HandlersExplorerAccessView) GetOwnerEligibleOk() (*bool, bool)`
-
-GetOwnerEligibleOk returns a tuple with the OwnerEligible field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetOwnerEligible
-
-`func (o *HandlersExplorerAccessView) SetOwnerEligible(v bool)`
-
-SetOwnerEligible sets OwnerEligible field to given value.
-
-### HasOwnerEligible
-
-`func (o *HandlersExplorerAccessView) HasOwnerEligible() bool`
-
-HasOwnerEligible returns a boolean if a field has been set.
 
 ### GetPendingRequest
 

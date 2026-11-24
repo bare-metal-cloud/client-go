@@ -20,14 +20,12 @@ var _ MappedNullable = &HandlersExplorerAccessView{}
 
 // HandlersExplorerAccessView struct for HandlersExplorerAccessView
 type HandlersExplorerAccessView struct {
-	// CanRequest: the caller may file (or claim) — true whenever the view is not already granted.
+	// CanRequest is FALSE at launch: the in-product request door is part of the strip (backend#4735 item 1), so the payload never advertises a door it does not open. The field stays in the shape — the v1 console contract reads it, and false keeps the request affordance hidden with no FE change; the field's removal rides the FE strip card.
 	CanRequest *bool `json:"can_request,omitempty"`
 	Cluster *HandlersExplorerAccessClusterRef `json:"cluster,omitempty"`
 	// Grant is the ledger row that decided the state (any status) — the expiry clock the boundary renders from.
 	Grant *HandlersExplorerGrantView `json:"grant,omitempty"`
-	// OwnerEligible: the caller passes the app-owner standing derivation — the request POST becomes a one-click INSTANT claim.
-	OwnerEligible *bool `json:"owner_eligible,omitempty"`
-	// PendingRequest is set when a request is queued — \"how to get it\" cites it (who is waiting, since when, why).
+	// PendingRequest is set when a pre-launch request is still queued — \"how to get it\" cites it (the approver tier still decides it).
 	PendingRequest *HandlersExplorerGrantView `json:"pending_request,omitempty"`
 	Reason *string `json:"reason,omitempty"`
 	// State: granted | requested | denied.
@@ -147,38 +145,6 @@ func (o *HandlersExplorerAccessView) SetGrant(v HandlersExplorerGrantView) {
 	o.Grant = &v
 }
 
-// GetOwnerEligible returns the OwnerEligible field value if set, zero value otherwise.
-func (o *HandlersExplorerAccessView) GetOwnerEligible() bool {
-	if o == nil || IsNil(o.OwnerEligible) {
-		var ret bool
-		return ret
-	}
-	return *o.OwnerEligible
-}
-
-// GetOwnerEligibleOk returns a tuple with the OwnerEligible field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *HandlersExplorerAccessView) GetOwnerEligibleOk() (*bool, bool) {
-	if o == nil || IsNil(o.OwnerEligible) {
-		return nil, false
-	}
-	return o.OwnerEligible, true
-}
-
-// HasOwnerEligible returns a boolean if a field has been set.
-func (o *HandlersExplorerAccessView) HasOwnerEligible() bool {
-	if o != nil && !IsNil(o.OwnerEligible) {
-		return true
-	}
-
-	return false
-}
-
-// SetOwnerEligible gets a reference to the given bool and assigns it to the OwnerEligible field.
-func (o *HandlersExplorerAccessView) SetOwnerEligible(v bool) {
-	o.OwnerEligible = &v
-}
-
 // GetPendingRequest returns the PendingRequest field value if set, zero value otherwise.
 func (o *HandlersExplorerAccessView) GetPendingRequest() HandlersExplorerGrantView {
 	if o == nil || IsNil(o.PendingRequest) {
@@ -293,9 +259,6 @@ func (o HandlersExplorerAccessView) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Grant) {
 		toSerialize["grant"] = o.Grant
-	}
-	if !IsNil(o.OwnerEligible) {
-		toSerialize["owner_eligible"] = o.OwnerEligible
 	}
 	if !IsNil(o.PendingRequest) {
 		toSerialize["pending_request"] = o.PendingRequest

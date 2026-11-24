@@ -401,10 +401,9 @@ func Test_bmc_ClustersAPIService(t *testing.T) {
 
 		var id int32
 
-		resp, httpRes, err := apiClient.ClustersAPI.PostClustersIdK8sViewAccessRequest(context.Background(), id).Execute()
+		httpRes, err := apiClient.ClustersAPI.PostClustersIdK8sViewAccessRequest(context.Background(), id).Execute()
 
 		require.Nil(t, err)
-		require.NotNil(t, resp)
 		assert.Equal(t, 200, httpRes.StatusCode)
 
 	})

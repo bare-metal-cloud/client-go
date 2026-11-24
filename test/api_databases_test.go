@@ -199,6 +199,36 @@ func Test_bmc_DatabasesAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test DatabasesAPIService GetServicesDatabasesIdSchema", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.DatabasesAPI.GetServicesDatabasesIdSchema(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test DatabasesAPIService GetServicesDatabasesIdSchemaSchemaTablesTableColumns", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var schema string
+		var table string
+
+		resp, httpRes, err := apiClient.DatabasesAPI.GetServicesDatabasesIdSchemaSchemaTablesTableColumns(context.Background(), id, schema, table).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test DatabasesAPIService GetServicesDatabasesIdStatus", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -345,6 +375,20 @@ func Test_bmc_DatabasesAPIService(t *testing.T) {
 		var id int32
 
 		resp, httpRes, err := apiClient.DatabasesAPI.PostServicesDatabasesIdConnectionResetPassword(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test DatabasesAPIService PostServicesDatabasesIdQuery", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.DatabasesAPI.PostServicesDatabasesIdQuery(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

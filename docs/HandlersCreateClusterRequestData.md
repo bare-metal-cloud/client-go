@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Addons** | Pointer to **[]string** | Addons is the wizard Add-ons step&#39;s checkbox set (epic app-platform story 3.4): the optional extras ticked at formation, from the CLOSED set models.ClusterAddons (monitoring, public_entry, databases, log_book). The omitted/empty field records none. An unknown key is a 400 caller error; the set is normalized again pre-row in the service and persisted as the clusters.addons JSON array. Installation honesty: only &#39;monitoring&#39; has a real install path today (the formation-completion hook provisions the in-cluster monitoring stack); the other three keys persist as declared-but-not-yet-installing — the surfaces list them, nothing fake-installs them. | [optional] 
-**AdoptExisting** | Pointer to **bool** | AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint 4): accept pre-existing, RUNNING, same-version k3s on the members instead of installing. Without it, a member with running k3s is 409 existing_k3s_running. The server verifies EVERY member via the contamination preflight before honoring it (verified adoption records cluster.adopted&#x3D;true; an unverified opt-in is not honored). | [optional] 
+**AdoptExisting** | Pointer to **bool** | AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint 4): accept pre-existing, RUNNING, same-version k3s on the members instead of installing. Without it, a member with running k3s is 409 existing_k3s_running. The server verifies EVERY member via the contamination preflight before honoring it (verified adoption records cluster.adopted&#x3D;true; an unverified opt-in is not honored). Mutually exclusive with ReplaceExisting (400) — adopting keeps the user&#39;s install; replacing tears it out. | [optional] 
 **AgentDeployMethod** | Pointer to **string** | AgentDeployMethod selects how the k8s-agent is deployed inside the cluster after provisioning: \&quot;kubectl\&quot; (default, applies manifest via client-go) or \&quot;helm\&quot; (installs via Helm SDK from the chart repo). | [optional] 
 **Backup** | Pointer to [**HandlersCreateClusterRequestDataBackup**](HandlersCreateClusterRequestDataBackup.md) |  | [optional] 
 **FailurePolicy** | Pointer to **string** | FailurePolicy is the E5-7 LOCKED failure policy for multi-master creates (story 125.3): \&quot;system_managed\&quot; (per-master retries to the deadline, then the quorum-preconditioned auto-return ladder) or \&quot;user_managed\&quot; (hold + action_required on first failure, zero autonomous actions). Locked for the operation; persisted with the operation record (job payload + the D6 hold) — never a cluster column. Multi-master only; single-master ignores it. | [optional] 
@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **InstallConfig** | Pointer to **map[string]string** | InstallConfig overrides distribution install defaults. Keys recognized by the distribution (e.g. \&quot;snapshotter\&quot;) set the corresponding flag; unknown keys are passed through as --key&#x3D;value. Empty &#x3D; use distribution defaults. | [optional] 
 **MasterCount** | Pointer to **int32** | Number of master nodes (cloud providers) | [optional] 
 **NetworkId** | Pointer to **int32** | NetworkID is the explicit network contract (story 124.17, D12): the network every member VM must belong to, selected in wizard step 1. Nullable — null &#x3D; the acknowledged \&quot;No network — advanced\&quot; choice (every member must be networkless). Validated server-side against every member; violations surface as structured 409s (vm_not_in_network / vm_in_cluster). | [optional] 
+**ReplaceExisting** | Pointer to **bool** | ReplaceExisting is the BAR-3685 replace confirmation (BAR-3707): the caller accepted the ONE confirm prompt over a pre-existing cluster — ANY version, running or stopped — so the create proceeds with a clean-install of the requested version (the flag rides the cluster row; formation tears the existing install out first). The import flow never sends it (import stays best-effort, unchanged). | [optional] 
 **Stack** | **string** |  | 
 **Version** | **string** |  | 
 **VmIds** | Pointer to **[]int32** | VMIDs is the array of VM IDs for BYOV clusters. The first VM is assigned the master role; all others are workers. For explicit per-VM role assignment, use VMRoles instead. | [optional] 
@@ -262,6 +263,31 @@ SetNetworkId sets NetworkId field to given value.
 `func (o *HandlersCreateClusterRequestData) HasNetworkId() bool`
 
 HasNetworkId returns a boolean if a field has been set.
+
+### GetReplaceExisting
+
+`func (o *HandlersCreateClusterRequestData) GetReplaceExisting() bool`
+
+GetReplaceExisting returns the ReplaceExisting field if non-nil, zero value otherwise.
+
+### GetReplaceExistingOk
+
+`func (o *HandlersCreateClusterRequestData) GetReplaceExistingOk() (*bool, bool)`
+
+GetReplaceExistingOk returns a tuple with the ReplaceExisting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetReplaceExisting
+
+`func (o *HandlersCreateClusterRequestData) SetReplaceExisting(v bool)`
+
+SetReplaceExisting sets ReplaceExisting field to given value.
+
+### HasReplaceExisting
+
+`func (o *HandlersCreateClusterRequestData) HasReplaceExisting() bool`
+
+HasReplaceExisting returns a boolean if a field has been set.
 
 ### GetStack
 

@@ -6995,7 +6995,7 @@
             }
           },
           "409": {
-            "description": "Conflict \u2014 structured codes: direct_reachability_unproven (reason: never_probed|expired|pairs_failed|unverifiable|duplicate_address|invalid_candidate|unsupported_address|vm_missing|size_bound), vm_in_cluster, no_master_assigned, master_count_unsupported, policy_required, vm_starved, preflight rejections",
+            "description": "Conflict \u2014 structured codes: direct_reachability_unproven (reason: never_probed|expired|pairs_failed|unverifiable|duplicate_address|invalid_candidate|unsupported_address|vm_missing|size_bound), vm_in_cluster, no_master_assigned, master_count_unsupported, policy_required, vm_starved, preflight rejections (existing_k3s_replace_required = the BAR-3685 ONE confirm over a pre-existing cluster; resubmit with data.replace_existing; the body carries affected_machines \u2014 every member the confirm covers, BAR-3821)",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -12535,7 +12535,7 @@
             "CookieAuth": []
           }
         ],
-        "description": "Resolves the caller's explorer-grant state for one cluster:\nwhat exists (the cluster), why hidden (the named reason),\nhow to get it (pending request / one-click owner claim).",
+        "description": "Resolves the caller's explorer-grant state for one cluster:\nwhat exists (the cluster), why hidden (the named reason),\nhow to get it (a special request handled outside the\nsystem; a BMC-admin grants \u2014 the in-product request door\nis OFF at launch and can_request is always false).",
         "produces": [
           "application/json"
         ],
@@ -12597,7 +12597,7 @@
             "CookieAuth": []
           }
         ],
-        "description": "Files an access request in the explorer grants ledger.\nIdempotent while a request/grant is open. App owners of\ninstalls on the cluster claim a standing grant instantly\n(7-day window); other members queue for the BMC-admin\napprover tier.",
+        "description": "The in-product request door is OFF at launch: explorer\naccess is granted by a BMC-admin only, from a special\nrequest handled outside the system. Nothing is filed \u2014\nthe response is the teaching denial (code\nexplorer_grant_required + the boundary shape, with\ncan_request always false).",
         "consumes": [
           "application/json"
         ],
@@ -12607,7 +12607,7 @@
         "tags": [
           "clusters"
         ],
-        "summary": "Request K8s View access for a cluster",
+        "summary": "Request K8s View access (disabled at launch)",
         "parameters": [
           {
             "type": "integer",
@@ -12617,7 +12617,7 @@
             "required": true
           },
           {
-            "description": "{\\",
+            "description": "Ignored (nothing is filed)",
             "name": "body",
             "in": "body",
             "schema": {
@@ -12626,21 +12626,6 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "$ref": "#/definitions/handlers.explorerAccessView"
-            }
-          },
-          "400": {
-            "description": "Reason longer than 2000 characters",
-            "schema": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
           "401": {
             "description": "Unauthorized",
             "schema": {
@@ -25278,7 +25263,7 @@
     },
     "/orgs/{org_id}/storage/volumes": {
       "get": {
-        "description": "Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.\nprojection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.\nOtherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.",
+        "description": "Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.\nworkload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.\nprojection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.\nOtherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.",
         "produces": [
           "application/json"
         ],
@@ -31526,6 +31511,93 @@
         "operationId": "GetServicesDatabasesIdExtensions"
       }
     },
+    "/services/databases/{id}/query": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Runs one customer SELECT against the database through the read-only\nrunner: a server-set 10-second statement timeout, a 2000-row cap, a\n2 MiB result envelope, and a permanent audit line for every attempt\n(including refusals). Owner and org admins only. PostgreSQL, running\ndatabases only \u2014 other engines answer the named refusal.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Run one read-only query on a database",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/databasequery.QueryResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdQuery"
+      }
+    },
     "/services/databases/{id}/recover-lane": {
       "post": {
         "security": [
@@ -31799,6 +31871,183 @@
           }
         },
         "operationId": "PostServicesDatabasesIdScale-storage"
+      }
+    },
+    "/services/databases/{id}/schema": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The schema browser's tree: the schemas the read-only role can use\nand, inside each, the relations it can read (privilege-filtered \u2014\nthe server's own words, one fixed catalog read). Owner and org\nadmins only. PostgreSQL, running databases only.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Browse a database's schema",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetServicesDatabasesIdSchema"
+      }
+    },
+    "/services/databases/{id}/schema/{schema}/tables/{table}/columns": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The schema browser's column list for one relation (position order,\nthe engine's own type names). Owner and org admins only.\nPostgreSQL, running databases only.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "List one relation's columns",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Schema name",
+            "name": "schema",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Table name",
+            "name": "table",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetServicesDatabasesIdSchemaSchemaTablesTableColumns"
       }
     },
     "/services/databases/{id}/start": {
@@ -37070,6 +37319,63 @@
         }
       }
     },
+    "databasequery.Outcome": {
+      "type": "string",
+      "enum": [
+        "ok",
+        "truncated",
+        "timeout",
+        "permission_denied",
+        "refused",
+        "busy",
+        "error"
+      ],
+      "x-enum-varnames": [
+        "OutcomeOK",
+        "OutcomeTruncated",
+        "OutcomeTimeout",
+        "OutcomePermissionDenied",
+        "OutcomeRefused",
+        "OutcomeBusy",
+        "OutcomeError"
+      ]
+    },
+    "databasequery.QueryResponse": {
+      "type": "object",
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "durationMs": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        },
+        "outcome": {
+          "$ref": "#/definitions/databasequery.Outcome"
+        },
+        "rowCount": {
+          "type": "integer"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {}
+          }
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncatedBy": {
+          "type": "string"
+        }
+      }
+    },
     "dnsregistry.AvailabilityResult": {
       "type": "object",
       "properties": {
@@ -38961,7 +39267,7 @@
               }
             },
             "adopt_existing": {
-              "description": "AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint\n4): accept pre-existing, RUNNING, same-version k3s on the members\ninstead of installing. Without it, a member with running k3s is 409\nexisting_k3s_running. The server verifies EVERY member via the\ncontamination preflight before honoring it (verified adoption\nrecords cluster.adopted=true; an unverified opt-in is not honored).",
+              "description": "AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint\n4): accept pre-existing, RUNNING, same-version k3s on the members\ninstead of installing. Without it, a member with running k3s is 409\nexisting_k3s_running. The server verifies EVERY member via the\ncontamination preflight before honoring it (verified adoption\nrecords cluster.adopted=true; an unverified opt-in is not honored).\nMutually exclusive with ReplaceExisting (400) \u2014 adopting keeps the\nuser's install; replacing tears it out.",
               "type": "boolean"
             },
             "agent_deploy_method": {
@@ -39007,6 +39313,10 @@
             "network_id": {
               "description": "NetworkID is the explicit network contract (story 124.17, D12): the\nnetwork every member VM must belong to, selected in wizard step 1.\nNullable \u2014 null = the acknowledged \"No network \u2014 advanced\" choice\n(every member must be networkless). Validated server-side against\nevery member; violations surface as structured 409s\n(vm_not_in_network / vm_in_cluster).",
               "type": "integer"
+            },
+            "replace_existing": {
+              "description": "ReplaceExisting is the BAR-3685 replace confirmation (BAR-3707):\nthe caller accepted the ONE confirm prompt over a pre-existing\ncluster \u2014 ANY version, running or stopped \u2014 so the create proceeds\nwith a clean-install of the requested version (the flag rides the\ncluster row; formation tears the existing install out first). The\nimport flow never sends it (import stays best-effort, unchanged).",
+              "type": "boolean"
             },
             "stack": {
               "type": "string",
@@ -45580,7 +45890,7 @@
       "type": "object",
       "properties": {
         "can_request": {
-          "description": "CanRequest: the caller may file (or claim) \u2014 true whenever the view\nis not already granted.",
+          "description": "CanRequest is FALSE at launch: the in-product request door is part\nof the strip (backend#4735 item 1), so the payload never advertises\na door it does not open. The field stays in the shape \u2014 the v1\nconsole contract reads it, and false keeps the request affordance\nhidden with no FE change; the field's removal rides the FE strip\ncard.",
           "type": "boolean"
         },
         "cluster": {
@@ -45594,12 +45904,8 @@
             }
           ]
         },
-        "owner_eligible": {
-          "description": "OwnerEligible: the caller passes the app-owner standing derivation \u2014\nthe request POST becomes a one-click INSTANT claim.",
-          "type": "boolean"
-        },
         "pending_request": {
-          "description": "PendingRequest is set when a request is queued \u2014 \"how to get it\"\ncites it (who is waiting, since when, why).",
+          "description": "PendingRequest is set when a pre-launch request is still queued \u2014\n\"how to get it\" cites it (the approver tier still decides it).",
           "allOf": [
             {
               "$ref": "#/definitions/handlers.explorerGrantView"
@@ -47391,6 +47697,10 @@
         "provider_cluster_id": {
           "description": "EKS/AKS/GKE cluster ID",
           "type": "string"
+        },
+        "replaced_existing": {
+          "description": "ReplacedExisting records the customer's BAR-3685 replace confirmation\n(BAR-3707): at creation the contamination preflight found pre-existing\nKubernetes on at least one member (newer, older, or matching; running\nor stopped), the console showed the ONE confirm prompt, and the create\ncame back with replace_existing. True means formation CLEAN-INSTALLS\nour pinned version over whatever was on the machines \u2014 SetupNode runs\nits uninstall-then-probe leg first; it never silently keeps a foreign\ninstall (that silent keep is exactly what install_k3s's\nalready_installed path would otherwise report on a matching-version\ncluster). The column \u2014 not the job payload \u2014 is the durable truth the\ninstall worker reads on every (re)dispatch, the same contract as the\nsibling Adopted column.",
+          "type": "boolean"
         },
         "secondary_network_ids": {
           "type": "array",
@@ -50592,6 +50902,9 @@
         "cluster_id": {
           "type": "integer"
         },
+        "install_name": {
+          "type": "string"
+        },
         "namespace": {
           "type": "string"
         },
@@ -50609,6 +50922,12 @@
         },
         "used_bytes": {
           "type": "integer"
+        },
+        "workload_kind": {
+          "type": "string"
+        },
+        "workload_name": {
+          "type": "string"
         }
       }
     },

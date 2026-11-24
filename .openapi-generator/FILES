@@ -171,6 +171,8 @@ docs/ConsoleAPI.md
 docs/ContractsMetricSample.md
 docs/ContractsMetricsWindow.md
 docs/ContractsRunnerMetrics.md
+docs/DatabasequeryOutcome.md
+docs/DatabasequeryQueryResponse.md
 docs/DatabasesAPI.md
 docs/DelegationAPI.md
 docs/DeleteVirtualMachinesId200Response.md
@@ -842,6 +844,8 @@ model_clonereplay_report_unit.go
 model_contracts_metric_sample.go
 model_contracts_metrics_window.go
 model_contracts_runner_metrics.go
+model_databasequery_outcome.go
+model_databasequery_query_response.go
 model_delete_virtual_machines_id_200_response.go
 model_delete_virtual_machines_id_403_response.go
 model_dnsregistry_availability_result.go

@@ -22,12 +22,15 @@ var _ MappedNullable = &StorageusageVolumeUsage{}
 type StorageusageVolumeUsage struct {
 	CapacityBytes *int32 `json:"capacity_bytes,omitempty"`
 	ClusterId *int32 `json:"cluster_id,omitempty"`
+	InstallName *string `json:"install_name,omitempty"`
 	Namespace *string `json:"namespace,omitempty"`
 	PodName *string `json:"pod_name,omitempty"`
 	Projection *StorageusageVolumeProjectionView `json:"projection,omitempty"`
 	PvcName *string `json:"pvc_name,omitempty"`
 	SampledAt *string `json:"sampled_at,omitempty"`
 	UsedBytes *int32 `json:"used_bytes,omitempty"`
+	WorkloadKind *string `json:"workload_kind,omitempty"`
+	WorkloadName *string `json:"workload_name,omitempty"`
 }
 
 // NewStorageusageVolumeUsage instantiates a new StorageusageVolumeUsage object
@@ -109,6 +112,38 @@ func (o *StorageusageVolumeUsage) HasClusterId() bool {
 // SetClusterId gets a reference to the given int32 and assigns it to the ClusterId field.
 func (o *StorageusageVolumeUsage) SetClusterId(v int32) {
 	o.ClusterId = &v
+}
+
+// GetInstallName returns the InstallName field value if set, zero value otherwise.
+func (o *StorageusageVolumeUsage) GetInstallName() string {
+	if o == nil || IsNil(o.InstallName) {
+		var ret string
+		return ret
+	}
+	return *o.InstallName
+}
+
+// GetInstallNameOk returns a tuple with the InstallName field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageusageVolumeUsage) GetInstallNameOk() (*string, bool) {
+	if o == nil || IsNil(o.InstallName) {
+		return nil, false
+	}
+	return o.InstallName, true
+}
+
+// HasInstallName returns a boolean if a field has been set.
+func (o *StorageusageVolumeUsage) HasInstallName() bool {
+	if o != nil && !IsNil(o.InstallName) {
+		return true
+	}
+
+	return false
+}
+
+// SetInstallName gets a reference to the given string and assigns it to the InstallName field.
+func (o *StorageusageVolumeUsage) SetInstallName(v string) {
+	o.InstallName = &v
 }
 
 // GetNamespace returns the Namespace field value if set, zero value otherwise.
@@ -303,6 +338,70 @@ func (o *StorageusageVolumeUsage) SetUsedBytes(v int32) {
 	o.UsedBytes = &v
 }
 
+// GetWorkloadKind returns the WorkloadKind field value if set, zero value otherwise.
+func (o *StorageusageVolumeUsage) GetWorkloadKind() string {
+	if o == nil || IsNil(o.WorkloadKind) {
+		var ret string
+		return ret
+	}
+	return *o.WorkloadKind
+}
+
+// GetWorkloadKindOk returns a tuple with the WorkloadKind field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageusageVolumeUsage) GetWorkloadKindOk() (*string, bool) {
+	if o == nil || IsNil(o.WorkloadKind) {
+		return nil, false
+	}
+	return o.WorkloadKind, true
+}
+
+// HasWorkloadKind returns a boolean if a field has been set.
+func (o *StorageusageVolumeUsage) HasWorkloadKind() bool {
+	if o != nil && !IsNil(o.WorkloadKind) {
+		return true
+	}
+
+	return false
+}
+
+// SetWorkloadKind gets a reference to the given string and assigns it to the WorkloadKind field.
+func (o *StorageusageVolumeUsage) SetWorkloadKind(v string) {
+	o.WorkloadKind = &v
+}
+
+// GetWorkloadName returns the WorkloadName field value if set, zero value otherwise.
+func (o *StorageusageVolumeUsage) GetWorkloadName() string {
+	if o == nil || IsNil(o.WorkloadName) {
+		var ret string
+		return ret
+	}
+	return *o.WorkloadName
+}
+
+// GetWorkloadNameOk returns a tuple with the WorkloadName field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageusageVolumeUsage) GetWorkloadNameOk() (*string, bool) {
+	if o == nil || IsNil(o.WorkloadName) {
+		return nil, false
+	}
+	return o.WorkloadName, true
+}
+
+// HasWorkloadName returns a boolean if a field has been set.
+func (o *StorageusageVolumeUsage) HasWorkloadName() bool {
+	if o != nil && !IsNil(o.WorkloadName) {
+		return true
+	}
+
+	return false
+}
+
+// SetWorkloadName gets a reference to the given string and assigns it to the WorkloadName field.
+func (o *StorageusageVolumeUsage) SetWorkloadName(v string) {
+	o.WorkloadName = &v
+}
+
 func (o StorageusageVolumeUsage) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -318,6 +417,9 @@ func (o StorageusageVolumeUsage) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ClusterId) {
 		toSerialize["cluster_id"] = o.ClusterId
+	}
+	if !IsNil(o.InstallName) {
+		toSerialize["install_name"] = o.InstallName
 	}
 	if !IsNil(o.Namespace) {
 		toSerialize["namespace"] = o.Namespace
@@ -336,6 +438,12 @@ func (o StorageusageVolumeUsage) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.UsedBytes) {
 		toSerialize["used_bytes"] = o.UsedBytes
+	}
+	if !IsNil(o.WorkloadKind) {
+		toSerialize["workload_kind"] = o.WorkloadKind
+	}
+	if !IsNil(o.WorkloadName) {
+		toSerialize["workload_name"] = o.WorkloadName
 	}
 	return toSerialize, nil
 }

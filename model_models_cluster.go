@@ -78,6 +78,8 @@ type ModelsCluster struct {
 	Provider *ModelsClusterProvider `json:"provider,omitempty"`
 	// EKS/AKS/GKE cluster ID
 	ProviderClusterId *string `json:"provider_cluster_id,omitempty"`
+	// ReplacedExisting records the customer's BAR-3685 replace confirmation (BAR-3707): at creation the contamination preflight found pre-existing Kubernetes on at least one member (newer, older, or matching; running or stopped), the console showed the ONE confirm prompt, and the create came back with replace_existing. True means formation CLEAN-INSTALLS our pinned version over whatever was on the machines — SetupNode runs its uninstall-then-probe leg first; it never silently keeps a foreign install (that silent keep is exactly what install_k3s's already_installed path would otherwise report on a matching-version cluster). The column — not the job payload — is the durable truth the install worker reads on every (re)dispatch, the same contract as the sibling Adopted column.
+	ReplacedExisting *bool `json:"replaced_existing,omitempty"`
 	SecondaryNetworkIds []int32 `json:"secondary_network_ids,omitempty"`
 	Stack *ModelsClusterStack `json:"stack,omitempty"`
 	Status *ModelsClusterStatus `json:"status,omitempty"`
@@ -1295,6 +1297,38 @@ func (o *ModelsCluster) SetProviderClusterId(v string) {
 	o.ProviderClusterId = &v
 }
 
+// GetReplacedExisting returns the ReplacedExisting field value if set, zero value otherwise.
+func (o *ModelsCluster) GetReplacedExisting() bool {
+	if o == nil || IsNil(o.ReplacedExisting) {
+		var ret bool
+		return ret
+	}
+	return *o.ReplacedExisting
+}
+
+// GetReplacedExistingOk returns a tuple with the ReplacedExisting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsCluster) GetReplacedExistingOk() (*bool, bool) {
+	if o == nil || IsNil(o.ReplacedExisting) {
+		return nil, false
+	}
+	return o.ReplacedExisting, true
+}
+
+// HasReplacedExisting returns a boolean if a field has been set.
+func (o *ModelsCluster) HasReplacedExisting() bool {
+	if o != nil && !IsNil(o.ReplacedExisting) {
+		return true
+	}
+
+	return false
+}
+
+// SetReplacedExisting gets a reference to the given bool and assigns it to the ReplacedExisting field.
+func (o *ModelsCluster) SetReplacedExisting(v bool) {
+	o.ReplacedExisting = &v
+}
+
 // GetSecondaryNetworkIds returns the SecondaryNetworkIds field value if set, zero value otherwise.
 func (o *ModelsCluster) GetSecondaryNetworkIds() []int32 {
 	if o == nil || IsNil(o.SecondaryNetworkIds) {
@@ -1735,6 +1769,9 @@ func (o ModelsCluster) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ProviderClusterId) {
 		toSerialize["provider_cluster_id"] = o.ProviderClusterId
+	}
+	if !IsNil(o.ReplacedExisting) {
+		toSerialize["replaced_existing"] = o.ReplacedExisting
 	}
 	if !IsNil(o.SecondaryNetworkIds) {
 		toSerialize["secondary_network_ids"] = o.SecondaryNetworkIds
