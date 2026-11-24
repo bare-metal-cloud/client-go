@@ -24,7 +24,7 @@ var _ MappedNullable = &HandlersCreateClusterRequestData{}
 type HandlersCreateClusterRequestData struct {
 	// Addons is the wizard Add-ons step's checkbox set (epic app-platform story 3.4): the optional extras ticked at formation, from the CLOSED set models.ClusterAddons (monitoring, public_entry, databases, log_book). The omitted/empty field records none. An unknown key is a 400 caller error; the set is normalized again pre-row in the service and persisted as the clusters.addons JSON array. Installation honesty: only 'monitoring' has a real install path today (the formation-completion hook provisions the in-cluster monitoring stack); the other three keys persist as declared-but-not-yet-installing — the surfaces list them, nothing fake-installs them.
 	Addons []string `json:"addons,omitempty"`
-	// AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint 4): accept pre-existing, RUNNING, same-version k3s on the members instead of installing. Without it, a member with running k3s is 409 existing_k3s_running. The server verifies EVERY member via the contamination preflight before honoring it (verified adoption records cluster.adopted=true; an unverified opt-in is not honored).
+	// AdoptExisting is the EXPLICIT ADOPT opt-in (story 124.3, constraint 4): accept pre-existing, RUNNING, same-version k3s on the members instead of installing. Without it, a member with running k3s is 409 existing_k3s_running. The server verifies EVERY member via the contamination preflight before honoring it (verified adoption records cluster.adopted=true; an unverified opt-in is not honored). Mutually exclusive with ReplaceExisting (400) — adopting keeps the user's install; replacing tears it out.
 	AdoptExisting *bool `json:"adopt_existing,omitempty"`
 	// AgentDeployMethod selects how the k8s-agent is deployed inside the cluster after provisioning: \"kubectl\" (default, applies manifest via client-go) or \"helm\" (installs via Helm SDK from the chart repo).
 	AgentDeployMethod *string `json:"agent_deploy_method,omitempty"`
@@ -39,6 +39,8 @@ type HandlersCreateClusterRequestData struct {
 	MasterCount *int32 `json:"master_count,omitempty"`
 	// NetworkID is the explicit network contract (story 124.17, D12): the network every member VM must belong to, selected in wizard step 1. Nullable — null = the acknowledged \"No network — advanced\" choice (every member must be networkless). Validated server-side against every member; violations surface as structured 409s (vm_not_in_network / vm_in_cluster).
 	NetworkId *int32 `json:"network_id,omitempty"`
+	// ReplaceExisting is the BAR-3685 replace confirmation (BAR-3707): the caller accepted the ONE confirm prompt over a pre-existing cluster — ANY version, running or stopped — so the create proceeds with a clean-install of the requested version (the flag rides the cluster row; formation tears the existing install out first). The import flow never sends it (import stays best-effort, unchanged).
+	ReplaceExisting *bool `json:"replace_existing,omitempty"`
 	Stack string `json:"stack"`
 	Version string `json:"version"`
 	// VMIDs is the array of VM IDs for BYOV clusters. The first VM is assigned the master role; all others are workers. For explicit per-VM role assignment, use VMRoles instead.
@@ -358,6 +360,38 @@ func (o *HandlersCreateClusterRequestData) SetNetworkId(v int32) {
 	o.NetworkId = &v
 }
 
+// GetReplaceExisting returns the ReplaceExisting field value if set, zero value otherwise.
+func (o *HandlersCreateClusterRequestData) GetReplaceExisting() bool {
+	if o == nil || IsNil(o.ReplaceExisting) {
+		var ret bool
+		return ret
+	}
+	return *o.ReplaceExisting
+}
+
+// GetReplaceExistingOk returns a tuple with the ReplaceExisting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersCreateClusterRequestData) GetReplaceExistingOk() (*bool, bool) {
+	if o == nil || IsNil(o.ReplaceExisting) {
+		return nil, false
+	}
+	return o.ReplaceExisting, true
+}
+
+// HasReplaceExisting returns a boolean if a field has been set.
+func (o *HandlersCreateClusterRequestData) HasReplaceExisting() bool {
+	if o != nil && !IsNil(o.ReplaceExisting) {
+		return true
+	}
+
+	return false
+}
+
+// SetReplaceExisting gets a reference to the given bool and assigns it to the ReplaceExisting field.
+func (o *HandlersCreateClusterRequestData) SetReplaceExisting(v bool) {
+	o.ReplaceExisting = &v
+}
+
 // GetStack returns the Stack field value
 func (o *HandlersCreateClusterRequestData) GetStack() string {
 	if o == nil {
@@ -538,6 +572,9 @@ func (o HandlersCreateClusterRequestData) ToMap() (map[string]interface{}, error
 	}
 	if !IsNil(o.NetworkId) {
 		toSerialize["network_id"] = o.NetworkId
+	}
+	if !IsNil(o.ReplaceExisting) {
+		toSerialize["replace_existing"] = o.ReplaceExisting
 	}
 	toSerialize["stack"] = o.Stack
 	toSerialize["version"] = o.Version

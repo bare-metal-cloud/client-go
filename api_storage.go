@@ -27,6 +27,7 @@ type StorageAPI interface {
 	GetOrgsOrgIdStorageVolumes List PVC usage for an organization
 
 	Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.
+workload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.
 projection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.
 Otherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.
 
@@ -58,6 +59,7 @@ func (r ApiGetOrgsOrgIdStorageVolumesRequest) Execute() (*HandlersStorageVolumes
 GetOrgsOrgIdStorageVolumes List PVC usage for an organization
 
 Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.
+workload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.
 projection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.
 Otherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.
 

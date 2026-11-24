@@ -17,6 +17,8 @@ Method | HTTP request | Description
 [**GetServicesDatabasesIdAdminUsers**](DatabasesAPI.md#GetServicesDatabasesIdAdminUsers) | **Get** /services/databases/{id}/admin/users | List the users on a database service
 [**GetServicesDatabasesIdConnection**](DatabasesAPI.md#GetServicesDatabasesIdConnection) | **Get** /services/databases/{id}/connection | Get database connection info
 [**GetServicesDatabasesIdExtensions**](DatabasesAPI.md#GetServicesDatabasesIdExtensions) | **Get** /services/databases/{id}/extensions | List the Postgres extensions installed on a database
+[**GetServicesDatabasesIdSchema**](DatabasesAPI.md#GetServicesDatabasesIdSchema) | **Get** /services/databases/{id}/schema | Browse a database&#39;s schema
+[**GetServicesDatabasesIdSchemaSchemaTablesTableColumns**](DatabasesAPI.md#GetServicesDatabasesIdSchemaSchemaTablesTableColumns) | **Get** /services/databases/{id}/schema/{schema}/tables/{table}/columns | List one relation&#39;s columns
 [**GetServicesDatabasesIdStatus**](DatabasesAPI.md#GetServicesDatabasesIdStatus) | **Get** /services/databases/{id}/status | Get database deployment status
 [**PatchServicesDatabasesIdAdminGrantsGrantId**](DatabasesAPI.md#PatchServicesDatabasesIdAdminGrantsGrantId) | **Patch** /services/databases/{id}/admin/grants/{grantId} | Edit a member&#39;s grant
 [**PatchServicesDatabasesIdAdminUsersName**](DatabasesAPI.md#PatchServicesDatabasesIdAdminUsersName) | **Patch** /services/databases/{id}/admin/users/{name} | Edit a user&#39;s role
@@ -28,6 +30,7 @@ Method | HTTP request | Description
 [**PostServicesDatabasesIdAdminUsers**](DatabasesAPI.md#PostServicesDatabasesIdAdminUsers) | **Post** /services/databases/{id}/admin/users | Create a user on a database service
 [**PostServicesDatabasesIdAdminUsersNameRevoke**](DatabasesAPI.md#PostServicesDatabasesIdAdminUsersNameRevoke) | **Post** /services/databases/{id}/admin/users/{name}/revoke | Revoke a user&#39;s login
 [**PostServicesDatabasesIdConnectionResetPassword**](DatabasesAPI.md#PostServicesDatabasesIdConnectionResetPassword) | **Post** /services/databases/{id}/connection/reset-password | Reset database password
+[**PostServicesDatabasesIdQuery**](DatabasesAPI.md#PostServicesDatabasesIdQuery) | **Post** /services/databases/{id}/query | Run one read-only query on a database
 [**PostServicesDatabasesIdRecoverLane**](DatabasesAPI.md#PostServicesDatabasesIdRecoverLane) | **Post** /services/databases/{id}/recover-lane | Recover a stranded backup lane (admin)
 [**PostServicesDatabasesIdRestart**](DatabasesAPI.md#PostServicesDatabasesIdRestart) | **Post** /services/databases/{id}/restart | Restart a database (graceful rolling restart)
 [**PostServicesDatabasesIdRestore**](DatabasesAPI.md#PostServicesDatabasesIdRestore) | **Post** /services/databases/{id}/restore | Restore a database from a backup archive (deploykit engine)
@@ -933,6 +936,152 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## GetServicesDatabasesIdSchema
+
+> map[string]interface{} GetServicesDatabasesIdSchema(ctx, id).Execute()
+
+Browse a database's schema
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdSchema(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdSchema``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdSchema`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdSchema`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdSchemaRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServicesDatabasesIdSchemaSchemaTablesTableColumns
+
+> map[string]interface{} GetServicesDatabasesIdSchemaSchemaTablesTableColumns(ctx, id, schema, table).Execute()
+
+List one relation's columns
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	schema := "schema_example" // string | Schema name
+	table := "table_example" // string | Table name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdSchemaSchemaTablesTableColumns(context.Background(), id, schema, table).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdSchemaSchemaTablesTableColumns``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdSchemaSchemaTablesTableColumns`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdSchemaSchemaTablesTableColumns`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**schema** | **string** | Schema name | 
+**table** | **string** | Table name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdSchemaSchemaTablesTableColumnsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetServicesDatabasesIdStatus
 
 > HandlersDatabaseStatusResponse GetServicesDatabasesIdStatus(ctx, id).Execute()
@@ -1695,6 +1844,76 @@ Name | Type | Description  | Notes
 ### Return type
 
 **map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdQuery
+
+> DatabasequeryQueryResponse PostServicesDatabasesIdQuery(ctx, id).Execute()
+
+Run one read-only query on a database
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdQuery(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdQuery``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdQuery`: DatabasequeryQueryResponse
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdQuery`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdQueryRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**DatabasequeryQueryResponse**](DatabasequeryQueryResponse.md)
 
 ### Authorization
 

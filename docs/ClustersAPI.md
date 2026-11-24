@@ -31,7 +31,7 @@ Method | HTTP request | Description
 [**PostClustersIdBackupMigrationResume**](ClustersAPI.md#PostClustersIdBackupMigrationResume) | **Post** /clusters/{id}/backup-migration/resume | Resume a failed backup destination migration
 [**PostClustersIdBackupRunsRunIdRestore**](ClustersAPI.md#PostClustersIdBackupRunsRunIdRestore) | **Post** /clusters/{id}/backup-runs/{run_id}/restore | Restore an install&#39;s data from a recorded backup run
 [**PostClustersIdExplorerSetup**](ClustersAPI.md#PostClustersIdExplorerSetup) | **Post** /clusters/{id}/explorer/setup | Setup K8s cluster explorer tunnel
-[**PostClustersIdK8sViewAccessRequest**](ClustersAPI.md#PostClustersIdK8sViewAccessRequest) | **Post** /clusters/{id}/k8s-view/access/request | Request K8s View access for a cluster
+[**PostClustersIdK8sViewAccessRequest**](ClustersAPI.md#PostClustersIdK8sViewAccessRequest) | **Post** /clusters/{id}/k8s-view/access/request | Request K8s View access (disabled at launch)
 [**PostClustersIdNetwork**](ClustersAPI.md#PostClustersIdNetwork) | **Post** /clusters/{id}/network | Set cluster network
 [**PostClustersIdVirtualMachines**](ClustersAPI.md#PostClustersIdVirtualMachines) | **Post** /clusters/{id}/virtual-machines | Add VMs to cluster
 [**PostClustersImport**](ClustersAPI.md#PostClustersImport) | **Post** /clusters/import | Import an existing cluster (unified)
@@ -1948,9 +1948,9 @@ Name | Type | Description  | Notes
 
 ## PostClustersIdK8sViewAccessRequest
 
-> HandlersExplorerAccessView PostClustersIdK8sViewAccessRequest(ctx, id).Body(body).Execute()
+> PostClustersIdK8sViewAccessRequest(ctx, id).Body(body).Execute()
 
-Request K8s View access for a cluster
+Request K8s View access (disabled at launch)
 
 
 
@@ -1968,17 +1968,15 @@ import (
 
 func main() {
 	id := int32(56) // int32 | Cluster ID
-	body := map[string]interface{}{ ... } // map[string]interface{} | {\\ (optional)
+	body := map[string]interface{}{ ... } // map[string]interface{} | Ignored (nothing is filed) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ClustersAPI.PostClustersIdK8sViewAccessRequest(context.Background(), id).Body(body).Execute()
+	r, err := apiClient.ClustersAPI.PostClustersIdK8sViewAccessRequest(context.Background(), id).Body(body).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ClustersAPI.PostClustersIdK8sViewAccessRequest``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `PostClustersIdK8sViewAccessRequest`: HandlersExplorerAccessView
-	fmt.Fprintf(os.Stdout, "Response from `ClustersAPI.PostClustersIdK8sViewAccessRequest`: %v\n", resp)
 }
 ```
 
@@ -1998,11 +1996,11 @@ Other parameters are passed through a pointer to a apiPostClustersIdK8sViewAcces
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **body** | **map[string]interface{}** | {\\ | 
+ **body** | **map[string]interface{}** | Ignored (nothing is filed) | 
 
 ### Return type
 
-[**HandlersExplorerAccessView**](HandlersExplorerAccessView.md)
+ (empty response body)
 
 ### Authorization
 

@@ -41,6 +41,7 @@ Name | Type | Description | Notes
 **ProjectId** | Pointer to **int32** |  | [optional] 
 **Provider** | Pointer to [**ModelsClusterProvider**](ModelsClusterProvider.md) |  | [optional] 
 **ProviderClusterId** | Pointer to **string** | EKS/AKS/GKE cluster ID | [optional] 
+**ReplacedExisting** | Pointer to **bool** | ReplacedExisting records the customer&#39;s BAR-3685 replace confirmation (BAR-3707): at creation the contamination preflight found pre-existing Kubernetes on at least one member (newer, older, or matching; running or stopped), the console showed the ONE confirm prompt, and the create came back with replace_existing. True means formation CLEAN-INSTALLS our pinned version over whatever was on the machines — SetupNode runs its uninstall-then-probe leg first; it never silently keeps a foreign install (that silent keep is exactly what install_k3s&#39;s already_installed path would otherwise report on a matching-version cluster). The column — not the job payload — is the durable truth the install worker reads on every (re)dispatch, the same contract as the sibling Adopted column. | [optional] 
 **SecondaryNetworkIds** | Pointer to **[]int32** |  | [optional] 
 **Stack** | Pointer to [**ModelsClusterStack**](ModelsClusterStack.md) |  | [optional] 
 **Status** | Pointer to [**ModelsClusterStatus**](ModelsClusterStatus.md) |  | [optional] 
@@ -995,6 +996,31 @@ SetProviderClusterId sets ProviderClusterId field to given value.
 `func (o *ModelsCluster) HasProviderClusterId() bool`
 
 HasProviderClusterId returns a boolean if a field has been set.
+
+### GetReplacedExisting
+
+`func (o *ModelsCluster) GetReplacedExisting() bool`
+
+GetReplacedExisting returns the ReplacedExisting field if non-nil, zero value otherwise.
+
+### GetReplacedExistingOk
+
+`func (o *ModelsCluster) GetReplacedExistingOk() (*bool, bool)`
+
+GetReplacedExistingOk returns a tuple with the ReplacedExisting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetReplacedExisting
+
+`func (o *ModelsCluster) SetReplacedExisting(v bool)`
+
+SetReplacedExisting sets ReplacedExisting field to given value.
+
+### HasReplacedExisting
+
+`func (o *ModelsCluster) HasReplacedExisting() bool`
+
+HasReplacedExisting returns a boolean if a field has been set.
 
 ### GetSecondaryNetworkIds
 

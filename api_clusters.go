@@ -256,7 +256,9 @@ Org/project scoped like GET /clusters/:id.
 
 	Resolves the caller's explorer-grant state for one cluster:
 what exists (the cluster), why hidden (the named reason),
-how to get it (pending request / one-click owner claim).
+how to get it (a special request handled outside the
+system; a BMC-admin grants — the in-product request door
+is OFF at launch and can_request is always false).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Cluster ID
@@ -511,13 +513,14 @@ re-post; progress rides the install's own status surface.
 	PostClustersIdExplorerSetupExecute(r ApiPostClustersIdExplorerSetupRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
-	PostClustersIdK8sViewAccessRequest Request K8s View access for a cluster
+	PostClustersIdK8sViewAccessRequest Request K8s View access (disabled at launch)
 
-	Files an access request in the explorer grants ledger.
-Idempotent while a request/grant is open. App owners of
-installs on the cluster claim a standing grant instantly
-(7-day window); other members queue for the BMC-admin
-approver tier.
+	The in-product request door is OFF at launch: explorer
+access is granted by a BMC-admin only, from a special
+request handled outside the system. Nothing is filed —
+the response is the teaching denial (code
+explorer_grant_required + the boundary shape, with
+can_request always false).
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id Cluster ID
@@ -526,8 +529,7 @@ approver tier.
 	PostClustersIdK8sViewAccessRequest(ctx context.Context, id int32) ApiPostClustersIdK8sViewAccessRequestRequest
 
 	// PostClustersIdK8sViewAccessRequestExecute executes the request
-	//  @return HandlersExplorerAccessView
-	PostClustersIdK8sViewAccessRequestExecute(r ApiPostClustersIdK8sViewAccessRequestRequest) (*HandlersExplorerAccessView, *http.Response, error)
+	PostClustersIdK8sViewAccessRequestExecute(r ApiPostClustersIdK8sViewAccessRequestRequest) (*http.Response, error)
 
 	/*
 	PostClustersIdNetwork Set cluster network
@@ -2652,7 +2654,9 @@ GetClustersIdK8sViewAccess K8s View access state (the teaching boundary shape)
 
 Resolves the caller's explorer-grant state for one cluster:
 what exists (the cluster), why hidden (the named reason),
-how to get it (pending request / one-click owner claim).
+how to get it (a special request handled outside the
+system; a BMC-admin grants — the in-product request door
+is OFF at launch and can_request is always false).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Cluster ID
@@ -4966,24 +4970,25 @@ type ApiPostClustersIdK8sViewAccessRequestRequest struct {
 	body *map[string]interface{}
 }
 
-// {\\
+// Ignored (nothing is filed)
 func (r ApiPostClustersIdK8sViewAccessRequestRequest) Body(body map[string]interface{}) ApiPostClustersIdK8sViewAccessRequestRequest {
 	r.body = &body
 	return r
 }
 
-func (r ApiPostClustersIdK8sViewAccessRequestRequest) Execute() (*HandlersExplorerAccessView, *http.Response, error) {
+func (r ApiPostClustersIdK8sViewAccessRequestRequest) Execute() (*http.Response, error) {
 	return r.ApiService.PostClustersIdK8sViewAccessRequestExecute(r)
 }
 
 /*
-PostClustersIdK8sViewAccessRequest Request K8s View access for a cluster
+PostClustersIdK8sViewAccessRequest Request K8s View access (disabled at launch)
 
-Files an access request in the explorer grants ledger.
-Idempotent while a request/grant is open. App owners of
-installs on the cluster claim a standing grant instantly
-(7-day window); other members queue for the BMC-admin
-approver tier.
+The in-product request door is OFF at launch: explorer
+access is granted by a BMC-admin only, from a special
+request handled outside the system. Nothing is filed —
+the response is the teaching denial (code
+explorer_grant_required + the boundary shape, with
+can_request always false).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param id Cluster ID
@@ -4998,18 +5003,16 @@ func (a *ClustersAPIService) PostClustersIdK8sViewAccessRequest(ctx context.Cont
 }
 
 // Execute executes the request
-//  @return HandlersExplorerAccessView
-func (a *ClustersAPIService) PostClustersIdK8sViewAccessRequestExecute(r ApiPostClustersIdK8sViewAccessRequestRequest) (*HandlersExplorerAccessView, *http.Response, error) {
+func (a *ClustersAPIService) PostClustersIdK8sViewAccessRequestExecute(r ApiPostClustersIdK8sViewAccessRequestRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
-		localVarReturnValue  *HandlersExplorerAccessView
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ClustersAPIService.PostClustersIdK8sViewAccessRequest")
 	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/clusters/{id}/k8s-view/access/request"
@@ -5054,19 +5057,19 @@ func (a *ClustersAPIService) PostClustersIdK8sViewAccessRequestExecute(r ApiPost
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return localVarReturnValue, nil, err
+		return nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
+		return localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -5074,73 +5077,53 @@ func (a *ClustersAPIService) PostClustersIdK8sViewAccessRequestExecute(r ApiPost
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		if localVarHTTPResponse.StatusCode == 400 {
-			var v map[string]string
-			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-			if err != nil {
-				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
-			}
-					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
-					newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
-		}
 		if localVarHTTPResponse.StatusCode == 401 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
+				return localVarHTTPResponse, newErr
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
+			return localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
+				return localVarHTTPResponse, newErr
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
+			return localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
+				return localVarHTTPResponse, newErr
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
-			return localVarReturnValue, localVarHTTPResponse, newErr
+			return localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
-				return localVarReturnValue, localVarHTTPResponse, newErr
+				return localVarHTTPResponse, newErr
 			}
 					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
 					newErr.model = v
 		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
+		return localVarHTTPResponse, newErr
 	}
 
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
+	return localVarHTTPResponse, nil
 }
 
 type ApiPostClustersIdNetworkRequest struct {

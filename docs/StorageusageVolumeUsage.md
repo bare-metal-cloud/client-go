@@ -6,12 +6,15 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **CapacityBytes** | Pointer to **int32** |  | [optional] 
 **ClusterId** | Pointer to **int32** |  | [optional] 
+**InstallName** | Pointer to **string** |  | [optional] 
 **Namespace** | Pointer to **string** |  | [optional] 
 **PodName** | Pointer to **string** |  | [optional] 
 **Projection** | Pointer to [**StorageusageVolumeProjectionView**](StorageusageVolumeProjectionView.md) |  | [optional] 
 **PvcName** | Pointer to **string** |  | [optional] 
 **SampledAt** | Pointer to **string** |  | [optional] 
 **UsedBytes** | Pointer to **int32** |  | [optional] 
+**WorkloadKind** | Pointer to **string** |  | [optional] 
+**WorkloadName** | Pointer to **string** |  | [optional] 
 
 ## Methods
 
@@ -81,6 +84,31 @@ SetClusterId sets ClusterId field to given value.
 `func (o *StorageusageVolumeUsage) HasClusterId() bool`
 
 HasClusterId returns a boolean if a field has been set.
+
+### GetInstallName
+
+`func (o *StorageusageVolumeUsage) GetInstallName() string`
+
+GetInstallName returns the InstallName field if non-nil, zero value otherwise.
+
+### GetInstallNameOk
+
+`func (o *StorageusageVolumeUsage) GetInstallNameOk() (*string, bool)`
+
+GetInstallNameOk returns a tuple with the InstallName field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetInstallName
+
+`func (o *StorageusageVolumeUsage) SetInstallName(v string)`
+
+SetInstallName sets InstallName field to given value.
+
+### HasInstallName
+
+`func (o *StorageusageVolumeUsage) HasInstallName() bool`
+
+HasInstallName returns a boolean if a field has been set.
 
 ### GetNamespace
 
@@ -231,6 +259,56 @@ SetUsedBytes sets UsedBytes field to given value.
 `func (o *StorageusageVolumeUsage) HasUsedBytes() bool`
 
 HasUsedBytes returns a boolean if a field has been set.
+
+### GetWorkloadKind
+
+`func (o *StorageusageVolumeUsage) GetWorkloadKind() string`
+
+GetWorkloadKind returns the WorkloadKind field if non-nil, zero value otherwise.
+
+### GetWorkloadKindOk
+
+`func (o *StorageusageVolumeUsage) GetWorkloadKindOk() (*string, bool)`
+
+GetWorkloadKindOk returns a tuple with the WorkloadKind field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkloadKind
+
+`func (o *StorageusageVolumeUsage) SetWorkloadKind(v string)`
+
+SetWorkloadKind sets WorkloadKind field to given value.
+
+### HasWorkloadKind
+
+`func (o *StorageusageVolumeUsage) HasWorkloadKind() bool`
+
+HasWorkloadKind returns a boolean if a field has been set.
+
+### GetWorkloadName
+
+`func (o *StorageusageVolumeUsage) GetWorkloadName() string`
+
+GetWorkloadName returns the WorkloadName field if non-nil, zero value otherwise.
+
+### GetWorkloadNameOk
+
+`func (o *StorageusageVolumeUsage) GetWorkloadNameOk() (*string, bool)`
+
+GetWorkloadNameOk returns a tuple with the WorkloadName field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkloadName
+
+`func (o *StorageusageVolumeUsage) SetWorkloadName(v string)`
+
+SetWorkloadName sets WorkloadName field to given value.
+
+### HasWorkloadName
+
+`func (o *StorageusageVolumeUsage) HasWorkloadName() bool`
+
+HasWorkloadName returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
