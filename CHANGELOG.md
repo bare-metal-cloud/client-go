@@ -4,6 +4,8 @@ Written for the product owner and customers.
 
 ## Unreleased
 
+## v0.2.3 (2026-11-24)
+
 - The Go SDK now covers the managed-database query API from the backend: send a database query and read its result rows and outcome. Try it: call the databases query operation on a database id and read the response and outcome fields (new `DatabasequeryQueryResponse` and `DatabasequeryOutcome` types).
 
 ## v0.2.2 (2026-11-22)
