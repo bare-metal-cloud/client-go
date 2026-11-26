@@ -5,6 +5,8 @@ All URIs are relative to *http://localhost:3001/api/v1*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteVirtualMachinesIdAlertRulesRuleId**](AlertsAPI.md#DeleteVirtualMachinesIdAlertRulesRuleId) | **Delete** /virtual-machines/{id}/alert-rules/{rule_id} | Delete an alert rule on a VM
+[**GetAlertsBucket**](AlertsAPI.md#GetAlertsBucket) | **Get** /alerts/bucket | Storage bucket alert status
+[**GetAlertsVolume**](AlertsAPI.md#GetAlertsVolume) | **Get** /alerts/volume | Storage volume alert status
 [**GetVirtualMachinesIdAlertRules**](AlertsAPI.md#GetVirtualMachinesIdAlertRules) | **Get** /virtual-machines/{id}/alert-rules | List a VM&#39;s alert rules
 [**PostOrgsOrgIdAlertsIdAcknowledge**](AlertsAPI.md#PostOrgsOrgIdAlertsIdAcknowledge) | **Post** /orgs/{org_id}/alerts/{id}/acknowledge | Acknowledge an org alert event
 [**PostOrgsOrgIdAlertsIdResolve**](AlertsAPI.md#PostOrgsOrgIdAlertsIdResolve) | **Post** /orgs/{org_id}/alerts/{id}/resolve | Resolve an org alert event
@@ -73,6 +75,142 @@ Name | Type | Description  | Notes
 ### Authorization
 
 [CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetAlertsBucket
+
+> HandlersStorageAlertStatus GetAlertsBucket(ctx).TargetId(targetId).TargetName(targetName).Execute()
+
+Storage bucket alert status
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	targetId := int32(56) // int32 | S3 connection that holds the bucket
+	targetName := "targetName_example" // string | Bucket name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.GetAlertsBucket(context.Background()).TargetId(targetId).TargetName(targetName).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.GetAlertsBucket``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetAlertsBucket`: HandlersStorageAlertStatus
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.GetAlertsBucket`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetAlertsBucketRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **targetId** | **int32** | S3 connection that holds the bucket | 
+ **targetName** | **string** | Bucket name | 
+
+### Return type
+
+[**HandlersStorageAlertStatus**](HandlersStorageAlertStatus.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetAlertsVolume
+
+> HandlersStorageAlertStatus GetAlertsVolume(ctx).TargetId(targetId).TargetName(targetName).Execute()
+
+Storage volume alert status
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	targetId := int32(56) // int32 | Cluster that holds the volume
+	targetName := "targetName_example" // string | Volume as namespace/pvc
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.GetAlertsVolume(context.Background()).TargetId(targetId).TargetName(targetName).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.GetAlertsVolume``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetAlertsVolume`: HandlersStorageAlertStatus
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.GetAlertsVolume`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetAlertsVolumeRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **targetId** | **int32** | Cluster that holds the volume | 
+ **targetName** | **string** | Volume as namespace/pvc | 
+
+### Return type
+
+[**HandlersStorageAlertStatus**](HandlersStorageAlertStatus.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
 
 ### HTTP request headers
 

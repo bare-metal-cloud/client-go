@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Install** | Pointer to **string** |  | [optional] 
 **Mode** | Pointer to **string** |  | [optional] 
 **Points** | Pointer to [**[]HandlersDurabilityPoint**](HandlersDurabilityPoint.md) |  | [optional] 
+**PolicyGen** | Pointer to **int32** | PolicyGen is the store-assigned CAS generation: the write route&#39;s optional policy_gen answer echoes it back, and a stale answer is the named 409 (BAR-5597 review — the panel&#39;s edit door races exactly like any other write door). | [optional] 
 **RetentionPreset** | Pointer to **string** |  | [optional] 
 **Runs** | Pointer to [**[]HandlersDurabilityRun**](HandlersDurabilityRun.md) |  | [optional] 
 **Schedule** | Pointer to **string** |  | [optional] 
@@ -159,6 +160,31 @@ SetPoints sets Points field to given value.
 `func (o *HandlersDurabilitySection) HasPoints() bool`
 
 HasPoints returns a boolean if a field has been set.
+
+### GetPolicyGen
+
+`func (o *HandlersDurabilitySection) GetPolicyGen() int32`
+
+GetPolicyGen returns the PolicyGen field if non-nil, zero value otherwise.
+
+### GetPolicyGenOk
+
+`func (o *HandlersDurabilitySection) GetPolicyGenOk() (*int32, bool)`
+
+GetPolicyGenOk returns a tuple with the PolicyGen field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPolicyGen
+
+`func (o *HandlersDurabilitySection) SetPolicyGen(v int32)`
+
+SetPolicyGen sets PolicyGen field to given value.
+
+### HasPolicyGen
+
+`func (o *HandlersDurabilitySection) HasPolicyGen() bool`
+
+HasPolicyGen returns a boolean if a field has been set.
 
 ### GetRetentionPreset
 

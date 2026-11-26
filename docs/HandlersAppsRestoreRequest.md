@@ -4,9 +4,12 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**BackupPoint** | Pointer to [**HandlersAppsRestoreClonePoint**](HandlersAppsRestoreClonePoint.md) |  | [optional] 
 **Confirm** | Pointer to **string** | Confirm is the user&#39;s fresh consent (the dialog&#39;s confirm). Empty on the first POST — the dialog answer. | [optional] 
+**Data** | Pointer to **string** |  | [optional] 
 **Destination** | Pointer to **string** | Destination + Key are the point&#39;s archive handle (the durability endpoint&#39;s point list carries both). | [optional] 
 **Key** | Pointer to **string** |  | [optional] 
+**NewInstall** | Pointer to **string** | The clone mode&#39;s fields (BAR-4912): NewInstall is the name of the install to create (required on clone), Data is the explicit with/without choice (required on clone), and BackupPoint is the with-data clone&#39;s point handle (absent on without). | [optional] 
 **ParallelInstall** | Pointer to **string** | ParallelInstall is the sibling install a parallel restore lands on. Required on parallel; the record must already exist. | [optional] 
 **Target** | Pointer to **string** | Target is in_place (default) or parallel. | [optional] 
 
@@ -28,6 +31,31 @@ will change when the set of required properties is changed
 NewHandlersAppsRestoreRequestWithDefaults instantiates a new HandlersAppsRestoreRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetBackupPoint
+
+`func (o *HandlersAppsRestoreRequest) GetBackupPoint() HandlersAppsRestoreClonePoint`
+
+GetBackupPoint returns the BackupPoint field if non-nil, zero value otherwise.
+
+### GetBackupPointOk
+
+`func (o *HandlersAppsRestoreRequest) GetBackupPointOk() (*HandlersAppsRestoreClonePoint, bool)`
+
+GetBackupPointOk returns a tuple with the BackupPoint field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBackupPoint
+
+`func (o *HandlersAppsRestoreRequest) SetBackupPoint(v HandlersAppsRestoreClonePoint)`
+
+SetBackupPoint sets BackupPoint field to given value.
+
+### HasBackupPoint
+
+`func (o *HandlersAppsRestoreRequest) HasBackupPoint() bool`
+
+HasBackupPoint returns a boolean if a field has been set.
 
 ### GetConfirm
 
@@ -53,6 +81,31 @@ SetConfirm sets Confirm field to given value.
 `func (o *HandlersAppsRestoreRequest) HasConfirm() bool`
 
 HasConfirm returns a boolean if a field has been set.
+
+### GetData
+
+`func (o *HandlersAppsRestoreRequest) GetData() string`
+
+GetData returns the Data field if non-nil, zero value otherwise.
+
+### GetDataOk
+
+`func (o *HandlersAppsRestoreRequest) GetDataOk() (*string, bool)`
+
+GetDataOk returns a tuple with the Data field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetData
+
+`func (o *HandlersAppsRestoreRequest) SetData(v string)`
+
+SetData sets Data field to given value.
+
+### HasData
+
+`func (o *HandlersAppsRestoreRequest) HasData() bool`
+
+HasData returns a boolean if a field has been set.
 
 ### GetDestination
 
@@ -103,6 +156,31 @@ SetKey sets Key field to given value.
 `func (o *HandlersAppsRestoreRequest) HasKey() bool`
 
 HasKey returns a boolean if a field has been set.
+
+### GetNewInstall
+
+`func (o *HandlersAppsRestoreRequest) GetNewInstall() string`
+
+GetNewInstall returns the NewInstall field if non-nil, zero value otherwise.
+
+### GetNewInstallOk
+
+`func (o *HandlersAppsRestoreRequest) GetNewInstallOk() (*string, bool)`
+
+GetNewInstallOk returns a tuple with the NewInstall field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetNewInstall
+
+`func (o *HandlersAppsRestoreRequest) SetNewInstall(v string)`
+
+SetNewInstall sets NewInstall field to given value.
+
+### HasNewInstall
+
+`func (o *HandlersAppsRestoreRequest) HasNewInstall() bool`
+
+HasNewInstall returns a boolean if a field has been set.
 
 ### GetParallelInstall
 

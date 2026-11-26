@@ -185,6 +185,21 @@ func Test_bmc_DatabasesAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test DatabasesAPIService GetServicesDatabasesIdExportDumpJobDownload", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var job string
+
+		resp, httpRes, err := apiClient.DatabasesAPI.GetServicesDatabasesIdExportDumpJobDownload(context.Background(), id, job).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test DatabasesAPIService GetServicesDatabasesIdExtensions", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -382,6 +397,34 @@ func Test_bmc_DatabasesAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test DatabasesAPIService PostServicesDatabasesIdDeploy", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.DatabasesAPI.PostServicesDatabasesIdDeploy(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test DatabasesAPIService PostServicesDatabasesIdExportDump", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.DatabasesAPI.PostServicesDatabasesIdExportDump(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test DatabasesAPIService PostServicesDatabasesIdQuery", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -431,6 +474,20 @@ func Test_bmc_DatabasesAPIService(t *testing.T) {
 		var id string
 
 		resp, httpRes, err := apiClient.DatabasesAPI.PostServicesDatabasesIdRestore(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test DatabasesAPIService PostServicesDatabasesIdRestoreDump", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.DatabasesAPI.PostServicesDatabasesIdRestoreDump(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

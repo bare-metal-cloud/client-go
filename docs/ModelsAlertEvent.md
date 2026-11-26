@@ -19,6 +19,7 @@ Name | Type | Description | Notes
 **ResolvedAt** | Pointer to **string** |  | [optional] 
 **ResolvedBy** | Pointer to **int32** |  | [optional] 
 **RuleId** | Pointer to **string** |  | [optional] 
+**Severity** | Pointer to **string** | Severity copies the firing rule&#39;s severity (AlertSeverity*). | [optional] 
 **TargetId** | Pointer to **int32** |  | [optional] 
 **TargetKind** | Pointer to **string** | TargetKind/TargetID/TargetName mirror the firing rule&#39;s target (AlertTarget*). Pre-158.3 rows read as vm_threshold with target_id 0 — their vm_id is the subject, unchanged. | [optional] 
 **TargetName** | Pointer to **string** |  | [optional] 
@@ -418,6 +419,31 @@ SetRuleId sets RuleId field to given value.
 `func (o *ModelsAlertEvent) HasRuleId() bool`
 
 HasRuleId returns a boolean if a field has been set.
+
+### GetSeverity
+
+`func (o *ModelsAlertEvent) GetSeverity() string`
+
+GetSeverity returns the Severity field if non-nil, zero value otherwise.
+
+### GetSeverityOk
+
+`func (o *ModelsAlertEvent) GetSeverityOk() (*string, bool)`
+
+GetSeverityOk returns a tuple with the Severity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSeverity
+
+`func (o *ModelsAlertEvent) SetSeverity(v string)`
+
+SetSeverity sets Severity field to given value.
+
+### HasSeverity
+
+`func (o *ModelsAlertEvent) HasSeverity() bool`
+
+HasSeverity returns a boolean if a field has been set.
 
 ### GetTargetId
 

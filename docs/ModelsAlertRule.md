@@ -15,6 +15,8 @@ Name | Type | Description | Notes
 **Metric** | Pointer to **string** |  | [optional] 
 **OrgId** | Pointer to **int32** |  | [optional] 
 **ProjectId** | Pointer to **int32** |  | [optional] 
+**Scope** | Pointer to **string** | Scope says which resources a storage_volume rule covers (AlertScope*). Defaults to resource; other kinds ignore it. | [optional] 
+**Severity** | Pointer to **string** | Severity is warning or critical (AlertSeverity*). It rides every fired event and the notification text. Defaults to warning. | [optional] 
 **Status** | Pointer to **string** | Status is the evaluator-owned rule lifecycle surfaced in CRUD (AlertRuleStatus*). CRUD writes only Active; the sweep owns the target_missing flip (and never flips it back except through rule update, which re-arms the rule). | [optional] 
 **TargetId** | Pointer to **int32** | TargetID is the target resource id for the non-VM kinds (today: the cluster id for cluster_health and stack_component). Zero for vm_threshold and platform_signal rules. | [optional] 
 **TargetKind** | Pointer to **string** | TargetKind names what the rule watches (AlertTarget*). Defaults to vm_threshold so pre-158.3 rows (and payloads that omit it) keep their exact existing meaning. | [optional] 
@@ -316,6 +318,56 @@ SetProjectId sets ProjectId field to given value.
 `func (o *ModelsAlertRule) HasProjectId() bool`
 
 HasProjectId returns a boolean if a field has been set.
+
+### GetScope
+
+`func (o *ModelsAlertRule) GetScope() string`
+
+GetScope returns the Scope field if non-nil, zero value otherwise.
+
+### GetScopeOk
+
+`func (o *ModelsAlertRule) GetScopeOk() (*string, bool)`
+
+GetScopeOk returns a tuple with the Scope field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetScope
+
+`func (o *ModelsAlertRule) SetScope(v string)`
+
+SetScope sets Scope field to given value.
+
+### HasScope
+
+`func (o *ModelsAlertRule) HasScope() bool`
+
+HasScope returns a boolean if a field has been set.
+
+### GetSeverity
+
+`func (o *ModelsAlertRule) GetSeverity() string`
+
+GetSeverity returns the Severity field if non-nil, zero value otherwise.
+
+### GetSeverityOk
+
+`func (o *ModelsAlertRule) GetSeverityOk() (*string, bool)`
+
+GetSeverityOk returns a tuple with the Severity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSeverity
+
+`func (o *ModelsAlertRule) SetSeverity(v string)`
+
+SetSeverity sets Severity field to given value.
+
+### HasSeverity
+
+`func (o *ModelsAlertRule) HasSeverity() bool`
+
+HasSeverity returns a boolean if a field has been set.
 
 ### GetStatus
 

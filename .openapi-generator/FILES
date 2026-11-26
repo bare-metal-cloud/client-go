@@ -259,6 +259,7 @@ docs/HandlersAgentUpdateRequest.md
 docs/HandlersApplyRefusal.md
 docs/HandlersApproverView.md
 docs/HandlersAppsPromoteRequest.md
+docs/HandlersAppsRestoreClonePoint.md
 docs/HandlersAppsRestoreRequest.md
 docs/HandlersAppsRollbackRequest.md
 docs/HandlersAppsSlotRotateRequest.md
@@ -337,6 +338,8 @@ docs/HandlersDiscoveryConfig.md
 docs/HandlersDomainsRegisterRequest.md
 docs/HandlersDomainsRotateRequest.md
 docs/HandlersDomainsValidateRequest.md
+docs/HandlersDumpExportRequest.md
+docs/HandlersDumpRestoreRequest.md
 docs/HandlersDurabilityBadge.md
 docs/HandlersDurabilityPoint.md
 docs/HandlersDurabilityRun.md
@@ -561,11 +564,13 @@ docs/HandlersStackMemberPayload.md
 docs/HandlersStackMoveRequest.md
 docs/HandlersStackReviewPayload.md
 docs/HandlersStackRollbackRequest.md
+docs/HandlersStackSlotOnboardingPayload.md
 docs/HandlersStackStrategyPayload.md
 docs/HandlersStackWaveMemberPayload.md
 docs/HandlersStackWavePayload.md
 docs/HandlersStackWiringDeltaPayload.md
 docs/HandlersStopDatabaseRequest.md
+docs/HandlersStorageAlertStatus.md
 docs/HandlersStorageVolumesResponse.md
 docs/HandlersStoreDelegationMandatesRequest.md
 docs/HandlersStoreDelegationMandatesResponse.md
@@ -917,6 +922,7 @@ model_handlers_agent_update_request.go
 model_handlers_apply_refusal.go
 model_handlers_approver_view.go
 model_handlers_apps_promote_request.go
+model_handlers_apps_restore_clone_point.go
 model_handlers_apps_restore_request.go
 model_handlers_apps_rollback_request.go
 model_handlers_apps_slot_rotate_request.go
@@ -997,6 +1003,8 @@ model_handlers_discovery_config.go
 model_handlers_domains_register_request.go
 model_handlers_domains_rotate_request.go
 model_handlers_domains_validate_request.go
+model_handlers_dump_export_request.go
+model_handlers_dump_restore_request.go
 model_handlers_durability_badge.go
 model_handlers_durability_point.go
 model_handlers_durability_run.go
@@ -1221,11 +1229,13 @@ model_handlers_stack_member_payload.go
 model_handlers_stack_move_request.go
 model_handlers_stack_review_payload.go
 model_handlers_stack_rollback_request.go
+model_handlers_stack_slot_onboarding_payload.go
 model_handlers_stack_strategy_payload.go
 model_handlers_stack_wave_member_payload.go
 model_handlers_stack_wave_payload.go
 model_handlers_stack_wiring_delta_payload.go
 model_handlers_stop_database_request.go
+model_handlers_storage_alert_status.go
 model_handlers_storage_volumes_response.go
 model_handlers_store_delegation_mandates_request.go
 model_handlers_store_delegation_mandates_response.go

@@ -16,6 +16,7 @@ Method | HTTP request | Description
 [**GetServicesDatabasesIdAdminParameters**](DatabasesAPI.md#GetServicesDatabasesIdAdminParameters) | **Get** /services/databases/{id}/admin/parameters | List the engine parameters on a database service
 [**GetServicesDatabasesIdAdminUsers**](DatabasesAPI.md#GetServicesDatabasesIdAdminUsers) | **Get** /services/databases/{id}/admin/users | List the users on a database service
 [**GetServicesDatabasesIdConnection**](DatabasesAPI.md#GetServicesDatabasesIdConnection) | **Get** /services/databases/{id}/connection | Get database connection info
+[**GetServicesDatabasesIdExportDumpJobDownload**](DatabasesAPI.md#GetServicesDatabasesIdExportDumpJobDownload) | **Get** /services/databases/{id}/export-dump/{job}/download | Download one completed database dump export
 [**GetServicesDatabasesIdExtensions**](DatabasesAPI.md#GetServicesDatabasesIdExtensions) | **Get** /services/databases/{id}/extensions | List the Postgres extensions installed on a database
 [**GetServicesDatabasesIdSchema**](DatabasesAPI.md#GetServicesDatabasesIdSchema) | **Get** /services/databases/{id}/schema | Browse a database&#39;s schema
 [**GetServicesDatabasesIdSchemaSchemaTablesTableColumns**](DatabasesAPI.md#GetServicesDatabasesIdSchemaSchemaTablesTableColumns) | **Get** /services/databases/{id}/schema/{schema}/tables/{table}/columns | List one relation&#39;s columns
@@ -30,10 +31,13 @@ Method | HTTP request | Description
 [**PostServicesDatabasesIdAdminUsers**](DatabasesAPI.md#PostServicesDatabasesIdAdminUsers) | **Post** /services/databases/{id}/admin/users | Create a user on a database service
 [**PostServicesDatabasesIdAdminUsersNameRevoke**](DatabasesAPI.md#PostServicesDatabasesIdAdminUsersNameRevoke) | **Post** /services/databases/{id}/admin/users/{name}/revoke | Revoke a user&#39;s login
 [**PostServicesDatabasesIdConnectionResetPassword**](DatabasesAPI.md#PostServicesDatabasesIdConnectionResetPassword) | **Post** /services/databases/{id}/connection/reset-password | Reset database password
+[**PostServicesDatabasesIdDeploy**](DatabasesAPI.md#PostServicesDatabasesIdDeploy) | **Post** /services/databases/{id}/deploy | Deploy a database (first deploy or re-deploy after error/stop)
+[**PostServicesDatabasesIdExportDump**](DatabasesAPI.md#PostServicesDatabasesIdExportDump) | **Post** /services/databases/{id}/export-dump | Dump (export) ONE managed database out for download
 [**PostServicesDatabasesIdQuery**](DatabasesAPI.md#PostServicesDatabasesIdQuery) | **Post** /services/databases/{id}/query | Run one read-only query on a database
 [**PostServicesDatabasesIdRecoverLane**](DatabasesAPI.md#PostServicesDatabasesIdRecoverLane) | **Post** /services/databases/{id}/recover-lane | Recover a stranded backup lane (admin)
 [**PostServicesDatabasesIdRestart**](DatabasesAPI.md#PostServicesDatabasesIdRestart) | **Post** /services/databases/{id}/restart | Restart a database (graceful rolling restart)
 [**PostServicesDatabasesIdRestore**](DatabasesAPI.md#PostServicesDatabasesIdRestore) | **Post** /services/databases/{id}/restore | Restore a database from a backup archive (deploykit engine)
+[**PostServicesDatabasesIdRestoreDump**](DatabasesAPI.md#PostServicesDatabasesIdRestoreDump) | **Post** /services/databases/{id}/restore-dump | Restore ONE managed database from a raw dump file
 [**PostServicesDatabasesIdScaleResources**](DatabasesAPI.md#PostServicesDatabasesIdScaleResources) | **Post** /services/databases/{id}/scale-resources | Scale database CPU/memory resources
 [**PostServicesDatabasesIdScaleStorage**](DatabasesAPI.md#PostServicesDatabasesIdScaleStorage) | **Post** /services/databases/{id}/scale-storage | Scale database storage (increase only)
 [**PostServicesDatabasesIdStart**](DatabasesAPI.md#PostServicesDatabasesIdStart) | **Post** /services/databases/{id}/start | Start a stopped database (restore replicas)
@@ -335,7 +339,7 @@ import (
 )
 
 func main() {
-	type_ := "type__example" // string | Database type (postgresql, mariadb)
+	type_ := "type__example" // string | Database type (postgresql, mariadb, mysql)
 	clusterId := "clusterId_example" // string | Cluster ID for storage classes
 
 	configuration := openapiclient.NewConfiguration()
@@ -359,7 +363,7 @@ Other parameters are passed through a pointer to a apiGetServicesDatabasesConfig
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **type_** | **string** | Database type (postgresql, mariadb) | 
+ **type_** | **string** | Database type (postgresql, mariadb, mysql) | 
  **clusterId** | **string** | Cluster ID for storage classes | 
 
 ### Return type
@@ -866,6 +870,79 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## GetServicesDatabasesIdExportDumpJobDownload
+
+> map[string]interface{} GetServicesDatabasesIdExportDumpJobDownload(ctx, id, job).Execute()
+
+Download one completed database dump export
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	job := "job_example" // string | The export job id
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.GetServicesDatabasesIdExportDumpJobDownload(context.Background(), id, job).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.GetServicesDatabasesIdExportDumpJobDownload``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServicesDatabasesIdExportDumpJobDownload`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.GetServicesDatabasesIdExportDumpJobDownload`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+**job** | **string** | The export job id | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServicesDatabasesIdExportDumpJobDownloadRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetServicesDatabasesIdExtensions
 
 > HandlersDatabaseExtensionsResponse GetServicesDatabasesIdExtensions(ctx, id).Execute()
@@ -1307,6 +1384,8 @@ Name | Type | Description  | Notes
 > ModelsDatabase PostServicesDatabases(ctx).Request(request).Execute()
 
 Create database configuration
+
+
 
 ### Example
 
@@ -1859,6 +1938,146 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## PostServicesDatabasesIdDeploy
+
+> map[string]interface{} PostServicesDatabasesIdDeploy(ctx, id).Execute()
+
+Deploy a database (first deploy or re-deploy after error/stop)
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdDeploy(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdDeploy``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdDeploy`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdDeploy`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdDeployRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdExportDump
+
+> map[string]interface{} PostServicesDatabasesIdExportDump(ctx, id).Body(body).Execute()
+
+Dump (export) ONE managed database out for download
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	body := *openapiclient.NewHandlersDumpExportRequest() // HandlersDumpExportRequest | destination_ref; object_key optional (defaults under managed-db-dumps/) (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdExportDump(context.Background(), id).Body(body).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdExportDump``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdExportDump`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdExportDump`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdExportDumpRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **body** | [**HandlersDumpExportRequest**](HandlersDumpExportRequest.md) | destination_ref; object_key optional (defaults under managed-db-dumps/) | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## PostServicesDatabasesIdQuery
 
 > DatabasequeryQueryResponse PostServicesDatabasesIdQuery(ctx, id).Execute()
@@ -2135,6 +2354,78 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdRestoreDump
+
+> map[string]interface{} PostServicesDatabasesIdRestoreDump(ctx, id).Body(body).Execute()
+
+Restore ONE managed database from a raw dump file
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	body := *openapiclient.NewHandlersDumpRestoreRequest() // HandlersDumpRestoreRequest | destination_ref, object_key, optional digest; confirm on the re-post
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdRestoreDump(context.Background(), id).Body(body).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdRestoreDump``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdRestoreDump`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdRestoreDump`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdRestoreDumpRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **body** | [**HandlersDumpRestoreRequest**](HandlersDumpRestoreRequest.md) | destination_ref, object_key, optional digest; confirm on the re-post | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

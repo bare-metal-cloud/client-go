@@ -209,6 +209,27 @@ ones leave the list. Engine-neutral (FR-T-3); no grant syntax, no credentials.
 	GetServicesDatabasesIdConnectionExecute(r ApiGetServicesDatabasesIdConnectionRequest) (*ServicesDatabaseConnectionInfo, *http.Response, error)
 
 	/*
+	GetServicesDatabasesIdExportDumpJobDownload Download one completed database dump export
+
+	Issues a windowed presigned GET (15 minutes, one object)
+for a completed database:dump-export job's outcome handle.
+The job row is org+project+resource scoped to the caller
+and the path's database's cluster; the destination
+re-resolves through the vault's tenancy gate. Maintainer
+tier.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Database ID
+	@param job The export job id
+	@return ApiGetServicesDatabasesIdExportDumpJobDownloadRequest
+	*/
+	GetServicesDatabasesIdExportDumpJobDownload(ctx context.Context, id string, job string) ApiGetServicesDatabasesIdExportDumpJobDownloadRequest
+
+	// GetServicesDatabasesIdExportDumpJobDownloadExecute executes the request
+	//  @return map[string]interface{}
+	GetServicesDatabasesIdExportDumpJobDownloadExecute(r ApiGetServicesDatabasesIdExportDumpJobDownloadRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
 	GetServicesDatabasesIdExtensions List the Postgres extensions installed on a database
 
 	The extensions inventory read from pg_extension through the
@@ -318,6 +339,10 @@ apply lane ships, the verdict is honestly pending.
 
 	/*
 	PostServicesDatabases Create database configuration
+
+	Creating a database also ENQUEUES its database:deploy job (BAR-3876):
+the row provisions immediately — the create is a deploy request.
+The 201 body is the Database row; the job id is in the server log line.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiPostServicesDatabasesRequest
@@ -446,6 +471,42 @@ name again re-grants it with a fresh password.
 	PostServicesDatabasesIdConnectionResetPasswordExecute(r ApiPostServicesDatabasesIdConnectionResetPasswordRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
+	PostServicesDatabasesIdDeploy Deploy a database (first deploy or re-deploy after error/stop)
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Database ID
+	@return ApiPostServicesDatabasesIdDeployRequest
+	*/
+	PostServicesDatabasesIdDeploy(ctx context.Context, id string) ApiPostServicesDatabasesIdDeployRequest
+
+	// PostServicesDatabasesIdDeployExecute executes the request
+	//  @return map[string]interface{}
+	PostServicesDatabasesIdDeployExecute(r ApiPostServicesDatabasesIdDeployRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostServicesDatabasesIdExportDump Dump (export) ONE managed database out for download
+
+	The per-database data affordance (BAR-4907): dumps exactly
+ONE database (slotseed's DumpCommand verbatim) into the
+org's own bucket over a windowed presigned PUT. Read-only
+on the database — no confirm dialog; the answer carries the
+dump-scope disclosure (roles/cron/scheduled events do not
+travel). The default object key lands under the reserved
+managed-db-dumps/ prefix. The download read issues a
+windowed presigned GET once the job completes. Maintainer
+tier; legacy rows refuse.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Database ID
+	@return ApiPostServicesDatabasesIdExportDumpRequest
+	*/
+	PostServicesDatabasesIdExportDump(ctx context.Context, id string) ApiPostServicesDatabasesIdExportDumpRequest
+
+	// PostServicesDatabasesIdExportDumpExecute executes the request
+	//  @return map[string]interface{}
+	PostServicesDatabasesIdExportDumpExecute(r ApiPostServicesDatabasesIdExportDumpRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
 	PostServicesDatabasesIdQuery Run one read-only query on a database
 
 	Runs one customer SELECT against the database through the read-only
@@ -506,6 +567,30 @@ databases only — other engines answer the named refusal.
 	// PostServicesDatabasesIdRestoreExecute executes the request
 	//  @return map[string]interface{}
 	PostServicesDatabasesIdRestoreExecute(r ApiPostServicesDatabasesIdRestoreRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
+	PostServicesDatabasesIdRestoreDump Restore ONE managed database from a raw dump file
+
+	The per-database data affordance (BAR-4907): the first
+POST (no confirm) answers the 409 confirm dialog with the
+engine + installed major, the dump's server-side size, the
+reset/overwrite warnings (the scope law: only THIS database
+resets; sibling databases on the instance are untouched),
+the dump-scope disclosure, and — only for stack-bundle
+members — the stack_consistency warning. The confirmed
+re-post enqueues the database:dump-restore leg (202 + job
+id); the job's outcome carries the per-table completeness
+verdict. Maintainer tier; legacy rows refuse.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Database ID
+	@return ApiPostServicesDatabasesIdRestoreDumpRequest
+	*/
+	PostServicesDatabasesIdRestoreDump(ctx context.Context, id string) ApiPostServicesDatabasesIdRestoreDumpRequest
+
+	// PostServicesDatabasesIdRestoreDumpExecute executes the request
+	//  @return map[string]interface{}
+	PostServicesDatabasesIdRestoreDumpExecute(r ApiPostServicesDatabasesIdRestoreDumpRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
 	PostServicesDatabasesIdScaleResources Scale database CPU/memory resources
@@ -1173,7 +1258,7 @@ type ApiGetServicesDatabasesConfigSchemaRequest struct {
 	clusterId *string
 }
 
-// Database type (postgresql, mariadb)
+// Database type (postgresql, mariadb, mysql)
 func (r ApiGetServicesDatabasesConfigSchemaRequest) Type_(type_ string) ApiGetServicesDatabasesConfigSchemaRequest {
 	r.type_ = &type_
 	return r
@@ -2354,6 +2439,164 @@ func (a *DatabasesAPIService) GetServicesDatabasesIdConnectionExecute(r ApiGetSe
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiGetServicesDatabasesIdExportDumpJobDownloadRequest struct {
+	ctx context.Context
+	ApiService DatabasesAPI
+	id string
+	job string
+}
+
+func (r ApiGetServicesDatabasesIdExportDumpJobDownloadRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetServicesDatabasesIdExportDumpJobDownloadExecute(r)
+}
+
+/*
+GetServicesDatabasesIdExportDumpJobDownload Download one completed database dump export
+
+Issues a windowed presigned GET (15 minutes, one object)
+for a completed database:dump-export job's outcome handle.
+The job row is org+project+resource scoped to the caller
+and the path's database's cluster; the destination
+re-resolves through the vault's tenancy gate. Maintainer
+tier.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Database ID
+ @param job The export job id
+ @return ApiGetServicesDatabasesIdExportDumpJobDownloadRequest
+*/
+func (a *DatabasesAPIService) GetServicesDatabasesIdExportDumpJobDownload(ctx context.Context, id string, job string) ApiGetServicesDatabasesIdExportDumpJobDownloadRequest {
+	return ApiGetServicesDatabasesIdExportDumpJobDownloadRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+		job: job,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DatabasesAPIService) GetServicesDatabasesIdExportDumpJobDownloadExecute(r ApiGetServicesDatabasesIdExportDumpJobDownloadRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatabasesAPIService.GetServicesDatabasesIdExportDumpJobDownload")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/services/databases/{id}/export-dump/{job}/download"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"job"+"}", url.PathEscape(parameterValueToString(r.job, "job")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiGetServicesDatabasesIdExtensionsRequest struct {
 	ctx context.Context
 	ApiService DatabasesAPI
@@ -3475,6 +3718,10 @@ func (r ApiPostServicesDatabasesRequest) Execute() (*ModelsDatabase, *http.Respo
 /*
 PostServicesDatabases Create database configuration
 
+Creating a database also ENQUEUES its database:deploy job (BAR-3876):
+the row provisions immediately — the create is a deploy request.
+The 201 body is the Database row; the job id is in the server log line.
+
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostServicesDatabasesRequest
 */
@@ -3565,6 +3812,17 @@ func (a *DatabasesAPIService) PostServicesDatabasesExecute(r ApiPostServicesData
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
@@ -4780,6 +5038,319 @@ func (a *DatabasesAPIService) PostServicesDatabasesIdConnectionResetPasswordExec
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiPostServicesDatabasesIdDeployRequest struct {
+	ctx context.Context
+	ApiService DatabasesAPI
+	id string
+}
+
+func (r ApiPostServicesDatabasesIdDeployRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostServicesDatabasesIdDeployExecute(r)
+}
+
+/*
+PostServicesDatabasesIdDeploy Deploy a database (first deploy or re-deploy after error/stop)
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Database ID
+ @return ApiPostServicesDatabasesIdDeployRequest
+*/
+func (a *DatabasesAPIService) PostServicesDatabasesIdDeploy(ctx context.Context, id string) ApiPostServicesDatabasesIdDeployRequest {
+	return ApiPostServicesDatabasesIdDeployRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DatabasesAPIService) PostServicesDatabasesIdDeployExecute(r ApiPostServicesDatabasesIdDeployRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatabasesAPIService.PostServicesDatabasesIdDeploy")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/services/databases/{id}/deploy"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"*/*"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostServicesDatabasesIdExportDumpRequest struct {
+	ctx context.Context
+	ApiService DatabasesAPI
+	id string
+	body *HandlersDumpExportRequest
+}
+
+// destination_ref; object_key optional (defaults under managed-db-dumps/)
+func (r ApiPostServicesDatabasesIdExportDumpRequest) Body(body HandlersDumpExportRequest) ApiPostServicesDatabasesIdExportDumpRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostServicesDatabasesIdExportDumpRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostServicesDatabasesIdExportDumpExecute(r)
+}
+
+/*
+PostServicesDatabasesIdExportDump Dump (export) ONE managed database out for download
+
+The per-database data affordance (BAR-4907): dumps exactly
+ONE database (slotseed's DumpCommand verbatim) into the
+org's own bucket over a windowed presigned PUT. Read-only
+on the database — no confirm dialog; the answer carries the
+dump-scope disclosure (roles/cron/scheduled events do not
+travel). The default object key lands under the reserved
+managed-db-dumps/ prefix. The download read issues a
+windowed presigned GET once the job completes. Maintainer
+tier; legacy rows refuse.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Database ID
+ @return ApiPostServicesDatabasesIdExportDumpRequest
+*/
+func (a *DatabasesAPIService) PostServicesDatabasesIdExportDump(ctx context.Context, id string) ApiPostServicesDatabasesIdExportDumpRequest {
+	return ApiPostServicesDatabasesIdExportDumpRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DatabasesAPIService) PostServicesDatabasesIdExportDumpExecute(r ApiPostServicesDatabasesIdExportDumpRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatabasesAPIService.PostServicesDatabasesIdExportDump")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/services/databases/{id}/export-dump"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPostServicesDatabasesIdQueryRequest struct {
 	ctx context.Context
 	ApiService DatabasesAPI
@@ -5434,6 +6005,198 @@ func (a *DatabasesAPIService) PostServicesDatabasesIdRestoreExecute(r ApiPostSer
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostServicesDatabasesIdRestoreDumpRequest struct {
+	ctx context.Context
+	ApiService DatabasesAPI
+	id string
+	body *HandlersDumpRestoreRequest
+}
+
+// destination_ref, object_key, optional digest; confirm on the re-post
+func (r ApiPostServicesDatabasesIdRestoreDumpRequest) Body(body HandlersDumpRestoreRequest) ApiPostServicesDatabasesIdRestoreDumpRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostServicesDatabasesIdRestoreDumpRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostServicesDatabasesIdRestoreDumpExecute(r)
+}
+
+/*
+PostServicesDatabasesIdRestoreDump Restore ONE managed database from a raw dump file
+
+The per-database data affordance (BAR-4907): the first
+POST (no confirm) answers the 409 confirm dialog with the
+engine + installed major, the dump's server-side size, the
+reset/overwrite warnings (the scope law: only THIS database
+resets; sibling databases on the instance are untouched),
+the dump-scope disclosure, and — only for stack-bundle
+members — the stack_consistency warning. The confirmed
+re-post enqueues the database:dump-restore leg (202 + job
+id); the job's outcome carries the per-table completeness
+verdict. Maintainer tier; legacy rows refuse.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Database ID
+ @return ApiPostServicesDatabasesIdRestoreDumpRequest
+*/
+func (a *DatabasesAPIService) PostServicesDatabasesIdRestoreDump(ctx context.Context, id string) ApiPostServicesDatabasesIdRestoreDumpRequest {
+	return ApiPostServicesDatabasesIdRestoreDumpRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DatabasesAPIService) PostServicesDatabasesIdRestoreDumpExecute(r ApiPostServicesDatabasesIdRestoreDumpRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatabasesAPIService.PostServicesDatabasesIdRestoreDump")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/services/databases/{id}/restore-dump"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

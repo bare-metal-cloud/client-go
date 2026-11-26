@@ -24,6 +24,8 @@ const (
 	MODELSDATABASETYPE_DatabaseTypePostgreSQL ModelsDatabaseType = "postgresql"
 	MODELSDATABASETYPE_DatabaseTypeMongoDB ModelsDatabaseType = "mongodb"
 	MODELSDATABASETYPE_DatabaseTypeMariaDB ModelsDatabaseType = "mariadb"
+	MODELSDATABASETYPE_DatabaseTypeMySQL ModelsDatabaseType = "mysql"
+	MODELSDATABASETYPE_DatabaseTypeRedis ModelsDatabaseType = "redis"
 )
 
 // All allowed values of ModelsDatabaseType enum
@@ -31,6 +33,8 @@ var AllowedModelsDatabaseTypeEnumValues = []ModelsDatabaseType{
 	"postgresql",
 	"mongodb",
 	"mariadb",
+	"mysql",
+	"redis",
 }
 
 func (v *ModelsDatabaseType) UnmarshalJSON(src []byte) error {

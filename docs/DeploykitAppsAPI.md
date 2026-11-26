@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**GetClustersIdAppsInstallBlueprintUpdate**](DeploykitAppsAPI.md#GetClustersIdAppsInstallBlueprintUpdate) | **Get** /clusters/{id}/apps/{install}/blueprint/update | Review a blueprint stack&#39;s update (the compiled-artifact diff)
 [**GetClustersIdAppsInstallCliRedisWs**](DeploykitAppsAPI.md#GetClustersIdAppsInstallCliRedisWs) | **Get** /clusters/{id}/apps/{install}/cli/redis/ws | Open the redis service CLI terminal
 [**GetClustersIdAppsInstallDurability**](DeploykitAppsAPI.md#GetClustersIdAppsInstallDurability) | **Get** /clusters/{id}/apps/{install}/durability | Get an install&#39;s durability read model
+[**GetClustersIdAppsInstallExportDumpJobDownload**](DeploykitAppsAPI.md#GetClustersIdAppsInstallExportDumpJobDownload) | **Get** /clusters/{id}/apps/{install}/export-dump/{job}/download | Download one completed install dump export
 [**GetClustersIdAppsInstallForm**](DeploykitAppsAPI.md#GetClustersIdAppsInstallForm) | **Get** /clusters/{id}/apps/{install}/form | Render the deploy form (FormSpec) for an install&#39;s bundle
 [**GetClustersIdAppsInstallInspect**](DeploykitAppsAPI.md#GetClustersIdAppsInstallInspect) | **Get** /clusters/{id}/apps/{install}/inspect | Inspect an install&#39;s declared insight collectors live
 [**GetClustersIdAppsInstallPromoteTargets**](DeploykitAppsAPI.md#GetClustersIdAppsInstallPromoteTargets) | **Get** /clusters/{id}/apps/{install}/promote/targets | List the org&#39;s eligible promotion targets
@@ -21,14 +22,17 @@ Method | HTTP request | Description
 [**GetClustersIdAppsVersions**](DeploykitAppsAPI.md#GetClustersIdAppsVersions) | **Get** /clusters/{id}/apps/versions | List the catalog versions of one bundle this engine can run
 [**PostClustersIdAppsInstall**](DeploykitAppsAPI.md#PostClustersIdAppsInstall) | **Post** /clusters/{id}/apps/{install} | Start an app install on a cluster (the resolved form payload)
 [**PostClustersIdAppsInstallBlueprintDriftDismiss**](DeploykitAppsAPI.md#PostClustersIdAppsInstallBlueprintDriftDismiss) | **Post** /clusters/{id}/apps/{install}/blueprint/drift/dismiss | Dismiss a blueprint stack&#39;s drift hint instance
+[**PostClustersIdAppsInstallExportDump**](DeploykitAppsAPI.md#PostClustersIdAppsInstallExportDump) | **Post** /clusters/{id}/apps/{install}/export-dump | Dump (export) ONE stack-member or engine-install database
 [**PostClustersIdAppsInstallPromote**](DeploykitAppsAPI.md#PostClustersIdAppsInstallPromote) | **Post** /clusters/{id}/apps/{install}/promote | Promote an install&#39;s current CI digest to another install
 [**PostClustersIdAppsInstallResolve**](DeploykitAppsAPI.md#PostClustersIdAppsInstallResolve) | **Post** /clusters/{id}/apps/{install}/resolve | Resolve the form against user input and platform context facts
 [**PostClustersIdAppsInstallRestore**](DeploykitAppsAPI.md#PostClustersIdAppsInstallRestore) | **Post** /clusters/{id}/apps/{install}/restore | Restore an install from a recorded backup point
+[**PostClustersIdAppsInstallRestoreDump**](DeploykitAppsAPI.md#PostClustersIdAppsInstallRestoreDump) | **Post** /clusters/{id}/apps/{install}/restore-dump | Restore ONE stack-member or engine-install database from a raw dump
 [**PostClustersIdAppsInstallRollback**](DeploykitAppsAPI.md#PostClustersIdAppsInstallRollback) | **Post** /clusters/{id}/apps/{install}/rollback | Re-pin an install to a previous revision&#39;s CI build digest
 [**PostClustersIdAppsInstallSlotsSlotRotate**](DeploykitAppsAPI.md#PostClustersIdAppsInstallSlotsSlotRotate) | **Post** /clusters/{id}/apps/{install}/slots/{slot}/rotate | Rotate one managed slot&#39;s credential (the slot and every component of the stack re-apply)
 [**PostClustersIdAppsInstallUpgrade**](DeploykitAppsAPI.md#PostClustersIdAppsInstallUpgrade) | **Post** /clusters/{id}/apps/{install}/upgrade | Upgrade an app install to a target catalog version
 [**PostClustersIdAppsInstallUpgradeParkConfirm**](DeploykitAppsAPI.md#PostClustersIdAppsInstallUpgradeParkConfirm) | **Post** /clusters/{id}/apps/{install}/upgrade/park/confirm | Confirm (grant) an install&#39;s parked upgrade
 [**PostClustersIdAppsInstallUpgradeParkWithdraw**](DeploykitAppsAPI.md#PostClustersIdAppsInstallUpgradeParkWithdraw) | **Post** /clusters/{id}/apps/{install}/upgrade/park/withdraw | Withdraw an install&#39;s parked upgrade
+[**PutClustersIdAppsInstallDurability**](DeploykitAppsAPI.md#PutClustersIdAppsInstallDurability) | **Put** /clusters/{id}/apps/{install}/durability | Set an install&#39;s durability policy
 
 
 
@@ -600,6 +604,82 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**HandlersDurabilitySection**](HandlersDurabilitySection.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetClustersIdAppsInstallExportDumpJobDownload
+
+> map[string]interface{} GetClustersIdAppsInstallExportDumpJobDownload(ctx, id, install, job).Execute()
+
+Download one completed install dump export
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Cluster ID
+	install := "install_example" // string | Install name
+	job := "job_example" // string | The export job id
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DeploykitAppsAPI.GetClustersIdAppsInstallExportDumpJobDownload(context.Background(), id, install, job).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DeploykitAppsAPI.GetClustersIdAppsInstallExportDumpJobDownload``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetClustersIdAppsInstallExportDumpJobDownload`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DeploykitAppsAPI.GetClustersIdAppsInstallExportDumpJobDownload`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Cluster ID | 
+**install** | **string** | Install name | 
+**job** | **string** | The export job id | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetClustersIdAppsInstallExportDumpJobDownloadRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+
+### Return type
+
+**map[string]interface{}**
 
 ### Authorization
 
@@ -1279,6 +1359,81 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## PostClustersIdAppsInstallExportDump
+
+> map[string]interface{} PostClustersIdAppsInstallExportDump(ctx, id, install).Body(body).Execute()
+
+Dump (export) ONE stack-member or engine-install database
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Cluster ID
+	install := "install_example" // string | Install name
+	body := *openapiclient.NewHandlersDumpExportRequest() // HandlersDumpExportRequest | destination_ref; object_key optional (defaults under managed-db-dumps/) (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DeploykitAppsAPI.PostClustersIdAppsInstallExportDump(context.Background(), id, install).Body(body).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DeploykitAppsAPI.PostClustersIdAppsInstallExportDump``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostClustersIdAppsInstallExportDump`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DeploykitAppsAPI.PostClustersIdAppsInstallExportDump`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Cluster ID | 
+**install** | **string** | Install name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostClustersIdAppsInstallExportDumpRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | [**HandlersDumpExportRequest**](HandlersDumpExportRequest.md) | destination_ref; object_key optional (defaults under managed-db-dumps/) | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## PostClustersIdAppsInstallPromote
 
 > map[string]interface{} PostClustersIdAppsInstallPromote(ctx, id, install).Body(body).Execute()
@@ -1481,6 +1636,81 @@ Name | Type | Description  | Notes
 
 
  **body** | [**HandlersAppsRestoreRequest**](HandlersAppsRestoreRequest.md) | The point&#39;s archive handle, the target mode, and (on the confirmed re-post) the fresh confirm | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostClustersIdAppsInstallRestoreDump
+
+> map[string]interface{} PostClustersIdAppsInstallRestoreDump(ctx, id, install).Body(body).Execute()
+
+Restore ONE stack-member or engine-install database from a raw dump
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Cluster ID
+	install := "install_example" // string | Install name
+	body := *openapiclient.NewHandlersDumpRestoreRequest() // HandlersDumpRestoreRequest | destination_ref, object_key, optional digest; confirm on the re-post
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DeploykitAppsAPI.PostClustersIdAppsInstallRestoreDump(context.Background(), id, install).Body(body).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DeploykitAppsAPI.PostClustersIdAppsInstallRestoreDump``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostClustersIdAppsInstallRestoreDump`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DeploykitAppsAPI.PostClustersIdAppsInstallRestoreDump`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Cluster ID | 
+**install** | **string** | Install name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostClustersIdAppsInstallRestoreDumpRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | [**HandlersDumpRestoreRequest**](HandlersDumpRestoreRequest.md) | destination_ref, object_key, optional digest; confirm on the re-post | 
 
 ### Return type
 
@@ -1863,6 +2093,81 @@ Name | Type | Description  | Notes
 ### Return type
 
 **map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PutClustersIdAppsInstallDurability
+
+> HandlersDurabilitySection PutClustersIdAppsInstallDurability(ctx, id, install).Body(body).Execute()
+
+Set an install's durability policy
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Cluster ID
+	install := "install_example" // string | Install name
+	body := map[string]interface{}{"key": interface{}(123)} // map[string]interface{} | Durability answers keyed by bundle field id (durability.mode, durability.schedule, durability.destination, durability.retention); string values. Optional policy_gen integer: the gen the client loaded (the GET read model exposes it) — a different gen answers 409
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DeploykitAppsAPI.PutClustersIdAppsInstallDurability(context.Background(), id, install).Body(body).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DeploykitAppsAPI.PutClustersIdAppsInstallDurability``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PutClustersIdAppsInstallDurability`: HandlersDurabilitySection
+	fmt.Fprintf(os.Stdout, "Response from `DeploykitAppsAPI.PutClustersIdAppsInstallDurability`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Cluster ID | 
+**install** | **string** | Install name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPutClustersIdAppsInstallDurabilityRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | **map[string]interface{}** | Durability answers keyed by bundle field id (durability.mode, durability.schedule, durability.destination, durability.retention); string values. Optional policy_gen integer: the gen the client loaded (the GET read model exposes it) — a different gen answers 409 | 
+
+### Return type
+
+[**HandlersDurabilitySection**](HandlersDurabilitySection.md)
 
 ### Authorization
 
