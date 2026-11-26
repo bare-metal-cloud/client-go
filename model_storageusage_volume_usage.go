@@ -20,6 +20,8 @@ var _ MappedNullable = &StorageusageVolumeUsage{}
 
 // StorageusageVolumeUsage struct for StorageusageVolumeUsage
 type StorageusageVolumeUsage struct {
+	ActiveAlerts *int32 `json:"active_alerts,omitempty"`
+	AlertSeverity *string `json:"alert_severity,omitempty"`
 	CapacityBytes *int32 `json:"capacity_bytes,omitempty"`
 	ClusterId *int32 `json:"cluster_id,omitempty"`
 	InstallName *string `json:"install_name,omitempty"`
@@ -28,7 +30,9 @@ type StorageusageVolumeUsage struct {
 	Projection *StorageusageVolumeProjectionView `json:"projection,omitempty"`
 	PvcName *string `json:"pvc_name,omitempty"`
 	SampledAt *string `json:"sampled_at,omitempty"`
+	StorageClass *string `json:"storage_class,omitempty"`
 	UsedBytes *int32 `json:"used_bytes,omitempty"`
+	WorkloadClass *string `json:"workload_class,omitempty"`
 	WorkloadKind *string `json:"workload_kind,omitempty"`
 	WorkloadName *string `json:"workload_name,omitempty"`
 }
@@ -48,6 +52,70 @@ func NewStorageusageVolumeUsage() *StorageusageVolumeUsage {
 func NewStorageusageVolumeUsageWithDefaults() *StorageusageVolumeUsage {
 	this := StorageusageVolumeUsage{}
 	return &this
+}
+
+// GetActiveAlerts returns the ActiveAlerts field value if set, zero value otherwise.
+func (o *StorageusageVolumeUsage) GetActiveAlerts() int32 {
+	if o == nil || IsNil(o.ActiveAlerts) {
+		var ret int32
+		return ret
+	}
+	return *o.ActiveAlerts
+}
+
+// GetActiveAlertsOk returns a tuple with the ActiveAlerts field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageusageVolumeUsage) GetActiveAlertsOk() (*int32, bool) {
+	if o == nil || IsNil(o.ActiveAlerts) {
+		return nil, false
+	}
+	return o.ActiveAlerts, true
+}
+
+// HasActiveAlerts returns a boolean if a field has been set.
+func (o *StorageusageVolumeUsage) HasActiveAlerts() bool {
+	if o != nil && !IsNil(o.ActiveAlerts) {
+		return true
+	}
+
+	return false
+}
+
+// SetActiveAlerts gets a reference to the given int32 and assigns it to the ActiveAlerts field.
+func (o *StorageusageVolumeUsage) SetActiveAlerts(v int32) {
+	o.ActiveAlerts = &v
+}
+
+// GetAlertSeverity returns the AlertSeverity field value if set, zero value otherwise.
+func (o *StorageusageVolumeUsage) GetAlertSeverity() string {
+	if o == nil || IsNil(o.AlertSeverity) {
+		var ret string
+		return ret
+	}
+	return *o.AlertSeverity
+}
+
+// GetAlertSeverityOk returns a tuple with the AlertSeverity field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageusageVolumeUsage) GetAlertSeverityOk() (*string, bool) {
+	if o == nil || IsNil(o.AlertSeverity) {
+		return nil, false
+	}
+	return o.AlertSeverity, true
+}
+
+// HasAlertSeverity returns a boolean if a field has been set.
+func (o *StorageusageVolumeUsage) HasAlertSeverity() bool {
+	if o != nil && !IsNil(o.AlertSeverity) {
+		return true
+	}
+
+	return false
+}
+
+// SetAlertSeverity gets a reference to the given string and assigns it to the AlertSeverity field.
+func (o *StorageusageVolumeUsage) SetAlertSeverity(v string) {
+	o.AlertSeverity = &v
 }
 
 // GetCapacityBytes returns the CapacityBytes field value if set, zero value otherwise.
@@ -306,6 +374,38 @@ func (o *StorageusageVolumeUsage) SetSampledAt(v string) {
 	o.SampledAt = &v
 }
 
+// GetStorageClass returns the StorageClass field value if set, zero value otherwise.
+func (o *StorageusageVolumeUsage) GetStorageClass() string {
+	if o == nil || IsNil(o.StorageClass) {
+		var ret string
+		return ret
+	}
+	return *o.StorageClass
+}
+
+// GetStorageClassOk returns a tuple with the StorageClass field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageusageVolumeUsage) GetStorageClassOk() (*string, bool) {
+	if o == nil || IsNil(o.StorageClass) {
+		return nil, false
+	}
+	return o.StorageClass, true
+}
+
+// HasStorageClass returns a boolean if a field has been set.
+func (o *StorageusageVolumeUsage) HasStorageClass() bool {
+	if o != nil && !IsNil(o.StorageClass) {
+		return true
+	}
+
+	return false
+}
+
+// SetStorageClass gets a reference to the given string and assigns it to the StorageClass field.
+func (o *StorageusageVolumeUsage) SetStorageClass(v string) {
+	o.StorageClass = &v
+}
+
 // GetUsedBytes returns the UsedBytes field value if set, zero value otherwise.
 func (o *StorageusageVolumeUsage) GetUsedBytes() int32 {
 	if o == nil || IsNil(o.UsedBytes) {
@@ -336,6 +436,38 @@ func (o *StorageusageVolumeUsage) HasUsedBytes() bool {
 // SetUsedBytes gets a reference to the given int32 and assigns it to the UsedBytes field.
 func (o *StorageusageVolumeUsage) SetUsedBytes(v int32) {
 	o.UsedBytes = &v
+}
+
+// GetWorkloadClass returns the WorkloadClass field value if set, zero value otherwise.
+func (o *StorageusageVolumeUsage) GetWorkloadClass() string {
+	if o == nil || IsNil(o.WorkloadClass) {
+		var ret string
+		return ret
+	}
+	return *o.WorkloadClass
+}
+
+// GetWorkloadClassOk returns a tuple with the WorkloadClass field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StorageusageVolumeUsage) GetWorkloadClassOk() (*string, bool) {
+	if o == nil || IsNil(o.WorkloadClass) {
+		return nil, false
+	}
+	return o.WorkloadClass, true
+}
+
+// HasWorkloadClass returns a boolean if a field has been set.
+func (o *StorageusageVolumeUsage) HasWorkloadClass() bool {
+	if o != nil && !IsNil(o.WorkloadClass) {
+		return true
+	}
+
+	return false
+}
+
+// SetWorkloadClass gets a reference to the given string and assigns it to the WorkloadClass field.
+func (o *StorageusageVolumeUsage) SetWorkloadClass(v string) {
+	o.WorkloadClass = &v
 }
 
 // GetWorkloadKind returns the WorkloadKind field value if set, zero value otherwise.
@@ -412,6 +544,12 @@ func (o StorageusageVolumeUsage) MarshalJSON() ([]byte, error) {
 
 func (o StorageusageVolumeUsage) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.ActiveAlerts) {
+		toSerialize["active_alerts"] = o.ActiveAlerts
+	}
+	if !IsNil(o.AlertSeverity) {
+		toSerialize["alert_severity"] = o.AlertSeverity
+	}
 	if !IsNil(o.CapacityBytes) {
 		toSerialize["capacity_bytes"] = o.CapacityBytes
 	}
@@ -436,8 +574,14 @@ func (o StorageusageVolumeUsage) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.SampledAt) {
 		toSerialize["sampled_at"] = o.SampledAt
 	}
+	if !IsNil(o.StorageClass) {
+		toSerialize["storage_class"] = o.StorageClass
+	}
 	if !IsNil(o.UsedBytes) {
 		toSerialize["used_bytes"] = o.UsedBytes
+	}
+	if !IsNil(o.WorkloadClass) {
+		toSerialize["workload_class"] = o.WorkloadClass
 	}
 	if !IsNil(o.WorkloadKind) {
 		toSerialize["workload_kind"] = o.WorkloadKind

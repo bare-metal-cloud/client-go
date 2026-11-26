@@ -4,6 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ActiveAlerts** | Pointer to **int32** |  | [optional] 
+**AlertSeverity** | Pointer to **string** |  | [optional] 
 **CapacityBytes** | Pointer to **int32** |  | [optional] 
 **ClusterId** | Pointer to **int32** |  | [optional] 
 **InstallName** | Pointer to **string** |  | [optional] 
@@ -12,7 +14,9 @@ Name | Type | Description | Notes
 **Projection** | Pointer to [**StorageusageVolumeProjectionView**](StorageusageVolumeProjectionView.md) |  | [optional] 
 **PvcName** | Pointer to **string** |  | [optional] 
 **SampledAt** | Pointer to **string** |  | [optional] 
+**StorageClass** | Pointer to **string** |  | [optional] 
 **UsedBytes** | Pointer to **int32** |  | [optional] 
+**WorkloadClass** | Pointer to **string** |  | [optional] 
 **WorkloadKind** | Pointer to **string** |  | [optional] 
 **WorkloadName** | Pointer to **string** |  | [optional] 
 
@@ -34,6 +38,56 @@ will change when the set of required properties is changed
 NewStorageusageVolumeUsageWithDefaults instantiates a new StorageusageVolumeUsage object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetActiveAlerts
+
+`func (o *StorageusageVolumeUsage) GetActiveAlerts() int32`
+
+GetActiveAlerts returns the ActiveAlerts field if non-nil, zero value otherwise.
+
+### GetActiveAlertsOk
+
+`func (o *StorageusageVolumeUsage) GetActiveAlertsOk() (*int32, bool)`
+
+GetActiveAlertsOk returns a tuple with the ActiveAlerts field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetActiveAlerts
+
+`func (o *StorageusageVolumeUsage) SetActiveAlerts(v int32)`
+
+SetActiveAlerts sets ActiveAlerts field to given value.
+
+### HasActiveAlerts
+
+`func (o *StorageusageVolumeUsage) HasActiveAlerts() bool`
+
+HasActiveAlerts returns a boolean if a field has been set.
+
+### GetAlertSeverity
+
+`func (o *StorageusageVolumeUsage) GetAlertSeverity() string`
+
+GetAlertSeverity returns the AlertSeverity field if non-nil, zero value otherwise.
+
+### GetAlertSeverityOk
+
+`func (o *StorageusageVolumeUsage) GetAlertSeverityOk() (*string, bool)`
+
+GetAlertSeverityOk returns a tuple with the AlertSeverity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAlertSeverity
+
+`func (o *StorageusageVolumeUsage) SetAlertSeverity(v string)`
+
+SetAlertSeverity sets AlertSeverity field to given value.
+
+### HasAlertSeverity
+
+`func (o *StorageusageVolumeUsage) HasAlertSeverity() bool`
+
+HasAlertSeverity returns a boolean if a field has been set.
 
 ### GetCapacityBytes
 
@@ -235,6 +289,31 @@ SetSampledAt sets SampledAt field to given value.
 
 HasSampledAt returns a boolean if a field has been set.
 
+### GetStorageClass
+
+`func (o *StorageusageVolumeUsage) GetStorageClass() string`
+
+GetStorageClass returns the StorageClass field if non-nil, zero value otherwise.
+
+### GetStorageClassOk
+
+`func (o *StorageusageVolumeUsage) GetStorageClassOk() (*string, bool)`
+
+GetStorageClassOk returns a tuple with the StorageClass field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetStorageClass
+
+`func (o *StorageusageVolumeUsage) SetStorageClass(v string)`
+
+SetStorageClass sets StorageClass field to given value.
+
+### HasStorageClass
+
+`func (o *StorageusageVolumeUsage) HasStorageClass() bool`
+
+HasStorageClass returns a boolean if a field has been set.
+
 ### GetUsedBytes
 
 `func (o *StorageusageVolumeUsage) GetUsedBytes() int32`
@@ -259,6 +338,31 @@ SetUsedBytes sets UsedBytes field to given value.
 `func (o *StorageusageVolumeUsage) HasUsedBytes() bool`
 
 HasUsedBytes returns a boolean if a field has been set.
+
+### GetWorkloadClass
+
+`func (o *StorageusageVolumeUsage) GetWorkloadClass() string`
+
+GetWorkloadClass returns the WorkloadClass field if non-nil, zero value otherwise.
+
+### GetWorkloadClassOk
+
+`func (o *StorageusageVolumeUsage) GetWorkloadClassOk() (*string, bool)`
+
+GetWorkloadClassOk returns a tuple with the WorkloadClass field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWorkloadClass
+
+`func (o *StorageusageVolumeUsage) SetWorkloadClass(v string)`
+
+SetWorkloadClass sets WorkloadClass field to given value.
+
+### HasWorkloadClass
+
+`func (o *StorageusageVolumeUsage) HasWorkloadClass() bool`
+
+HasWorkloadClass returns a boolean if a field has been set.
 
 ### GetWorkloadKind
 

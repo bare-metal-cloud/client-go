@@ -132,6 +132,19 @@ type S3ConnectionsAPI interface {
 	PostS3ConnectionsExecute(r ApiPostS3ConnectionsRequest) (*ModelsS3Connection, *http.Response, error)
 
 	/*
+	PostS3ConnectionsIdRotateCredentials Rotate credentials for an S3 connection
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id S3 Connection ID
+	@return ApiPostS3ConnectionsIdRotateCredentialsRequest
+	*/
+	PostS3ConnectionsIdRotateCredentials(ctx context.Context, id int32) ApiPostS3ConnectionsIdRotateCredentialsRequest
+
+	// PostS3ConnectionsIdRotateCredentialsExecute executes the request
+	//  @return HandlersProjectS3ConnectionResponse
+	PostS3ConnectionsIdRotateCredentialsExecute(r ApiPostS3ConnectionsIdRotateCredentialsRequest) (*HandlersProjectS3ConnectionResponse, *http.Response, error)
+
+	/*
 	PostS3ConnectionsTest Test an S3 connection before saving
 
 	Verifies a storage connection before create. Raw-key requests use the keys in the body; a linked_credential_id request resolves the org-scoped cloud credential through the vault and probes with its secret (vault-gated: 423 with X-Org-Vault-Required while locked). azblob runs a ListContainers check, the S3 family a ListBuckets check.
@@ -144,6 +157,19 @@ type S3ConnectionsAPI interface {
 	// PostS3ConnectionsTestExecute executes the request
 	//  @return ServicesTestConnectionResponse
 	PostS3ConnectionsTestExecute(r ApiPostS3ConnectionsTestRequest) (*ServicesTestConnectionResponse, *http.Response, error)
+
+	/*
+	PutS3ConnectionsId Update an S3 connection (rename / endpoint / default bucket)
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id S3 Connection ID
+	@return ApiPutS3ConnectionsIdRequest
+	*/
+	PutS3ConnectionsId(ctx context.Context, id int32) ApiPutS3ConnectionsIdRequest
+
+	// PutS3ConnectionsIdExecute executes the request
+	//  @return HandlersProjectS3ConnectionResponse
+	PutS3ConnectionsIdExecute(r ApiPutS3ConnectionsIdRequest) (*HandlersProjectS3ConnectionResponse, *http.Response, error)
 
 	/*
 	PutS3ConnectionsIdBucketsBucketObjectsKey Upload an S3 object (nested path, streamed multipart)
@@ -1554,6 +1580,176 @@ func (a *S3ConnectionsAPIService) PostS3ConnectionsExecute(r ApiPostS3Connection
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiPostS3ConnectionsIdRotateCredentialsRequest struct {
+	ctx context.Context
+	ApiService S3ConnectionsAPI
+	id int32
+	request *HandlersRotateOrgS3ConnectionCredentialsRequest
+}
+
+// New credentials
+func (r ApiPostS3ConnectionsIdRotateCredentialsRequest) Request(request HandlersRotateOrgS3ConnectionCredentialsRequest) ApiPostS3ConnectionsIdRotateCredentialsRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPostS3ConnectionsIdRotateCredentialsRequest) Execute() (*HandlersProjectS3ConnectionResponse, *http.Response, error) {
+	return r.ApiService.PostS3ConnectionsIdRotateCredentialsExecute(r)
+}
+
+/*
+PostS3ConnectionsIdRotateCredentials Rotate credentials for an S3 connection
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id S3 Connection ID
+ @return ApiPostS3ConnectionsIdRotateCredentialsRequest
+*/
+func (a *S3ConnectionsAPIService) PostS3ConnectionsIdRotateCredentials(ctx context.Context, id int32) ApiPostS3ConnectionsIdRotateCredentialsRequest {
+	return ApiPostS3ConnectionsIdRotateCredentialsRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersProjectS3ConnectionResponse
+func (a *S3ConnectionsAPIService) PostS3ConnectionsIdRotateCredentialsExecute(r ApiPostS3ConnectionsIdRotateCredentialsRequest) (*HandlersProjectS3ConnectionResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersProjectS3ConnectionResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "S3ConnectionsAPIService.PostS3ConnectionsIdRotateCredentials")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/s3-connections/{id}/rotate-credentials"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPostS3ConnectionsTestRequest struct {
 	ctx context.Context
 	ApiService S3ConnectionsAPI
@@ -1665,6 +1861,187 @@ func (a *S3ConnectionsAPIService) PostS3ConnectionsTestExecute(r ApiPostS3Connec
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 423 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPutS3ConnectionsIdRequest struct {
+	ctx context.Context
+	ApiService S3ConnectionsAPI
+	id int32
+	request *HandlersUpdateProjectS3ConnectionRequest
+}
+
+// Fields to update
+func (r ApiPutS3ConnectionsIdRequest) Request(request HandlersUpdateProjectS3ConnectionRequest) ApiPutS3ConnectionsIdRequest {
+	r.request = &request
+	return r
+}
+
+func (r ApiPutS3ConnectionsIdRequest) Execute() (*HandlersProjectS3ConnectionResponse, *http.Response, error) {
+	return r.ApiService.PutS3ConnectionsIdExecute(r)
+}
+
+/*
+PutS3ConnectionsId Update an S3 connection (rename / endpoint / default bucket)
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id S3 Connection ID
+ @return ApiPutS3ConnectionsIdRequest
+*/
+func (a *S3ConnectionsAPIService) PutS3ConnectionsId(ctx context.Context, id int32) ApiPutS3ConnectionsIdRequest {
+	return ApiPutS3ConnectionsIdRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersProjectS3ConnectionResponse
+func (a *S3ConnectionsAPIService) PutS3ConnectionsIdExecute(r ApiPutS3ConnectionsIdRequest) (*HandlersProjectS3ConnectionResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPut
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersProjectS3ConnectionResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "S3ConnectionsAPIService.PutS3ConnectionsId")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/s3-connections/{id}"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.request == nil {
+		return localVarReturnValue, nil, reportError("request is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.request
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

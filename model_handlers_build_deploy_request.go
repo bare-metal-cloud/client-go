@@ -20,6 +20,7 @@ var _ MappedNullable = &HandlersBuildDeployRequest{}
 
 // HandlersBuildDeployRequest struct for HandlersBuildDeployRequest
 type HandlersBuildDeployRequest struct {
+	Ref *string `json:"ref,omitempty"`
 	RepoFull *string `json:"repo_full,omitempty"`
 	TriggerId *int32 `json:"trigger_id,omitempty"`
 }
@@ -39,6 +40,38 @@ func NewHandlersBuildDeployRequest() *HandlersBuildDeployRequest {
 func NewHandlersBuildDeployRequestWithDefaults() *HandlersBuildDeployRequest {
 	this := HandlersBuildDeployRequest{}
 	return &this
+}
+
+// GetRef returns the Ref field value if set, zero value otherwise.
+func (o *HandlersBuildDeployRequest) GetRef() string {
+	if o == nil || IsNil(o.Ref) {
+		var ret string
+		return ret
+	}
+	return *o.Ref
+}
+
+// GetRefOk returns a tuple with the Ref field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersBuildDeployRequest) GetRefOk() (*string, bool) {
+	if o == nil || IsNil(o.Ref) {
+		return nil, false
+	}
+	return o.Ref, true
+}
+
+// HasRef returns a boolean if a field has been set.
+func (o *HandlersBuildDeployRequest) HasRef() bool {
+	if o != nil && !IsNil(o.Ref) {
+		return true
+	}
+
+	return false
+}
+
+// SetRef gets a reference to the given string and assigns it to the Ref field.
+func (o *HandlersBuildDeployRequest) SetRef(v string) {
+	o.Ref = &v
 }
 
 // GetRepoFull returns the RepoFull field value if set, zero value otherwise.
@@ -115,6 +148,9 @@ func (o HandlersBuildDeployRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersBuildDeployRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.Ref) {
+		toSerialize["ref"] = o.Ref
+	}
 	if !IsNil(o.RepoFull) {
 		toSerialize["repo_full"] = o.RepoFull
 	}

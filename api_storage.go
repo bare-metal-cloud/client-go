@@ -45,8 +45,12 @@ Byte fields are null when nothing was measured, never 0; the *_measured counts n
 
 	Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.
 workload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.
+storage_class is the PVC's spec storage class at sample time; workload_class names the workload family the attribution resolved ("database" for the database engines — database volumes are grow-only). Both are null when unknown, never guessed.
+active_alerts counts this org's unresolved alerts naming the volume (cluster + namespace/pvc); it is a measured 0 when none fire, and alert_severity ("warning"|"critical") is the loudest one, null when none fire.
 projection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.
 Otherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.
+The register is read-only: growth and resize happen on the owning workload's surface.
+Access is role-gated by organization only — the register holds no secrets and never consults the vault. The path organization must be the caller's active organization; a 403 names both organizations.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param orgId Organization ID
@@ -228,8 +232,12 @@ GetOrgsOrgIdStorageVolumes List PVC usage for an organization
 
 Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.
 workload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.
+storage_class is the PVC's spec storage class at sample time; workload_class names the workload family the attribution resolved ("database" for the database engines — database volumes are grow-only). Both are null when unknown, never guessed.
+active_alerts counts this org's unresolved alerts naming the volume (cluster + namespace/pvc); it is a measured 0 when none fire, and alert_severity ("warning"|"critical") is the loudest one, null when none fire.
 projection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.
 Otherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.
+The register is read-only: growth and resize happen on the owning workload's surface.
+Access is role-gated by organization only — the register holds no secrets and never consults the vault. The path organization must be the caller's active organization; a 403 names both organizations.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @param orgId Organization ID
@@ -282,6 +290,34 @@ func (a *StorageAPIService) GetOrgsOrgIdStorageVolumesExecute(r ApiGetOrgsOrgIdS
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -305,6 +341,17 @@ func (a *StorageAPIService) GetOrgsOrgIdStorageVolumesExecute(r ApiGetOrgsOrgIdS
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
 			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

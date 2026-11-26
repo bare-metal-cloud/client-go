@@ -5078,11 +5078,25 @@ type ApiPutClustersIdAppsInstallDurabilityRequest struct {
 	id string
 	install string
 	body *map[string]interface{}
+	xOrgID *int32
+	xProjectId *string
 }
 
 // Durability answers keyed by bundle field id (durability.mode, durability.schedule, durability.destination, durability.retention); string values. Optional policy_gen integer: the gen the client loaded (the GET read model exposes it) — a different gen answers 409
 func (r ApiPutClustersIdAppsInstallDurabilityRequest) Body(body map[string]interface{}) ApiPutClustersIdAppsInstallDurabilityRequest {
 	r.body = &body
+	return r
+}
+
+// Organization selector (PAT callers; session callers resolve the org from the session)
+func (r ApiPutClustersIdAppsInstallDurabilityRequest) XOrgID(xOrgID int32) ApiPutClustersIdAppsInstallDurabilityRequest {
+	r.xOrgID = &xOrgID
+	return r
+}
+
+// Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404)
+func (r ApiPutClustersIdAppsInstallDurabilityRequest) XProjectId(xProjectId string) ApiPutClustersIdAppsInstallDurabilityRequest {
+	r.xProjectId = &xProjectId
 	return r
 }
 
@@ -5160,6 +5174,12 @@ func (a *DeploykitAppsAPIService) PutClustersIdAppsInstallDurabilityExecute(r Ap
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.xOrgID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Org-ID", r.xOrgID, "", "")
+	}
+	if r.xProjectId != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Project-Id", r.xProjectId, "", "")
+	}
 	// body params
 	localVarPostBody = r.body
 	if r.ctx != nil {
@@ -5173,6 +5193,20 @@ func (a *DeploykitAppsAPIService) PutClustersIdAppsInstallDurabilityExecute(r Ap
 					key = apiKey.Key
 				}
 				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
 			}
 		}
 	}

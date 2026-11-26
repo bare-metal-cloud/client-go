@@ -8530,6 +8530,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "Writes the install's durability policy through the same\nvalidators the install lane runs \u2014 the org's grounded\ndestination registry, the stateful pairing law, the\nengine's schedule grammar and retention presets \u2014 then\npersists it with a policy-gen CAS and syncs the backup\nschedule owner. Mode off or scheduled; continuous is\nconfigured at install time and refused here. The response\nis the durability read model (policy, streaks, decay\nclock, ledger points, run ledger, badge). Maintainer+.",
@@ -8544,6 +8547,18 @@
         ],
         "summary": "Set an install's durability policy",
         "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization selector (PAT callers; session callers resolve the org from the session)",
+            "name": "X-Org-ID",
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "description": "Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404)",
+            "name": "X-Project-Id",
+            "in": "header"
+          },
           {
             "type": "string",
             "description": "Cluster ID",
@@ -21387,6 +21402,81 @@
         "operationId": "PostOrgsOrg_idGitopsConnectionsIdTest"
       }
     },
+    "/orgs/{org_id}/gitops/verifying-machines": {
+      "get": {
+        "description": "Lists the org machines eligible to verify a git build binding, with the public delivery key the browser seals the bind secret to. Pass connection_id to see the connection's pinned verifier (SD5: one verifier per connection); a pinned connection offers only its pin. Revoked, terminated, uninstalled and keyless machines are never listed. Never returns private key material. An org with no eligible machine answers 404.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "gitops"
+        ],
+        "summary": "List the org's verifying machines (public delivery keys)",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "The org id",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "The git connection id (optional; scopes the list to its pinned verifier)",
+            "name": "connection_id",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/handlers.VerifyingMachineRow"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idGitopsVerifying-machines"
+      }
+    },
     "/orgs/{org_id}/person-grants": {
       "get": {
         "security": [
@@ -25452,14 +25542,181 @@
         "operationId": "DeleteOrgsOrg_idS3-connectionsId"
       }
     },
+    "/orgs/{org_id}/s3-connections/{id}/buckets/{bucket}/goal": {
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Sets the size (in bytes) the bucket's occupancy bar and fill projection are measured against. An S3 bucket has no built-in size limit, so this goal is what makes \"full in ~N days\" computable (BAR-806, question 3). Replaces any existing goal. Only an admin of the org may set it.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "org-s3-connections"
+        ],
+        "summary": "Set the fill goal for a bucket",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Bucket name",
+            "name": "bucket",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "The goal in bytes (must be positive)",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.bucketGoalRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/storagebucket.BucketGoalView"
+            }
+          },
+          "400": {
+            "description": "capacity_bytes missing or not positive",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "S3 connection not found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PutOrgsOrg_idS3-connectionsIdBucketsBucketGoal"
+      },
+      "delete": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Removes the bucket's fill goal. The occupancy bar and \"full in ~N days\" chip turn off again \u2014 an S3 bucket has no built-in size limit, so without a goal there is nothing to fill toward. Clearing a goal that was never set succeeds (the outcome is what was asked for).",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "org-s3-connections"
+        ],
+        "summary": "Clear the fill goal for a bucket",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Bucket name",
+            "name": "bucket",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "S3 connection not found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "DeleteOrgsOrg_idS3-connectionsIdBucketsBucketGoal"
+      }
+    },
     "/orgs/{org_id}/s3-connections/{id}/buckets/{bucket}/usage": {
       "get": {
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
-        "description": "Latest bucket occupancy snapshot with its freshness stamp, partial flag, and the fill projection. bytes and object_count are null when the bucket was not measured (for example, the platform cannot read its credential), never 0. projection.days_to_full is null until a capacity is set for the bucket.",
+        "description": "Latest bucket occupancy snapshot with its freshness stamp, partial flag, the measured trend points, and the fill projection. bytes and object_count are null when the bucket was not measured (for example, the platform cannot read its credential), never 0. capacity_bytes is the org-set fill goal; null until an admin sets one, which is also when occupancy percent and projection.days_to_full can become non-null. projection.status explains what the fill claim rests on: projected, not_enough_history (fewer than 12 measured points in the 7-day window), no_growth, or no_capacity.",
         "produces": [
           "application/json"
         ],
@@ -25674,7 +25931,7 @@
     },
     "/orgs/{org_id}/stacks/deploy": {
       "post": {
-        "description": "Deploys a bound trigger's watched branch at the provider's current tip through the builder's\nruled gate. The body names the binding by trigger_id or by repo_full (exactly one). Every\noutcome state answers 200: dispatched (the attempt is out), queued (every capable machine was\nbusy \u2014 the ledger row is durable and the reconciler drives it), or held (no assigned/reachable\nmachines \u2014 the honest gate state). The answer carries the run reference and, for a dispatched or\nqueued attempt, the attempt_id the console and logs reads key on. An unbound repo is the typed two-doors 404 (bind a trigger, or connect the repo). A Bearer API key lacking the builds:write scope answers the typed 403 insufficient_scope (ADR-096).",
+        "description": "Deploys a bound trigger's watched branch at the provider's current tip through the builder's\nruled gate. The body names the binding by trigger_id or by repo_full (exactly one), and may\ncarry an optional ref: empty = the bound branch's current tip; a branch, tag, or commit SHA\nresolves to a full SHA the dispatch pins (an unknown ref answers 404 ref_not_found). The deploy\nidentity stays the bound branch's install. Every\noutcome state answers 200: dispatched (the attempt is out), queued (every capable machine was\nbusy \u2014 the ledger row is durable and the reconciler drives it), or held (no assigned/reachable\nmachines \u2014 the honest gate state). The answer carries the run reference and, for a dispatched or\nqueued attempt, the attempt_id the console and logs reads key on. An unbound repo is the typed two-doors 404 (bind a trigger, or connect the repo). A Bearer API key lacking the builds:write scope answers the typed 403 insufficient_scope (ADR-096).",
         "consumes": [
           "application/json"
         ],
@@ -25694,7 +25951,7 @@
             "required": true
           },
           {
-            "description": "The binding identity",
+            "description": "The binding identity (ref optional: branch, tag, or SHA)",
             "name": "body",
             "in": "body",
             "required": true,
@@ -25997,7 +26254,15 @@
     },
     "/orgs/{org_id}/storage/volumes": {
       "get": {
-        "description": "Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.\nworkload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.\nprojection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.\nOtherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.",
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.\nworkload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.\nstorage_class is the PVC's spec storage class at sample time; workload_class names the workload family the attribution resolved (\"database\" for the database engines \u2014 database volumes are grow-only). Both are null when unknown, never guessed.\nactive_alerts counts this org's unresolved alerts naming the volume (cluster + namespace/pvc); it is a measured 0 when none fire, and alert_severity (\"warning\"|\"critical\") is the loudest one, null when none fire.\nprojection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.\nOtherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.\nThe register is read-only: growth and resize happen on the owning workload's surface.\nAccess is role-gated by organization only \u2014 the register holds no secrets and never consults the vault. The path organization must be the caller's active organization; a 403 names both organizations.",
         "produces": [
           "application/json"
         ],
@@ -26023,6 +26288,15 @@
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "403": {
+            "description": "the path organization is not the caller's active organization",
             "schema": {
               "type": "object",
               "additionalProperties": {
@@ -29407,6 +29681,85 @@
       }
     },
     "/s3-connections/{id}": {
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "s3-connections"
+        ],
+        "summary": "Update an S3 connection (rename / endpoint / default bucket)",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Fields to update",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.UpdateProjectS3ConnectionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.ProjectS3ConnectionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Duplicate name, or the connection is in use and the PUT would move it (body lists the consumers)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "423": {
+            "description": "Vault unlock required for the endpoint re-probe",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PutS3-connectionsId"
+      },
       "delete": {
         "security": [
           {
@@ -29966,6 +30319,80 @@
         "operationId": "GetS3-connectionsIdObjectsDownload"
       }
     },
+    "/s3-connections/{id}/rotate-credentials": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "s3-connections"
+        ],
+        "summary": "Rotate credentials for an S3 connection",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "New credentials",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.RotateOrgS3ConnectionCredentialsRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.ProjectS3ConnectionResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostS3-connectionsIdRotate-credentials"
+      }
+    },
     "/secrets": {
       "get": {
         "security": [
@@ -29973,7 +30400,7 @@
             "CookieAuth": []
           }
         ],
-        "description": "Returns the org's secret-bearing rows across the 5 source types (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection) as metadata only \u2014 never secret material, no decrypt path. Each item also carries the keyring projection the Secrets console draws (provider, variant, linked_via, affordances, pickup, uses, discovered). Keyset-paginated on (name, type, id); the envelope carries items plus next_cursor (null on the last page), and freshness_available=false when the freshness aggregate could not be computed. Org-scoped via the tenant list scope (X-Project-Id header or ?project_id= selects the project filter). The ?scope= query is accepted for compatibility but no longer filters (ADR-067).",
+        "description": "Returns the org's secret-bearing rows across the 5 source types (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection) as metadata only \u2014 never secret material, no decrypt path. Each item also carries the keyring projection the Secrets console draws (provider, variant, linked_via, affordances, pickup, uses, discovered). s3_connection items additionally carry last_verified_at (RFC3339 UTC; omitted when the connection has never passed a check or the verification ledger read failed \u2014 BAR-5678). Keyset-paginated on (name, type, id); the envelope carries items plus next_cursor (null on the last page), and freshness_available=false when the freshness aggregate could not be computed. Org-scoped via the tenant list scope (X-Project-Id header or ?project_id= selects the project filter). The ?scope= query is accepted for compatibility but no longer filters (ADR-067).",
         "produces": [
           "application/json"
         ],
@@ -39707,6 +40134,10 @@
         "state": {
           "type": "string"
         },
+        "trigger_id": {
+          "description": "TriggerID is the binding id (BAR-5749 row 1, additive + omitempty):\nthe git_build_triggers row bound to this install's repo, so the\nmanual deploy affordance addresses the binding directly (the deploy\nroute's trigger_id half). Org-scoped through the connection join\n(the binding's tenancy law); absent when the repo has no binding \u2014\nthe deploy control stays hidden.",
+          "type": "integer"
+        },
         "workflow_path": {
           "type": "string"
         }
@@ -42153,6 +42584,10 @@
           "type": "integer"
         },
         "last_used_at": {},
+        "last_verified_at": {
+          "description": "LastVerifiedAt is RFC3339 (UTC) or \"\" when the connection has never\npassed a check (BAR-5678). Populated by the LIST path from one bulk\nread of the verification ledger; the create/update/rotate responses\ncarry \"\" (the zero value) \u2014 the same law as the project scope.",
+          "type": "string"
+        },
         "linked_credential_id": {
           "description": "LinkedCredentialID is set on link-mode rows of every provider (issue\n#3874; azblob since #3576): the connection authenticates through that\norg cloud credential and stores no vault credentials of its own, so a\nkey rotation does not apply to it.",
           "type": "integer"
@@ -42481,6 +42916,64 @@
           "items": {
             "$ref": "#/definitions/handlers.PendingReapprovalAsk"
           }
+        }
+      }
+    },
+    "handlers.ProjectS3ConnectionResponse": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "description": "Issue #3576 \u2014 azblob fields (empty for the S3-family providers).",
+          "type": "string"
+        },
+        "container": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "credentials": {
+          "description": "Credentials is ALWAYS a masked view \u2014 never decrypted on this path.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "default_bucket": {},
+        "endpoint": {
+          "type": "string"
+        },
+        "has_vault_credentials": {
+          "description": "HasVaultCredentials tells the FE whether a \"rotate\" affordance applies.",
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "last_used_at": {},
+        "last_verified_at": {
+          "description": "LastVerifiedAt is RFC3339 (UTC) or \"\" when the connection has never\npassed a check (BAR-5678). Populated by the LIST path only \u2014 the\nsingle-row mutations answer \"\", the same law as the org responses.",
+          "type": "string"
+        },
+        "linked_credential_id": {
+          "description": "LinkedCredentialID is set on link-mode rows of every provider.",
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "project_id": {
+          "type": "integer"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "region": {
+          "description": "Region is the S3-family region (issue #3874); empty for azblob rows.",
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
         }
       }
     },
@@ -45463,6 +45956,20 @@
         }
       }
     },
+    "handlers.UpdateProjectS3ConnectionRequest": {
+      "type": "object",
+      "properties": {
+        "default_bucket": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.UpgradeDatabaseRequest": {
       "type": "object",
       "properties": {
@@ -45835,6 +46342,25 @@
         }
       }
     },
+    "handlers.VerifyingMachineRow": {
+      "type": "object",
+      "properties": {
+        "delivery_key_fingerprint": {
+          "type": "string"
+        },
+        "delivery_public_key": {
+          "description": "DeliveryPublicKey is the raw X25519 public key, base64 on the wire.",
+          "type": "string",
+          "format": "byte"
+        },
+        "pinned_to_connection": {
+          "type": "boolean"
+        },
+        "verifying_agent_id": {
+          "type": "integer"
+        }
+      }
+    },
     "handlers.accountAlertEventsResponse": {
       "type": "object",
       "properties": {
@@ -46151,9 +46677,20 @@
         }
       }
     },
+    "handlers.bucketGoalRequest": {
+      "type": "object",
+      "properties": {
+        "capacity_bytes": {
+          "type": "integer"
+        }
+      }
+    },
     "handlers.buildDeployRequest": {
       "type": "object",
       "properties": {
+        "ref": {
+          "type": "string"
+        },
         "repo_full": {
           "type": "string"
         },
@@ -52061,6 +52598,20 @@
         }
       }
     },
+    "storagebucket.BucketGoalView": {
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "capacity_bytes": {
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
     "storagebucket.Confidence": {
       "type": "string",
       "enum": [
@@ -52091,6 +52642,17 @@
         },
         "unmeasured_reason": {
           "type": "string"
+        }
+      }
+    },
+    "storagebucket.Point": {
+      "type": "object",
+      "properties": {
+        "at": {
+          "type": "string"
+        },
+        "bytes": {
+          "type": "integer"
         }
       }
     },
@@ -52132,11 +52694,20 @@
         "bucket": {
           "type": "string"
         },
+        "capacity_bytes": {
+          "type": "integer"
+        },
         "latest": {
           "$ref": "#/definitions/storagebucket.LatestView"
         },
         "projection": {
           "$ref": "#/definitions/storagebucket.ProjectionView"
+        },
+        "trend": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/storagebucket.Point"
+          }
         }
       }
     },
@@ -52188,6 +52759,12 @@
     "storageusage.VolumeUsage": {
       "type": "object",
       "properties": {
+        "active_alerts": {
+          "type": "integer"
+        },
+        "alert_severity": {
+          "type": "string"
+        },
         "capacity_bytes": {
           "type": "integer"
         },
@@ -52212,8 +52789,14 @@
         "sampled_at": {
           "type": "string"
         },
+        "storage_class": {
+          "type": "string"
+        },
         "used_bytes": {
           "type": "integer"
+        },
+        "workload_class": {
+          "type": "string"
         },
         "workload_kind": {
           "type": "string"

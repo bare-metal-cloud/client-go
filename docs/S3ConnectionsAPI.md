@@ -12,7 +12,9 @@ Method | HTTP request | Description
 [**GetS3ConnectionsIdObjectsDownload**](S3ConnectionsAPI.md#GetS3ConnectionsIdObjectsDownload) | **Get** /s3-connections/{id}/objects/download | Download an S3 object
 [**GetS3ConnectionsProviderInfo**](S3ConnectionsAPI.md#GetS3ConnectionsProviderInfo) | **Get** /s3-connections/provider-info | Get S3 provider information
 [**PostS3Connections**](S3ConnectionsAPI.md#PostS3Connections) | **Post** /s3-connections | Create a new S3 connection
+[**PostS3ConnectionsIdRotateCredentials**](S3ConnectionsAPI.md#PostS3ConnectionsIdRotateCredentials) | **Post** /s3-connections/{id}/rotate-credentials | Rotate credentials for an S3 connection
 [**PostS3ConnectionsTest**](S3ConnectionsAPI.md#PostS3ConnectionsTest) | **Post** /s3-connections/test | Test an S3 connection before saving
+[**PutS3ConnectionsId**](S3ConnectionsAPI.md#PutS3ConnectionsId) | **Put** /s3-connections/{id} | Update an S3 connection (rename / endpoint / default bucket)
 [**PutS3ConnectionsIdBucketsBucketObjectsKey**](S3ConnectionsAPI.md#PutS3ConnectionsIdBucketsBucketObjectsKey) | **Put** /s3-connections/{id}/buckets/{bucket}/objects/{key} | Upload an S3 object (nested path, streamed multipart)
 
 
@@ -570,6 +572,76 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## PostS3ConnectionsIdRotateCredentials
+
+> HandlersProjectS3ConnectionResponse PostS3ConnectionsIdRotateCredentials(ctx, id).Request(request).Execute()
+
+Rotate credentials for an S3 connection
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | S3 Connection ID
+	request := *openapiclient.NewHandlersRotateOrgS3ConnectionCredentialsRequest() // HandlersRotateOrgS3ConnectionCredentialsRequest | New credentials
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.S3ConnectionsAPI.PostS3ConnectionsIdRotateCredentials(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `S3ConnectionsAPI.PostS3ConnectionsIdRotateCredentials``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostS3ConnectionsIdRotateCredentials`: HandlersProjectS3ConnectionResponse
+	fmt.Fprintf(os.Stdout, "Response from `S3ConnectionsAPI.PostS3ConnectionsIdRotateCredentials`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | S3 Connection ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostS3ConnectionsIdRotateCredentialsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersRotateOrgS3ConnectionCredentialsRequest**](HandlersRotateOrgS3ConnectionCredentialsRequest.md) | New credentials | 
+
+### Return type
+
+[**HandlersProjectS3ConnectionResponse**](HandlersProjectS3ConnectionResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## PostS3ConnectionsTest
 
 > ServicesTestConnectionResponse PostS3ConnectionsTest(ctx).Request(request).Execute()
@@ -621,6 +693,76 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ServicesTestConnectionResponse**](ServicesTestConnectionResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PutS3ConnectionsId
+
+> HandlersProjectS3ConnectionResponse PutS3ConnectionsId(ctx, id).Request(request).Execute()
+
+Update an S3 connection (rename / endpoint / default bucket)
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := int32(56) // int32 | S3 Connection ID
+	request := *openapiclient.NewHandlersUpdateProjectS3ConnectionRequest() // HandlersUpdateProjectS3ConnectionRequest | Fields to update
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.S3ConnectionsAPI.PutS3ConnectionsId(context.Background(), id).Request(request).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `S3ConnectionsAPI.PutS3ConnectionsId``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PutS3ConnectionsId`: HandlersProjectS3ConnectionResponse
+	fmt.Fprintf(os.Stdout, "Response from `S3ConnectionsAPI.PutS3ConnectionsId`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **int32** | S3 Connection ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPutS3ConnectionsIdRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **request** | [**HandlersUpdateProjectS3ConnectionRequest**](HandlersUpdateProjectS3ConnectionRequest.md) | Fields to update | 
+
+### Return type
+
+[**HandlersProjectS3ConnectionResponse**](HandlersProjectS3ConnectionResponse.md)
 
 ### Authorization
 

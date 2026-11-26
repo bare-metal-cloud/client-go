@@ -31,6 +31,8 @@ type GitopsInstallStateSection struct {
 	RegistrationRotate *bool `json:"registration_rotate,omitempty"`
 	Repo *string `json:"repo,omitempty"`
 	State *string `json:"state,omitempty"`
+	// TriggerID is the binding id (BAR-5749 row 1, additive + omitempty): the git_build_triggers row bound to this install's repo, so the manual deploy affordance addresses the binding directly (the deploy route's trigger_id half). Org-scoped through the connection join (the binding's tenancy law); absent when the repo has no binding — the deploy control stays hidden.
+	TriggerId *int32 `json:"trigger_id,omitempty"`
 	WorkflowPath *string `json:"workflow_path,omitempty"`
 }
 
@@ -307,6 +309,38 @@ func (o *GitopsInstallStateSection) SetState(v string) {
 	o.State = &v
 }
 
+// GetTriggerId returns the TriggerId field value if set, zero value otherwise.
+func (o *GitopsInstallStateSection) GetTriggerId() int32 {
+	if o == nil || IsNil(o.TriggerId) {
+		var ret int32
+		return ret
+	}
+	return *o.TriggerId
+}
+
+// GetTriggerIdOk returns a tuple with the TriggerId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GitopsInstallStateSection) GetTriggerIdOk() (*int32, bool) {
+	if o == nil || IsNil(o.TriggerId) {
+		return nil, false
+	}
+	return o.TriggerId, true
+}
+
+// HasTriggerId returns a boolean if a field has been set.
+func (o *GitopsInstallStateSection) HasTriggerId() bool {
+	if o != nil && !IsNil(o.TriggerId) {
+		return true
+	}
+
+	return false
+}
+
+// SetTriggerId gets a reference to the given int32 and assigns it to the TriggerId field.
+func (o *GitopsInstallStateSection) SetTriggerId(v int32) {
+	o.TriggerId = &v
+}
+
 // GetWorkflowPath returns the WorkflowPath field value if set, zero value otherwise.
 func (o *GitopsInstallStateSection) GetWorkflowPath() string {
 	if o == nil || IsNil(o.WorkflowPath) {
@@ -372,6 +406,9 @@ func (o GitopsInstallStateSection) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
+	}
+	if !IsNil(o.TriggerId) {
+		toSerialize["trigger_id"] = o.TriggerId
 	}
 	if !IsNil(o.WorkflowPath) {
 		toSerialize["workflow_path"] = o.WorkflowPath

@@ -21,8 +21,10 @@ var _ MappedNullable = &StoragebucketUsageView{}
 // StoragebucketUsageView struct for StoragebucketUsageView
 type StoragebucketUsageView struct {
 	Bucket *string `json:"bucket,omitempty"`
+	CapacityBytes *int32 `json:"capacity_bytes,omitempty"`
 	Latest *StoragebucketLatestView `json:"latest,omitempty"`
 	Projection *StoragebucketProjectionView `json:"projection,omitempty"`
+	Trend []StoragebucketPoint `json:"trend,omitempty"`
 }
 
 // NewStoragebucketUsageView instantiates a new StoragebucketUsageView object
@@ -72,6 +74,38 @@ func (o *StoragebucketUsageView) HasBucket() bool {
 // SetBucket gets a reference to the given string and assigns it to the Bucket field.
 func (o *StoragebucketUsageView) SetBucket(v string) {
 	o.Bucket = &v
+}
+
+// GetCapacityBytes returns the CapacityBytes field value if set, zero value otherwise.
+func (o *StoragebucketUsageView) GetCapacityBytes() int32 {
+	if o == nil || IsNil(o.CapacityBytes) {
+		var ret int32
+		return ret
+	}
+	return *o.CapacityBytes
+}
+
+// GetCapacityBytesOk returns a tuple with the CapacityBytes field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StoragebucketUsageView) GetCapacityBytesOk() (*int32, bool) {
+	if o == nil || IsNil(o.CapacityBytes) {
+		return nil, false
+	}
+	return o.CapacityBytes, true
+}
+
+// HasCapacityBytes returns a boolean if a field has been set.
+func (o *StoragebucketUsageView) HasCapacityBytes() bool {
+	if o != nil && !IsNil(o.CapacityBytes) {
+		return true
+	}
+
+	return false
+}
+
+// SetCapacityBytes gets a reference to the given int32 and assigns it to the CapacityBytes field.
+func (o *StoragebucketUsageView) SetCapacityBytes(v int32) {
+	o.CapacityBytes = &v
 }
 
 // GetLatest returns the Latest field value if set, zero value otherwise.
@@ -138,6 +172,38 @@ func (o *StoragebucketUsageView) SetProjection(v StoragebucketProjectionView) {
 	o.Projection = &v
 }
 
+// GetTrend returns the Trend field value if set, zero value otherwise.
+func (o *StoragebucketUsageView) GetTrend() []StoragebucketPoint {
+	if o == nil || IsNil(o.Trend) {
+		var ret []StoragebucketPoint
+		return ret
+	}
+	return o.Trend
+}
+
+// GetTrendOk returns a tuple with the Trend field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StoragebucketUsageView) GetTrendOk() ([]StoragebucketPoint, bool) {
+	if o == nil || IsNil(o.Trend) {
+		return nil, false
+	}
+	return o.Trend, true
+}
+
+// HasTrend returns a boolean if a field has been set.
+func (o *StoragebucketUsageView) HasTrend() bool {
+	if o != nil && !IsNil(o.Trend) {
+		return true
+	}
+
+	return false
+}
+
+// SetTrend gets a reference to the given []StoragebucketPoint and assigns it to the Trend field.
+func (o *StoragebucketUsageView) SetTrend(v []StoragebucketPoint) {
+	o.Trend = v
+}
+
 func (o StoragebucketUsageView) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -151,11 +217,17 @@ func (o StoragebucketUsageView) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Bucket) {
 		toSerialize["bucket"] = o.Bucket
 	}
+	if !IsNil(o.CapacityBytes) {
+		toSerialize["capacity_bytes"] = o.CapacityBytes
+	}
 	if !IsNil(o.Latest) {
 		toSerialize["latest"] = o.Latest
 	}
 	if !IsNil(o.Projection) {
 		toSerialize["projection"] = o.Projection
+	}
+	if !IsNil(o.Trend) {
+		toSerialize["trend"] = o.Trend
 	}
 	return toSerialize, nil
 }

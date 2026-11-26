@@ -2110,7 +2110,7 @@ Name | Type | Description  | Notes
 
 ## PutClustersIdAppsInstallDurability
 
-> HandlersDurabilitySection PutClustersIdAppsInstallDurability(ctx, id, install).Body(body).Execute()
+> HandlersDurabilitySection PutClustersIdAppsInstallDurability(ctx, id, install).Body(body).XOrgID(xOrgID).XProjectId(xProjectId).Execute()
 
 Set an install's durability policy
 
@@ -2132,10 +2132,12 @@ func main() {
 	id := "id_example" // string | Cluster ID
 	install := "install_example" // string | Install name
 	body := map[string]interface{}{"key": interface{}(123)} // map[string]interface{} | Durability answers keyed by bundle field id (durability.mode, durability.schedule, durability.destination, durability.retention); string values. Optional policy_gen integer: the gen the client loaded (the GET read model exposes it) — a different gen answers 409
+	xOrgID := int32(56) // int32 | Organization selector (PAT callers; session callers resolve the org from the session) (optional)
+	xProjectId := "xProjectId_example" // string | Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.DeploykitAppsAPI.PutClustersIdAppsInstallDurability(context.Background(), id, install).Body(body).Execute()
+	resp, r, err := apiClient.DeploykitAppsAPI.PutClustersIdAppsInstallDurability(context.Background(), id, install).Body(body).XOrgID(xOrgID).XProjectId(xProjectId).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DeploykitAppsAPI.PutClustersIdAppsInstallDurability``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -2164,6 +2166,8 @@ Name | Type | Description  | Notes
 
 
  **body** | **map[string]interface{}** | Durability answers keyed by bundle field id (durability.mode, durability.schedule, durability.destination, durability.retention); string values. Optional policy_gen integer: the gen the client loaded (the GET read model exposes it) — a different gen answers 409 | 
+ **xOrgID** | **int32** | Organization selector (PAT callers; session callers resolve the org from the session) | 
+ **xProjectId** | **string** | Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404) | 
 
 ### Return type
 
@@ -2171,7 +2175,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

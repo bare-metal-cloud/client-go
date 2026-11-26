@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Ref** | Pointer to **string** |  | [optional] 
 **RepoFull** | Pointer to **string** |  | [optional] 
 **TriggerId** | Pointer to **int32** |  | [optional] 
 
@@ -25,6 +26,31 @@ will change when the set of required properties is changed
 NewHandlersBuildDeployRequestWithDefaults instantiates a new HandlersBuildDeployRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetRef
+
+`func (o *HandlersBuildDeployRequest) GetRef() string`
+
+GetRef returns the Ref field if non-nil, zero value otherwise.
+
+### GetRefOk
+
+`func (o *HandlersBuildDeployRequest) GetRefOk() (*string, bool)`
+
+GetRefOk returns a tuple with the Ref field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRef
+
+`func (o *HandlersBuildDeployRequest) SetRef(v string)`
+
+SetRef sets Ref field to given value.
+
+### HasRef
+
+`func (o *HandlersBuildDeployRequest) HasRef() bool`
+
+HasRef returns a boolean if a field has been set.
 
 ### GetRepoFull
 

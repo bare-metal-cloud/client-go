@@ -276,6 +276,7 @@ docs/HandlersBlueprintDismissRequest.md
 docs/HandlersBlueprintDriftResponse.md
 docs/HandlersBlueprintSourceReconnect.md
 docs/HandlersBlueprintUpdateResponse.md
+docs/HandlersBucketGoalRequest.md
 docs/HandlersBuildCancelView.md
 docs/HandlersBuildDeployRequest.md
 docs/HandlersBuildDeployView.md
@@ -442,6 +443,7 @@ docs/HandlersPatchImageRegistryRequest.md
 docs/HandlersPeerProbePayload.md
 docs/HandlersPendingReapprovalAsk.md
 docs/HandlersPendingReapprovalsResponse.md
+docs/HandlersProjectS3ConnectionResponse.md
 docs/HandlersProvisionAWSVMRequest.md
 docs/HandlersProvisionAzureVMRequest.md
 docs/HandlersProvisionGCPVMRequest.md
@@ -597,6 +599,7 @@ docs/HandlersUpdateOrgS3ConnectionRequest.md
 docs/HandlersUpdatePasswordRequest.md
 docs/HandlersUpdatePasswordResponse.md
 docs/HandlersUpdateProfileRequest.md
+docs/HandlersUpdateProjectS3ConnectionRequest.md
 docs/HandlersUpdateUsageMeasurementRequest.md
 docs/HandlersUpgradeDatabaseRequest.md
 docs/HandlersUpgradeParkView.md
@@ -618,6 +621,7 @@ docs/HandlersVerifyEmailRequest.md
 docs/HandlersVerifySSHRequest.md
 docs/HandlersVerifySSHResponse.md
 docs/HandlersVerifyVerdictRequest.md
+docs/HandlersVerifyingMachineRow.md
 docs/HealthAPI.md
 docs/HelmOperationsAPI.md
 docs/ImageRegistriesAPI.md
@@ -769,8 +773,10 @@ docs/SshConnectionsAPI.md
 docs/SshKeysAPI.md
 docs/StacksAPI.md
 docs/StorageAPI.md
+docs/StoragebucketBucketGoalView.md
 docs/StoragebucketConfidence.md
 docs/StoragebucketLatestView.md
+docs/StoragebucketPoint.md
 docs/StoragebucketProjectionView.md
 docs/StoragebucketStatus.md
 docs/StoragebucketUsageView.md
@@ -947,6 +953,7 @@ model_handlers_blueprint_dismiss_request.go
 model_handlers_blueprint_drift_response.go
 model_handlers_blueprint_source_reconnect.go
 model_handlers_blueprint_update_response.go
+model_handlers_bucket_goal_request.go
 model_handlers_build_cancel_view.go
 model_handlers_build_deploy_request.go
 model_handlers_build_deploy_view.go
@@ -1113,6 +1120,7 @@ model_handlers_patch_image_registry_request.go
 model_handlers_peer_probe_payload.go
 model_handlers_pending_reapproval_ask.go
 model_handlers_pending_reapprovals_response.go
+model_handlers_project_s3_connection_response.go
 model_handlers_provision_awsvm_request.go
 model_handlers_provision_azure_vm_request.go
 model_handlers_provision_gcpvm_request.go
@@ -1268,6 +1276,7 @@ model_handlers_update_org_s3_connection_request.go
 model_handlers_update_password_request.go
 model_handlers_update_password_response.go
 model_handlers_update_profile_request.go
+model_handlers_update_project_s3_connection_request.go
 model_handlers_update_usage_measurement_request.go
 model_handlers_upgrade_database_request.go
 model_handlers_upgrade_park_view.go
@@ -1284,6 +1293,7 @@ model_handlers_verify_email_request.go
 model_handlers_verify_ssh_request.go
 model_handlers_verify_ssh_response.go
 model_handlers_verify_verdict_request.go
+model_handlers_verifying_machine_row.go
 model_handlers_vm_check_k3s_request.go
 model_handlers_vm_check_k3s_response.go
 model_handlers_vm_console_dev_mode_request.go
@@ -1397,8 +1407,10 @@ model_services_s3_upload_result.go
 model_services_tags_list_result.go
 model_services_test_connection_response.go
 model_services_user_requirement_status.go
+model_storagebucket_bucket_goal_view.go
 model_storagebucket_confidence.go
 model_storagebucket_latest_view.go
+model_storagebucket_point.go
 model_storagebucket_projection_view.go
 model_storagebucket_status.go
 model_storagebucket_usage_view.go
