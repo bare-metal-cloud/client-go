@@ -47,6 +47,7 @@ api_networks.go
 api_notification_channels.go
 api_notification_digest_settings.go
 api_org_s3_connections.go
+api_organizations.go
 api_person_grants.go
 api_pods.go
 api_registration_tokens.go
@@ -106,6 +107,7 @@ docs/AgentUpdateRestoreEventRequest.md
 docs/AgentUpdateRestoreEventResponse.md
 docs/AgentopsCheckK3sResult.md
 docs/AgentsAPI.md
+docs/AlertpicksGap.md
 docs/AlertsAPI.md
 docs/AppsAPI.md
 docs/AuditAPI.md
@@ -249,10 +251,12 @@ docs/GormDeletedAt.md
 docs/GuardAPI.md
 docs/HandlersAWSVMWorkerRequest.md
 docs/HandlersAWSVMWorkerResponse.md
+docs/HandlersAccountAlertEventsResponse.md
 docs/HandlersActiveGrantItem.md
 docs/HandlersAddVMToNetworkRequest.md
 docs/HandlersAddVirtualMachinesToClusterRequest.md
 docs/HandlersAddressChangeExecuteRequest.md
+docs/HandlersAgentReenrollCommandResponse.md
 docs/HandlersAgentToolCatalogResponse.md
 docs/HandlersAgentToolView.md
 docs/HandlersAgentUpdateRequest.md
@@ -571,6 +575,7 @@ docs/HandlersStackWavePayload.md
 docs/HandlersStackWiringDeltaPayload.md
 docs/HandlersStopDatabaseRequest.md
 docs/HandlersStorageAlertStatus.md
+docs/HandlersStorageOverviewResponse.md
 docs/HandlersStorageVolumesResponse.md
 docs/HandlersStoreDelegationMandatesRequest.md
 docs/HandlersStoreDelegationMandatesResponse.md
@@ -592,6 +597,7 @@ docs/HandlersUpdateOrgS3ConnectionRequest.md
 docs/HandlersUpdatePasswordRequest.md
 docs/HandlersUpdatePasswordResponse.md
 docs/HandlersUpdateProfileRequest.md
+docs/HandlersUpdateUsageMeasurementRequest.md
 docs/HandlersUpgradeDatabaseRequest.md
 docs/HandlersUpgradeParkView.md
 docs/HandlersVMCheckK3sRequest.md
@@ -691,6 +697,7 @@ docs/NetworksAPI.md
 docs/NotificationChannelsAPI.md
 docs/NotificationDigestSettingsAPI.md
 docs/OrgS3ConnectionsAPI.md
+docs/OrganizationsAPI.md
 docs/PersonGrantsAPI.md
 docs/PodsAPI.md
 docs/PostVirtualMachinesIdTransfer200Response.md
@@ -796,6 +803,7 @@ model_agent_support_bundle_upload_response.go
 model_agent_update_restore_event_request.go
 model_agent_update_restore_event_response.go
 model_agentops_check_k3s_result.go
+model_alertpicks_gap.go
 model_blueprintdrift_degraded_reason.go
 model_blueprintdrift_digest_drift_row.go
 model_blueprintdrift_hint_state.go
@@ -912,10 +920,12 @@ model_gitops_vault_sealed_envelope.go
 model_gitops_verdict_component.go
 model_gitops_volume_delta.go
 model_gorm_deleted_at.go
+model_handlers_account_alert_events_response.go
 model_handlers_active_grant_item.go
 model_handlers_add_virtual_machines_to_cluster_request.go
 model_handlers_add_vmto_network_request.go
 model_handlers_address_change_execute_request.go
+model_handlers_agent_reenroll_command_response.go
 model_handlers_agent_tool_catalog_response.go
 model_handlers_agent_tool_view.go
 model_handlers_agent_update_request.go
@@ -1236,6 +1246,7 @@ model_handlers_stack_wave_payload.go
 model_handlers_stack_wiring_delta_payload.go
 model_handlers_stop_database_request.go
 model_handlers_storage_alert_status.go
+model_handlers_storage_overview_response.go
 model_handlers_storage_volumes_response.go
 model_handlers_store_delegation_mandates_request.go
 model_handlers_store_delegation_mandates_response.go
@@ -1257,6 +1268,7 @@ model_handlers_update_org_s3_connection_request.go
 model_handlers_update_password_request.go
 model_handlers_update_password_response.go
 model_handlers_update_profile_request.go
+model_handlers_update_usage_measurement_request.go
 model_handlers_upgrade_database_request.go
 model_handlers_upgrade_park_view.go
 model_handlers_validate_cluster_name_response.go
@@ -1443,6 +1455,7 @@ test/api_networks_test.go
 test/api_notification_channels_test.go
 test/api_notification_digest_settings_test.go
 test/api_org_s3_connections_test.go
+test/api_organizations_test.go
 test/api_person_grants_test.go
 test/api_pods_test.go
 test/api_registration_tokens_test.go

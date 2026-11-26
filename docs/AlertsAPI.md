@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost:3001/api/v1*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteVirtualMachinesIdAlertRulesRuleId**](AlertsAPI.md#DeleteVirtualMachinesIdAlertRulesRuleId) | **Delete** /virtual-machines/{id}/alert-rules/{rule_id} | Delete an alert rule on a VM
+[**GetAlerts**](AlertsAPI.md#GetAlerts) | **Get** /alerts | List the account&#39;s fired alert events
 [**GetAlertsBucket**](AlertsAPI.md#GetAlertsBucket) | **Get** /alerts/bucket | Storage bucket alert status
 [**GetAlertsVolume**](AlertsAPI.md#GetAlertsVolume) | **Get** /alerts/volume | Storage volume alert status
 [**GetVirtualMachinesIdAlertRules**](AlertsAPI.md#GetVirtualMachinesIdAlertRules) | **Get** /virtual-machines/{id}/alert-rules | List a VM&#39;s alert rules
@@ -71,6 +72,78 @@ Name | Type | Description  | Notes
 ### Return type
 
 **map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetAlerts
+
+> HandlersAccountAlertEventsResponse GetAlerts(ctx).XOrgID(xOrgID).XProjectId(xProjectId).Status(status).Limit(limit).Execute()
+
+List the account's fired alert events
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	xOrgID := int32(56) // int32 | Organization selector (PAT callers; session callers resolve the org from the session) (optional)
+	xProjectId := "xProjectId_example" // string | Project selector: a project id or the value all (a PAT caller without it: 428 project_required) (optional)
+	status := "status_example" // string | Filter: active returns only unacknowledged events (optional)
+	limit := int32(56) // int32 | Page size (default 100, max 500) (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AlertsAPI.GetAlerts(context.Background()).XOrgID(xOrgID).XProjectId(xProjectId).Status(status).Limit(limit).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.GetAlerts``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetAlerts`: HandlersAccountAlertEventsResponse
+	fmt.Fprintf(os.Stdout, "Response from `AlertsAPI.GetAlerts`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetAlertsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **xOrgID** | **int32** | Organization selector (PAT callers; session callers resolve the org from the session) | 
+ **xProjectId** | **string** | Project selector: a project id or the value all (a PAT caller without it: 428 project_required) | 
+ **status** | **string** | Filter: active returns only unacknowledged events | 
+ **limit** | **int32** | Page size (default 100, max 500) | 
+
+### Return type
+
+[**HandlersAccountAlertEventsResponse**](HandlersAccountAlertEventsResponse.md)
 
 ### Authorization
 
@@ -351,7 +424,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -424,7 +497,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

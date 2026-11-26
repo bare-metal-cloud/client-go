@@ -867,12 +867,18 @@
     },
     "/agent/install.sh": {
       "get": {
-        "description": "Returns a dynamically generated bash script for installing the BMC agent. Without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.",
+        "description": "Returns a dynamically generated bash script for installing the BMC agent. mode=guard-reenroll renders the guard-key re-enrollment for an already-installed machine (no token); without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.",
         "tags": [
           "agent"
         ],
         "summary": "Get agent installation script",
         "parameters": [
+          {
+            "type": "string",
+            "description": "guard-reenroll renders the guard-key re-enrollment script for an already-installed machine",
+            "name": "mode",
+            "in": "query"
+          },
           {
             "type": "string",
             "description": "Agent registration token (short token) \u2014 omit for the runtime-prompt script",
@@ -883,6 +889,12 @@
         "responses": {
           "200": {
             "description": "Bash installation script",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "400": {
+            "description": "unknown mode, or mode=guard-reenroll combined with a token",
             "schema": {
               "type": "string"
             }
@@ -1050,6 +1062,47 @@
           }
         },
         "operationId": "GetAgentManifests"
+      }
+    },
+    "/agent/reenroll-command": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Server-rendered base command for the console's re-enroll-guard panel.\nThe token-less curl one-liner for the guard-reenroll install render,\nserved on the agent-service public URL the SPA cannot know.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "virtual-machines"
+        ],
+        "summary": "Get the guard-key re-enroll command",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.AgentReenrollCommandResponse"
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "operationId": "GetAgentReenroll-command"
       }
     },
     "/agent/registration-token": {
@@ -1892,6 +1945,75 @@
           }
         },
         "operationId": "GetAi-agentsTool-catalog"
+      }
+    },
+    "/alerts": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Newest-first fired alerts for the tenant list scope (single\nproject or all), used by the Monitoring overview page. The\npayload carries the firing list's delivery gap: per channel,\nthe picks whose health reached FAILING and the distinct\nundelivered-rule count (story 163.7). The gap uses the SAME\nproject filter as the events, so it names exactly the rules\nthe list shows. Empty channels = no gaps = an empty array.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "alerts"
+        ],
+        "summary": "List the account's fired alert events",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization selector (PAT callers; session callers resolve the org from the session)",
+            "name": "X-Org-ID",
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "description": "Project selector: a project id or the value all (a PAT caller without it: 428 project_required)",
+            "name": "X-Project-Id",
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "description": "Filter: active returns only unacknowledged events",
+            "name": "status",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Page size (default 100, max 500)",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.accountAlertEventsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "428": {
+            "description": "Precondition Required",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetAlerts"
       }
     },
     "/alerts/bucket": {
@@ -4131,6 +4253,77 @@
           }
         },
         "operationId": "PostApiV1Multipass-vmsSync"
+      }
+    },
+    "/api/v1/organizations/{org_id}/usage-measurement": {
+      "put": {
+        "description": "Turn the org's S3 usage measurement on or off (ADR-107 D3). Owner-tier and sudo-gated. The default is on.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "Organizations"
+        ],
+        "summary": "Set the organization's usage-measurement toggle",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Toggle value",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.updateUsageMeasurementRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PutApiV1OrganizationsOrg_idUsage-measurement"
       }
     },
     "/api/v1/orgs/{org_id}/elevation-approvers": {
@@ -11061,6 +11254,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "Change the backup plan's cadence (plan), retention window and\ndestination S3 connection \u2014 each field optional, only provided\nfields change. The destination is validated for existence and\norg access (never reachability). Retention applies immediately:\na shortened window deletes everything older than the new window\nat the next sweep, permanently \u2014 the response carries that\ndestructive-prune confirmation (destructive_prune) when and\nonly when the window shortens. Every applied change lands an\naudit event with per-field from \u2192 to. Existing backups stay in\ntheir original destination on a destination switch (the run\nledger records where every run lives).",
@@ -11144,6 +11340,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "Newest-first run ledger for the cluster's backup plan. Served\nfrom the local backup_runs table; the object store is never read.",
@@ -11318,6 +11517,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "The plan's decision, its newest run per lane target, the\nnewest recorded drift corrections and the missed-run findings.\nServed from local rows only.",
@@ -18553,6 +18755,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "Records that a person has seen the alert: who acknowledged it and when. Idempotent; a second call keeps the first actor and time.",
@@ -18623,6 +18828,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "Records that the alert's condition has been dealt with, who resolved it and when. A resolved missed-backup alert does not fire again for the same missed run. Resolving also stamps the acknowledgement when it is missing. Idempotent.",
@@ -25725,6 +25933,68 @@
         "operationId": "PostOrgsOrg_idStacksRollback"
       }
     },
+    "/orgs/{org_id}/storage/overview": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "One org-scoped aggregate over the measured storage data: bucket bytes, volume used and provisioned bytes.\nVolumes projected full within 14 days, and unresolved storage alert events (volume and bucket kinds).\nByte fields are null when nothing was measured, never 0; the *_measured counts name the sets the byte sums cover.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "storage"
+        ],
+        "summary": "Get the org's storage overview",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "the overview strip",
+            "schema": {
+              "$ref": "#/definitions/handlers.StorageOverviewResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idStorageOverview"
+      }
+    },
     "/orgs/{org_id}/storage/volumes": {
       "get": {
         "description": "Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.\nworkload_kind, workload_name and install_name name the owning workload; null when unattributed, never guessed.\nprojection: the 7-day fill fit over the measured samples; days_to_full and confidence appear only when they are real.\nOtherwise the status names the honest reason: not_enough_history, no_growth, or no_capacity.",
@@ -32168,6 +32438,89 @@
         "operationId": "GetServicesDatabasesIdExtensions"
       }
     },
+    "/services/databases/{id}/import-dump": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The customer-supplied dump import (BAR-5730): the first\nPOST (no confirm) answers the 409 confirm dialog \u2014 the\nengine + installed major, the scope-law reset warning, the\ndump-scope disclosure \u2014 plus an `upload` handle: a windowed\npresigned PUT (60 minutes, one object) over a key under the\nreserved managed-db-dumps/imports/ prefix. The customer's\nbytes go browser\u2192bucket directly (they never transit the\ncontrol plane); the PUT must send no Content-Type. The\nconfirmed re-post (with the handle's object_key) refuses\nnamed while the uploaded dump is not visible on the\ndestination, then enqueues the database:dump-restore leg \u2014\nthe job's outcome carries the per-table completeness\nverdict and the optional digest is verified in-pod before\nanything touches the database. The dialog's object_size is\n0 by law (the server has not seen the dump yet); the\nconsole renders the picked file's own size. Maintainer\ntier; legacy rows refuse.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Import a customer dump file into ONE managed database",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "destination_ref; object_key (the handle's key) and optional digest on the confirm",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.dumpRestoreRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Dump import enqueued",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Foreign destination, or role below maintainer",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "The confirm dialog + the upload handle",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "The uploaded dump is not visible, or an engine/status gate refusal",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdImport-dump"
+      }
+    },
     "/services/databases/{id}/query": {
       "post": {
         "security": [
@@ -33696,6 +34049,7 @@
             "BearerAuth": []
           }
         ],
+        "description": "Guard key enrolment comes from the console, not this call: install commands rendered with the org vault unlocked carry the guard env, and machines imported without it are enrolled afterwards with the console re-enroll command (Re-enroll guard key on the machine page).",
         "consumes": [
           "application/json"
         ],
@@ -36686,6 +37040,23 @@
         }
       }
     },
+    "alertpicks.Gap": {
+      "type": "object",
+      "properties": {
+        "channel_id": {
+          "type": "integer"
+        },
+        "channel_kind": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "undelivered_rules": {
+          "type": "integer"
+        }
+      }
+    },
     "blueprintdrift.DegradedReason": {
       "type": "string",
       "enum": [
@@ -39632,6 +40003,14 @@
           "items": {
             "type": "integer"
           }
+        }
+      }
+    },
+    "handlers.AgentReenrollCommandResponse": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
         }
       }
     },
@@ -44706,6 +45085,36 @@
         }
       }
     },
+    "handlers.StorageOverviewResponse": {
+      "type": "object",
+      "properties": {
+        "active_storage_alerts": {
+          "description": "ActiveStorageAlerts counts the org's unresolved storage_volume and\nstorage_bucket alert events \u2014 the same active predicate both\nper-resource status reads use.",
+          "type": "integer"
+        },
+        "bucket_bytes": {
+          "description": "BucketBytes sums every bucket's latest snapshot across the org's S3\nconnections. Null until a bucket snapshot carries bytes (LB-1 not\nlanded), and never counting a partial snapshot (a lower bound).",
+          "type": "integer"
+        },
+        "buckets_measured": {
+          "type": "integer"
+        },
+        "volume_provisioned_bytes": {
+          "type": "integer"
+        },
+        "volume_used_bytes": {
+          "description": "VolumeUsedBytes and VolumeProvisionedBytes sum the org's latest volume\nreadings over one reading set: the volumes that reported BOTH figures.\nNull when no volume did. VolumesMeasured counts exactly that set, so\nthe count and the two sums always name the same volumes.",
+          "type": "integer"
+        },
+        "volumes_full_within_14d": {
+          "description": "VolumesFullWithin14d counts volumes whose fill projection lands within\n14 days. A volume with no real projection (not enough history, no\ngrowth, no capacity) is never counted.",
+          "type": "integer"
+        },
+        "volumes_measured": {
+          "type": "integer"
+        }
+      }
+    },
     "handlers.StorageVolumesResponse": {
       "type": "object",
       "properties": {
@@ -45423,6 +45832,23 @@
         },
         "valid": {
           "type": "boolean"
+        }
+      }
+    },
+    "handlers.accountAlertEventsResponse": {
+      "type": "object",
+      "properties": {
+        "delivery_gaps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/alertpicks.Gap"
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/models.AlertEvent"
+          }
         }
       }
     },
@@ -47868,6 +48294,14 @@
         },
         "s3_connection_id": {
           "type": "integer"
+        }
+      }
+    },
+    "handlers.updateUsageMeasurementRequest": {
+      "type": "object",
+      "properties": {
+        "usage_measurement": {
+          "type": "boolean"
         }
       }
     },

@@ -25,7 +25,7 @@ type AgentAPI interface {
 	/*
 	GetAgentInstallSh Get agent installation script
 
-	Returns a dynamically generated bash script for installing the BMC agent. Without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.
+	Returns a dynamically generated bash script for installing the BMC agent. mode=guard-reenroll renders the guard-key re-enrollment for an already-installed machine (no token); without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetAgentInstallShRequest
@@ -57,7 +57,14 @@ type AgentAPIService service
 type ApiGetAgentInstallShRequest struct {
 	ctx context.Context
 	ApiService AgentAPI
+	mode *string
 	token *string
+}
+
+// guard-reenroll renders the guard-key re-enrollment script for an already-installed machine
+func (r ApiGetAgentInstallShRequest) Mode(mode string) ApiGetAgentInstallShRequest {
+	r.mode = &mode
+	return r
 }
 
 // Agent registration token (short token) — omit for the runtime-prompt script
@@ -73,7 +80,7 @@ func (r ApiGetAgentInstallShRequest) Execute() (string, *http.Response, error) {
 /*
 GetAgentInstallSh Get agent installation script
 
-Returns a dynamically generated bash script for installing the BMC agent. Without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.
+Returns a dynamically generated bash script for installing the BMC agent. mode=guard-reenroll renders the guard-key re-enrollment for an already-installed machine (no token); without a token query the script prompts for the token at run time; with ?token= the token is validated (not consumed) and baked in.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGetAgentInstallShRequest
@@ -106,6 +113,9 @@ func (a *AgentAPIService) GetAgentInstallShExecute(r ApiGetAgentInstallShRequest
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.mode != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "mode", r.mode, "", "")
+	}
 	if r.token != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "token", r.token, "", "")
 	}
@@ -147,6 +157,17 @@ func (a *AgentAPIService) GetAgentInstallShExecute(r ApiGetAgentInstallShRequest
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
 			var v map[string]string
