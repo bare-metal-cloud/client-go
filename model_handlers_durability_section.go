@@ -25,6 +25,8 @@ type HandlersDurabilitySection struct {
 	Install *string `json:"install,omitempty"`
 	Mode *string `json:"mode,omitempty"`
 	Points []HandlersDurabilityPoint `json:"points,omitempty"`
+	// PolicyGen is the store-assigned CAS generation: the write route's optional policy_gen answer echoes it back, and a stale answer is the named 409 (BAR-5597 review — the panel's edit door races exactly like any other write door).
+	PolicyGen *int32 `json:"policy_gen,omitempty"`
 	RetentionPreset *string `json:"retention_preset,omitempty"`
 	Runs []HandlersDurabilityRun `json:"runs,omitempty"`
 	Schedule *string `json:"schedule,omitempty"`
@@ -208,6 +210,38 @@ func (o *HandlersDurabilitySection) HasPoints() bool {
 // SetPoints gets a reference to the given []HandlersDurabilityPoint and assigns it to the Points field.
 func (o *HandlersDurabilitySection) SetPoints(v []HandlersDurabilityPoint) {
 	o.Points = v
+}
+
+// GetPolicyGen returns the PolicyGen field value if set, zero value otherwise.
+func (o *HandlersDurabilitySection) GetPolicyGen() int32 {
+	if o == nil || IsNil(o.PolicyGen) {
+		var ret int32
+		return ret
+	}
+	return *o.PolicyGen
+}
+
+// GetPolicyGenOk returns a tuple with the PolicyGen field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersDurabilitySection) GetPolicyGenOk() (*int32, bool) {
+	if o == nil || IsNil(o.PolicyGen) {
+		return nil, false
+	}
+	return o.PolicyGen, true
+}
+
+// HasPolicyGen returns a boolean if a field has been set.
+func (o *HandlersDurabilitySection) HasPolicyGen() bool {
+	if o != nil && !IsNil(o.PolicyGen) {
+		return true
+	}
+
+	return false
+}
+
+// SetPolicyGen gets a reference to the given int32 and assigns it to the PolicyGen field.
+func (o *HandlersDurabilitySection) SetPolicyGen(v int32) {
+	o.PolicyGen = &v
 }
 
 // GetRetentionPreset returns the RetentionPreset field value if set, zero value otherwise.
@@ -426,6 +460,9 @@ func (o HandlersDurabilitySection) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Points) {
 		toSerialize["points"] = o.Points
+	}
+	if !IsNil(o.PolicyGen) {
+		toSerialize["policy_gen"] = o.PolicyGen
 	}
 	if !IsNil(o.RetentionPreset) {
 		toSerialize["retention_preset"] = o.RetentionPreset

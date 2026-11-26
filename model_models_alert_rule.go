@@ -32,6 +32,10 @@ type ModelsAlertRule struct {
 	Metric *string `json:"metric,omitempty"`
 	OrgId *int32 `json:"org_id,omitempty"`
 	ProjectId *int32 `json:"project_id,omitempty"`
+	// Scope says which resources a storage_volume rule covers (AlertScope*). Defaults to resource; other kinds ignore it.
+	Scope *string `json:"scope,omitempty"`
+	// Severity is warning or critical (AlertSeverity*). It rides every fired event and the notification text. Defaults to warning.
+	Severity *string `json:"severity,omitempty"`
 	// Status is the evaluator-owned rule lifecycle surfaced in CRUD (AlertRuleStatus*). CRUD writes only Active; the sweep owns the target_missing flip (and never flips it back except through rule update, which re-arms the rule).
 	Status *string `json:"status,omitempty"`
 	// TargetID is the target resource id for the non-VM kinds (today: the cluster id for cluster_health and stack_component). Zero for vm_threshold and platform_signal rules.
@@ -414,6 +418,70 @@ func (o *ModelsAlertRule) SetProjectId(v int32) {
 	o.ProjectId = &v
 }
 
+// GetScope returns the Scope field value if set, zero value otherwise.
+func (o *ModelsAlertRule) GetScope() string {
+	if o == nil || IsNil(o.Scope) {
+		var ret string
+		return ret
+	}
+	return *o.Scope
+}
+
+// GetScopeOk returns a tuple with the Scope field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsAlertRule) GetScopeOk() (*string, bool) {
+	if o == nil || IsNil(o.Scope) {
+		return nil, false
+	}
+	return o.Scope, true
+}
+
+// HasScope returns a boolean if a field has been set.
+func (o *ModelsAlertRule) HasScope() bool {
+	if o != nil && !IsNil(o.Scope) {
+		return true
+	}
+
+	return false
+}
+
+// SetScope gets a reference to the given string and assigns it to the Scope field.
+func (o *ModelsAlertRule) SetScope(v string) {
+	o.Scope = &v
+}
+
+// GetSeverity returns the Severity field value if set, zero value otherwise.
+func (o *ModelsAlertRule) GetSeverity() string {
+	if o == nil || IsNil(o.Severity) {
+		var ret string
+		return ret
+	}
+	return *o.Severity
+}
+
+// GetSeverityOk returns a tuple with the Severity field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsAlertRule) GetSeverityOk() (*string, bool) {
+	if o == nil || IsNil(o.Severity) {
+		return nil, false
+	}
+	return o.Severity, true
+}
+
+// HasSeverity returns a boolean if a field has been set.
+func (o *ModelsAlertRule) HasSeverity() bool {
+	if o != nil && !IsNil(o.Severity) {
+		return true
+	}
+
+	return false
+}
+
+// SetSeverity gets a reference to the given string and assigns it to the Severity field.
+func (o *ModelsAlertRule) SetSeverity(v string) {
+	o.Severity = &v
+}
+
 // GetStatus returns the Status field value if set, zero value otherwise.
 func (o *ModelsAlertRule) GetStatus() string {
 	if o == nil || IsNil(o.Status) {
@@ -680,6 +748,12 @@ func (o ModelsAlertRule) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.ProjectId) {
 		toSerialize["project_id"] = o.ProjectId
+	}
+	if !IsNil(o.Scope) {
+		toSerialize["scope"] = o.Scope
+	}
+	if !IsNil(o.Severity) {
+		toSerialize["severity"] = o.Severity
 	}
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status

@@ -1522,6 +1522,108 @@ paths:
       summary: List the AI agent's tool catalog
       tags:
       - delegation
+  /alerts/bucket:
+    get:
+      description: "Active-alert count, covering rule count (no rules versus quiet)\
+        \ and recent alert history for one bucket"
+      operationId: GetAlertsBucket
+      parameters:
+      - description: S3 connection that holds the bucket
+        in: query
+        name: target_id
+        required: true
+        schema:
+          type: integer
+      - description: Bucket name
+        in: query
+        name: target_name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.StorageAlertStatus'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Missing or malformed target
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Connection not found in this org
+      security:
+      - CookieAuth: []
+      summary: Storage bucket alert status
+      tags:
+      - alerts
+  /alerts/volume:
+    get:
+      description: "Active-alert count, covering rule count (no rules versus quiet)\
+        \ and recent alert history for one volume"
+      operationId: GetAlertsVolume
+      parameters:
+      - description: Cluster that holds the volume
+        in: query
+        name: target_id
+        required: true
+        schema:
+          type: integer
+      - description: Volume as namespace/pvc
+        in: query
+        name: target_name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.StorageAlertStatus'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Missing or malformed target
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Cluster not found in this project
+      security:
+      - CookieAuth: []
+      summary: Storage volume alert status
+      tags:
+      - alerts
   /api/clusters/validate-name/{name}:
     get:
       description: Validate cluster name for DNS-1123 compliance and uniqueness
@@ -6596,6 +6698,97 @@ paths:
       summary: Get an install's durability read model
       tags:
       - deploykit-apps
+    put:
+      description: |-
+        Writes the install's durability policy through the same
+        validators the install lane runs — the org's grounded
+        destination registry, the stateful pairing law, the
+        engine's schedule grammar and retention presets — then
+        persists it with a policy-gen CAS and syncs the backup
+        schedule owner. Mode off or scheduled; continuous is
+        configured at install time and refused here. The response
+        is the durability read model (policy, streaks, decay
+        clock, ledger points, run ledger, badge). Maintainer+.
+      operationId: PutClustersIdAppsInstallDurability
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Install name
+        in: path
+        name: install
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+        description: "Durability answers keyed by bundle field id (durability.mode,\
+          \ durability.schedule, durability.destination, durability.retention); string\
+          \ values. Optional policy_gen integer: the gen the client loaded (the GET\
+          \ read model exposes it) — a different gen answers 409"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.durabilitySection'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "422":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unprocessable Entity
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      summary: Set an install's durability policy
+      tags:
+      - deploykit-apps
+      x-codegen-request-body-name: body
   /clusters/{id}/apps/{install}/edge-metrics:
     get:
       operationId: GetClustersIdAppsInstallEdge-metrics
@@ -6655,6 +6848,138 @@ paths:
       summary: Read an app install's edge metrics
       tags:
       - apps
+  /clusters/{id}/apps/{install}/export-dump:
+    post:
+      description: |-
+        The per-database export on the cluster surface (BAR-4907):
+        exactly ONE database, slotseed's DumpCommand verbatim, into
+        the org's own bucket over a windowed presigned PUT.
+        Read-only — no confirm dialog; the disclosure rides the
+        answer. Maintainer tier.
+      operationId: PostClustersIdAppsInstallExport-dump
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Install name
+        in: path
+        name: install
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/handlers.dumpExportRequest'
+        description: destination_ref; object_key optional (defaults under managed-db-dumps/)
+        required: false
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Dump export enqueued (the answer carries the object key + disclosure)
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unprocessable Entity
+      security:
+      - CookieAuth: []
+      summary: Dump (export) ONE stack-member or engine-install database
+      tags:
+      - deploykit-apps
+      x-codegen-request-body-name: body
+  /clusters/{id}/apps/{install}/export-dump/{job}/download:
+    get:
+      description: |-
+        The install surface's windowed presigned GET (15 minutes,
+        one object) for a completed database:dump-export job's
+        outcome handle. The job row is org+project+resource scoped
+        to the caller and the path's cluster. Maintainer tier.
+      operationId: GetClustersIdAppsInstallExport-dumpJobDownload
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Install name
+        in: path
+        name: install
+        required: true
+        schema:
+          type: string
+      - description: The export job id
+        in: path
+        name: job
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The windowed download URL + the outcome's bytes/sha256/disclosure
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+      security:
+      - CookieAuth: []
+      summary: Download one completed install dump export
+      tags:
+      - deploykit-apps
   /clusters/{id}/apps/{install}/form:
     get:
       operationId: GetClustersIdAppsInstallForm
@@ -7261,9 +7586,13 @@ paths:
         POST answers the confirm dialog (409) with the point's age
         and verification facts plus the environment's backup policy.
         The dispatch happens only on the confirmed re-post. Target
-        is in_place (default) or parallel (a named sibling install
-        whose record already exists). A stack component refuses —
-        the stack lane governs the component order.
+        is in_place (default), parallel (a named sibling install
+        whose record already exists), or clone (BAR-4912: the
+        restore CREATES a new install — new_install names it,
+        data is the explicit "with"|"without" choice, and with
+        names a verified backup_point; the with-data arm refuses
+        while the data seeder is not active). A stack component
+        refuses — the stack lane governs the component order.
       operationId: PostClustersIdAppsInstallRestore
       parameters:
       - description: Cluster ID
@@ -7332,6 +7661,92 @@ paths:
       security:
       - CookieAuth: []
       summary: Restore an install from a recorded backup point
+      tags:
+      - deploykit-apps
+      x-codegen-request-body-name: body
+  /clusters/{id}/apps/{install}/restore-dump:
+    post:
+      description: |-
+        The per-database data affordance on the cluster surface
+        (BAR-4907): ANY engine install, INCLUDING stack members —
+        the managed-slot fence is deliberately not applied (the
+        dump verbs are the database's own data affordance, not a
+        lane verb). The stack gate keys ONLY on the binding: a
+        stack-bundle member carries the stack_consistency block
+        (DUMP_RESTORE_STACK_POLICY warn default, block switchable —
+        under block the confirm POST refuses named); a
+        Database-row install never carries the block. Same
+        two-phase dialog + completeness verdict as the standalone
+        door. Maintainer tier.
+      operationId: PostClustersIdAppsInstallRestore-dump
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Install name
+        in: path
+        name: install
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/handlers.dumpRestoreRequest'
+        description: "destination_ref, object_key, optional digest; confirm on the\
+          \ re-post"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Dump restore enqueued
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The install is neither a managed slot nor a database install
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: "The confirm dialog, the stack block refusal, or a status-gate\
+            \ refusal"
+        "422":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unprocessable Entity
+      security:
+      - CookieAuth: []
+      summary: Restore ONE stack-member or engine-install database from a raw dump
       tags:
       - deploykit-apps
       x-codegen-request-body-name: body
@@ -24714,6 +25129,10 @@ paths:
       tags:
       - databases
     post:
+      description: |-
+        Creating a database also ENQUEUES its database:deploy job (BAR-3876):
+        the row provisions immediately — the create is a deploy request.
+        The 201 body is the Database row; the job id is in the server log line.
       operationId: PostServicesDatabases
       requestBody:
         content:
@@ -24736,6 +25155,13 @@ paths:
                 additionalProperties: true
                 type: object
           description: Bad Request
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Name collides with an existing app install
       security:
       - CookieAuth: []
       summary: Create database configuration
@@ -24746,7 +25172,7 @@ paths:
     get:
       operationId: GetServicesDatabasesConfigSchema
       parameters:
-      - description: "Database type (postgresql, mariadb)"
+      - description: "Database type (postgresql, mariadb, mysql)"
         in: query
         name: type
         required: true
@@ -25920,6 +26346,169 @@ paths:
       summary: Reset database password
       tags:
       - databases
+  /services/databases/{id}/deploy:
+    post:
+      operationId: PostServicesDatabasesIdDeploy
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "202":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Accepted
+        "400":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+      security:
+      - CookieAuth: []
+      summary: Deploy a database (first deploy or re-deploy after error/stop)
+      tags:
+      - databases
+  /services/databases/{id}/export-dump:
+    post:
+      description: |-
+        The per-database data affordance (BAR-4907): dumps exactly
+        ONE database (slotseed's DumpCommand verbatim) into the
+        org's own bucket over a windowed presigned PUT. Read-only
+        on the database — no confirm dialog; the answer carries the
+        dump-scope disclosure (roles/cron/scheduled events do not
+        travel). The default object key lands under the reserved
+        managed-db-dumps/ prefix. The download read issues a
+        windowed presigned GET once the job completes. Maintainer
+        tier; legacy rows refuse.
+      operationId: PostServicesDatabasesIdExport-dump
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/handlers.dumpExportRequest'
+        description: destination_ref; object_key optional (defaults under managed-db-dumps/)
+        required: false
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Dump export enqueued (the answer carries the object key + disclosure)
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: "Foreign destination, or role below maintainer"
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "422":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Destination or engine/status gate refusal
+      security:
+      - CookieAuth: []
+      summary: Dump (export) ONE managed database out for download
+      tags:
+      - databases
+      x-codegen-request-body-name: body
+  /services/databases/{id}/export-dump/{job}/download:
+    get:
+      description: |-
+        Issues a windowed presigned GET (15 minutes, one object)
+        for a completed database:dump-export job's outcome handle.
+        The job row is org+project+resource scoped to the caller
+        and the path's database's cluster; the destination
+        re-resolves through the vault's tenancy gate. Maintainer
+        tier.
+      operationId: GetServicesDatabasesIdExport-dumpJobDownload
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: The export job id
+        in: path
+        name: job
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The windowed download URL + the outcome's bytes/sha256/disclosure
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: No completed export job with that id
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The job's outcome carries no export handle
+      security:
+      - CookieAuth: []
+      summary: Download one completed database dump export
+      tags:
+      - databases
   /services/databases/{id}/extensions:
     get:
       description: |-
@@ -26232,6 +26821,85 @@ paths:
       tags:
       - databases
       x-codegen-request-body-name: request
+  /services/databases/{id}/restore-dump:
+    post:
+      description: |-
+        The per-database data affordance (BAR-4907): the first
+        POST (no confirm) answers the 409 confirm dialog with the
+        engine + installed major, the dump's server-side size, the
+        reset/overwrite warnings (the scope law: only THIS database
+        resets; sibling databases on the instance are untouched),
+        the dump-scope disclosure, and — only for stack-bundle
+        members — the stack_consistency warning. The confirmed
+        re-post enqueues the database:dump-restore leg (202 + job
+        id); the job's outcome carries the per-table completeness
+        verdict. Maintainer tier; legacy rows refuse.
+      operationId: PostServicesDatabasesIdRestore-dump
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/handlers.dumpRestoreRequest'
+        description: "destination_ref, object_key, optional digest; confirm on the\
+          \ re-post"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Dump restore enqueued
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: "Foreign destination, or role below maintainer"
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The confirm dialog
+        "422":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: "Object not visible on the destination, or engine/status gate\
+            \ refusal"
+      security:
+      - CookieAuth: []
+      summary: Restore ONE managed database from a raw dump file
+      tags:
+      - databases
+      x-codegen-request-body-name: body
   /services/databases/{id}/scale-resources:
     post:
       operationId: PostServicesDatabasesIdScale-resources
@@ -38535,6 +39203,66 @@ components:
       required:
       - confirm_name
       type: object
+    handlers.StorageAlertStatus:
+      example:
+        active_count: 0
+        state: state
+        events:
+        - severity: severity
+          dedup_key: dedup_key
+          acknowledged: true
+          target_name: target_name
+          created_at: created_at
+          target_id: 9
+          message: message
+          rule_id: rule_id
+          resolved_by: 7
+          vm_id: 2
+          breached_at: breached_at
+          observed_value: 5.962133916683182
+          metric: metric
+          project_id: 2
+          org_id: 5
+          resolved_at: resolved_at
+          threshold_value: 3.616076749251911
+          target_kind: target_kind
+          acknowledged_by: 6
+          id: 1
+          acknowledged_at: acknowledged_at
+        - severity: severity
+          dedup_key: dedup_key
+          acknowledged: true
+          target_name: target_name
+          created_at: created_at
+          target_id: 9
+          message: message
+          rule_id: rule_id
+          resolved_by: 7
+          vm_id: 2
+          breached_at: breached_at
+          observed_value: 5.962133916683182
+          metric: metric
+          project_id: 2
+          org_id: 5
+          resolved_at: resolved_at
+          threshold_value: 3.616076749251911
+          target_kind: target_kind
+          acknowledged_by: 6
+          id: 1
+          acknowledged_at: acknowledged_at
+        rule_count: 4
+      properties:
+        active_count:
+          type: integer
+        events:
+          items:
+            $ref: '#/components/schemas/models.AlertEvent'
+          type: array
+        rule_count:
+          type: integer
+        state:
+          type: string
+      type: object
     handlers.StorageVolumesResponse:
       example:
         volumes:
@@ -39275,12 +40003,23 @@ components:
         target_install:
           type: string
       type: object
+    handlers.appsRestoreClonePoint:
+      properties:
+        destination:
+          type: string
+        key:
+          type: string
+      type: object
     handlers.appsRestoreRequest:
       properties:
+        backup_point:
+          $ref: '#/components/schemas/handlers.appsRestoreClonePoint'
         confirm:
           description: |-
             Confirm is the user's fresh consent (the dialog's confirm). Empty on
             the first POST — the dialog answer.
+          type: string
+        data:
           type: string
         destination:
           description: |-
@@ -39288,6 +40027,13 @@ components:
             endpoint's point list carries both).
           type: string
         key:
+          type: string
+        new_install:
+          description: |-
+            The clone mode's fields (BAR-4912): NewInstall is the name of the
+            install to create (required on clone), Data is the explicit
+            with/without choice (required on clone), and BackupPoint is the
+            with-data clone's point handle (absent on without).
           type: string
         parallel_install:
           description: |-
@@ -40517,6 +41263,24 @@ components:
         token:
           type: string
       type: object
+    handlers.dumpExportRequest:
+      properties:
+        destination_ref:
+          type: string
+        object_key:
+          type: string
+      type: object
+    handlers.dumpRestoreRequest:
+      properties:
+        confirm:
+          type: string
+        destination_ref:
+          type: string
+        digest:
+          type: string
+        object_key:
+          type: string
+      type: object
     handlers.durabilityBadge:
       example:
         state: state
@@ -40578,13 +41342,14 @@ components:
           state: state
         schedule: schedule
         streaks:
-          last_backup_age_seconds: 1
+          last_backup_age_seconds: 5
           next_run: next_run
           last_backup_at: last_backup_at
           schedule_interval_seconds: 5
         components:
         - null
         - null
+        policy_gen: 1
         install: install
         target_destination: target_destination
         runs:
@@ -40632,6 +41397,13 @@ components:
           items:
             $ref: '#/components/schemas/handlers.durabilityPoint'
           type: array
+        policy_gen:
+          description: |-
+            PolicyGen is the store-assigned CAS generation: the write route's
+            optional policy_gen answer echoes it back, and a stale answer is
+            the named 409 (BAR-5597 review — the panel's edit door races
+            exactly like any other write door).
+          type: integer
         retention_preset:
           type: string
         runs:
@@ -40649,7 +41421,7 @@ components:
       type: object
     handlers.durabilityStreaks:
       example:
-        last_backup_age_seconds: 1
+        last_backup_age_seconds: 5
         next_run: next_run
         last_backup_at: last_backup_at
         schedule_interval_seconds: 5
@@ -41843,6 +42615,10 @@ components:
           items:
             $ref: '#/components/schemas/handlers.stackMemberPayload'
           type: array
+        slot_onboarding:
+          items:
+            $ref: '#/components/schemas/handlers.stackSlotOnboardingPayload'
+          type: array
         stack:
           type: string
         strategy:
@@ -41855,6 +42631,21 @@ components:
           type: array
         wiring_delta:
           $ref: '#/components/schemas/handlers.stackWiringDeltaPayload'
+      type: object
+    handlers.stackSlotOnboardingPayload:
+      properties:
+        class:
+          type: string
+        database:
+          type: string
+        disclosure:
+          type: string
+        slot:
+          type: string
+        source_member:
+          type: string
+        user:
+          type: string
       type: object
     handlers.stackStrategyPayload:
       properties:
@@ -42093,25 +42884,26 @@ components:
       type: object
     models.AlertEvent:
       example:
+        severity: severity
         dedup_key: dedup_key
         acknowledged: true
         target_name: target_name
         created_at: created_at
-        target_id: 7
+        target_id: 9
         message: message
         rule_id: rule_id
-        resolved_by: 2
-        vm_id: 3
+        resolved_by: 7
+        vm_id: 2
         breached_at: breached_at
-        observed_value: 1.4658129805029452
+        observed_value: 5.962133916683182
         metric: metric
-        project_id: 5
+        project_id: 2
         org_id: 5
         resolved_at: resolved_at
-        threshold_value: 9.301444243932576
+        threshold_value: 3.616076749251911
         target_kind: target_kind
-        acknowledged_by: 0
-        id: 6
+        acknowledged_by: 6
+        id: 1
         acknowledged_at: acknowledged_at
       properties:
         acknowledged:
@@ -42154,6 +42946,9 @@ components:
           type: integer
         rule_id:
           type: string
+        severity:
+          description: Severity copies the firing rule's severity (AlertSeverity*).
+          type: string
         target_id:
           type: integer
         target_kind:
@@ -42171,6 +42966,7 @@ components:
       type: object
     models.AlertRule:
       example:
+        severity: severity
         comparison: comparison
         target_name: target_name
         created_at: created_at
@@ -42184,6 +42980,7 @@ components:
         metric: metric
         project_id: 2
         org_id: 5
+        scope: scope
         cooldown_seconds: 0
         target_kind: target_kind
         for_duration_seconds: 1
@@ -42215,6 +43012,16 @@ components:
           type: integer
         project_id:
           type: integer
+        scope:
+          description: |-
+            Scope says which resources a storage_volume rule covers (AlertScope*).
+            Defaults to resource; other kinds ignore it.
+          type: string
+        severity:
+          description: |-
+            Severity is warning or critical (AlertSeverity*). It rides every fired
+            event and the notification text. Defaults to warning.
+          type: string
         status:
           description: |-
             Status is the evaluator-owned rule lifecycle surfaced in CRUD
@@ -43281,11 +44088,15 @@ components:
       - postgresql
       - mongodb
       - mariadb
+      - mysql
+      - redis
       type: string
       x-enum-varnames:
       - DatabaseTypePostgreSQL
       - DatabaseTypeMongoDB
       - DatabaseTypeMariaDB
+      - DatabaseTypeMySQL
+      - DatabaseTypeRedis
     models.DnsMigrationConsent:
       example:
         consented_at: consented_at

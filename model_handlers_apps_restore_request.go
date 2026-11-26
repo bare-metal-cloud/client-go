@@ -20,11 +20,15 @@ var _ MappedNullable = &HandlersAppsRestoreRequest{}
 
 // HandlersAppsRestoreRequest struct for HandlersAppsRestoreRequest
 type HandlersAppsRestoreRequest struct {
+	BackupPoint *HandlersAppsRestoreClonePoint `json:"backup_point,omitempty"`
 	// Confirm is the user's fresh consent (the dialog's confirm). Empty on the first POST — the dialog answer.
 	Confirm *string `json:"confirm,omitempty"`
+	Data *string `json:"data,omitempty"`
 	// Destination + Key are the point's archive handle (the durability endpoint's point list carries both).
 	Destination *string `json:"destination,omitempty"`
 	Key *string `json:"key,omitempty"`
+	// The clone mode's fields (BAR-4912): NewInstall is the name of the install to create (required on clone), Data is the explicit with/without choice (required on clone), and BackupPoint is the with-data clone's point handle (absent on without).
+	NewInstall *string `json:"new_install,omitempty"`
 	// ParallelInstall is the sibling install a parallel restore lands on. Required on parallel; the record must already exist.
 	ParallelInstall *string `json:"parallel_install,omitempty"`
 	// Target is in_place (default) or parallel.
@@ -46,6 +50,38 @@ func NewHandlersAppsRestoreRequest() *HandlersAppsRestoreRequest {
 func NewHandlersAppsRestoreRequestWithDefaults() *HandlersAppsRestoreRequest {
 	this := HandlersAppsRestoreRequest{}
 	return &this
+}
+
+// GetBackupPoint returns the BackupPoint field value if set, zero value otherwise.
+func (o *HandlersAppsRestoreRequest) GetBackupPoint() HandlersAppsRestoreClonePoint {
+	if o == nil || IsNil(o.BackupPoint) {
+		var ret HandlersAppsRestoreClonePoint
+		return ret
+	}
+	return *o.BackupPoint
+}
+
+// GetBackupPointOk returns a tuple with the BackupPoint field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersAppsRestoreRequest) GetBackupPointOk() (*HandlersAppsRestoreClonePoint, bool) {
+	if o == nil || IsNil(o.BackupPoint) {
+		return nil, false
+	}
+	return o.BackupPoint, true
+}
+
+// HasBackupPoint returns a boolean if a field has been set.
+func (o *HandlersAppsRestoreRequest) HasBackupPoint() bool {
+	if o != nil && !IsNil(o.BackupPoint) {
+		return true
+	}
+
+	return false
+}
+
+// SetBackupPoint gets a reference to the given HandlersAppsRestoreClonePoint and assigns it to the BackupPoint field.
+func (o *HandlersAppsRestoreRequest) SetBackupPoint(v HandlersAppsRestoreClonePoint) {
+	o.BackupPoint = &v
 }
 
 // GetConfirm returns the Confirm field value if set, zero value otherwise.
@@ -78,6 +114,38 @@ func (o *HandlersAppsRestoreRequest) HasConfirm() bool {
 // SetConfirm gets a reference to the given string and assigns it to the Confirm field.
 func (o *HandlersAppsRestoreRequest) SetConfirm(v string) {
 	o.Confirm = &v
+}
+
+// GetData returns the Data field value if set, zero value otherwise.
+func (o *HandlersAppsRestoreRequest) GetData() string {
+	if o == nil || IsNil(o.Data) {
+		var ret string
+		return ret
+	}
+	return *o.Data
+}
+
+// GetDataOk returns a tuple with the Data field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersAppsRestoreRequest) GetDataOk() (*string, bool) {
+	if o == nil || IsNil(o.Data) {
+		return nil, false
+	}
+	return o.Data, true
+}
+
+// HasData returns a boolean if a field has been set.
+func (o *HandlersAppsRestoreRequest) HasData() bool {
+	if o != nil && !IsNil(o.Data) {
+		return true
+	}
+
+	return false
+}
+
+// SetData gets a reference to the given string and assigns it to the Data field.
+func (o *HandlersAppsRestoreRequest) SetData(v string) {
+	o.Data = &v
 }
 
 // GetDestination returns the Destination field value if set, zero value otherwise.
@@ -142,6 +210,38 @@ func (o *HandlersAppsRestoreRequest) HasKey() bool {
 // SetKey gets a reference to the given string and assigns it to the Key field.
 func (o *HandlersAppsRestoreRequest) SetKey(v string) {
 	o.Key = &v
+}
+
+// GetNewInstall returns the NewInstall field value if set, zero value otherwise.
+func (o *HandlersAppsRestoreRequest) GetNewInstall() string {
+	if o == nil || IsNil(o.NewInstall) {
+		var ret string
+		return ret
+	}
+	return *o.NewInstall
+}
+
+// GetNewInstallOk returns a tuple with the NewInstall field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersAppsRestoreRequest) GetNewInstallOk() (*string, bool) {
+	if o == nil || IsNil(o.NewInstall) {
+		return nil, false
+	}
+	return o.NewInstall, true
+}
+
+// HasNewInstall returns a boolean if a field has been set.
+func (o *HandlersAppsRestoreRequest) HasNewInstall() bool {
+	if o != nil && !IsNil(o.NewInstall) {
+		return true
+	}
+
+	return false
+}
+
+// SetNewInstall gets a reference to the given string and assigns it to the NewInstall field.
+func (o *HandlersAppsRestoreRequest) SetNewInstall(v string) {
+	o.NewInstall = &v
 }
 
 // GetParallelInstall returns the ParallelInstall field value if set, zero value otherwise.
@@ -218,14 +318,23 @@ func (o HandlersAppsRestoreRequest) MarshalJSON() ([]byte, error) {
 
 func (o HandlersAppsRestoreRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.BackupPoint) {
+		toSerialize["backup_point"] = o.BackupPoint
+	}
 	if !IsNil(o.Confirm) {
 		toSerialize["confirm"] = o.Confirm
+	}
+	if !IsNil(o.Data) {
+		toSerialize["data"] = o.Data
 	}
 	if !IsNil(o.Destination) {
 		toSerialize["destination"] = o.Destination
 	}
 	if !IsNil(o.Key) {
 		toSerialize["key"] = o.Key
+	}
+	if !IsNil(o.NewInstall) {
+		toSerialize["new_install"] = o.NewInstall
 	}
 	if !IsNil(o.ParallelInstall) {
 		toSerialize["parallel_install"] = o.ParallelInstall

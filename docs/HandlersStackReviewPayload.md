@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **Changed** | Pointer to **bool** |  | [optional] 
 **Delta** | Pointer to [**HandlersStackDeltaPayload**](HandlersStackDeltaPayload.md) |  | [optional] 
 **Members** | Pointer to [**[]HandlersStackMemberPayload**](HandlersStackMemberPayload.md) |  | [optional] 
+**SlotOnboarding** | Pointer to [**[]HandlersStackSlotOnboardingPayload**](HandlersStackSlotOnboardingPayload.md) |  | [optional] 
 **Stack** | Pointer to **string** |  | [optional] 
 **Strategy** | Pointer to [**HandlersStackStrategyPayload**](HandlersStackStrategyPayload.md) |  | [optional] 
 **Target** | Pointer to **string** |  | [optional] 
@@ -106,6 +107,31 @@ SetMembers sets Members field to given value.
 `func (o *HandlersStackReviewPayload) HasMembers() bool`
 
 HasMembers returns a boolean if a field has been set.
+
+### GetSlotOnboarding
+
+`func (o *HandlersStackReviewPayload) GetSlotOnboarding() []HandlersStackSlotOnboardingPayload`
+
+GetSlotOnboarding returns the SlotOnboarding field if non-nil, zero value otherwise.
+
+### GetSlotOnboardingOk
+
+`func (o *HandlersStackReviewPayload) GetSlotOnboardingOk() (*[]HandlersStackSlotOnboardingPayload, bool)`
+
+GetSlotOnboardingOk returns a tuple with the SlotOnboarding field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSlotOnboarding
+
+`func (o *HandlersStackReviewPayload) SetSlotOnboarding(v []HandlersStackSlotOnboardingPayload)`
+
+SetSlotOnboarding sets SlotOnboarding field to given value.
+
+### HasSlotOnboarding
+
+`func (o *HandlersStackReviewPayload) HasSlotOnboarding() bool`
+
+HasSlotOnboarding returns a boolean if a field has been set.
 
 ### GetStack
 

@@ -37,6 +37,8 @@ type ModelsAlertEvent struct {
 	ResolvedAt *string `json:"resolved_at,omitempty"`
 	ResolvedBy *int32 `json:"resolved_by,omitempty"`
 	RuleId *string `json:"rule_id,omitempty"`
+	// Severity copies the firing rule's severity (AlertSeverity*).
+	Severity *string `json:"severity,omitempty"`
 	TargetId *int32 `json:"target_id,omitempty"`
 	// TargetKind/TargetID/TargetName mirror the firing rule's target (AlertTarget*). Pre-158.3 rows read as vm_threshold with target_id 0 — their vm_id is the subject, unchanged.
 	TargetKind *string `json:"target_kind,omitempty"`
@@ -542,6 +544,38 @@ func (o *ModelsAlertEvent) SetRuleId(v string) {
 	o.RuleId = &v
 }
 
+// GetSeverity returns the Severity field value if set, zero value otherwise.
+func (o *ModelsAlertEvent) GetSeverity() string {
+	if o == nil || IsNil(o.Severity) {
+		var ret string
+		return ret
+	}
+	return *o.Severity
+}
+
+// GetSeverityOk returns a tuple with the Severity field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsAlertEvent) GetSeverityOk() (*string, bool) {
+	if o == nil || IsNil(o.Severity) {
+		return nil, false
+	}
+	return o.Severity, true
+}
+
+// HasSeverity returns a boolean if a field has been set.
+func (o *ModelsAlertEvent) HasSeverity() bool {
+	if o != nil && !IsNil(o.Severity) {
+		return true
+	}
+
+	return false
+}
+
+// SetSeverity gets a reference to the given string and assigns it to the Severity field.
+func (o *ModelsAlertEvent) SetSeverity(v string) {
+	o.Severity = &v
+}
+
 // GetTargetId returns the TargetId field value if set, zero value otherwise.
 func (o *ModelsAlertEvent) GetTargetId() int32 {
 	if o == nil || IsNil(o.TargetId) {
@@ -756,6 +790,9 @@ func (o ModelsAlertEvent) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.RuleId) {
 		toSerialize["rule_id"] = o.RuleId
+	}
+	if !IsNil(o.Severity) {
+		toSerialize["severity"] = o.Severity
 	}
 	if !IsNil(o.TargetId) {
 		toSerialize["target_id"] = o.TargetId

@@ -140,6 +140,22 @@ func Test_bmc_DeploykitAppsAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test DeploykitAppsAPIService GetClustersIdAppsInstallExportDumpJobDownload", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var install string
+		var job string
+
+		resp, httpRes, err := apiClient.DeploykitAppsAPI.GetClustersIdAppsInstallExportDumpJobDownload(context.Background(), id, install, job).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test DeploykitAppsAPIService GetClustersIdAppsInstallForm", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -272,6 +288,21 @@ func Test_bmc_DeploykitAppsAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test DeploykitAppsAPIService PostClustersIdAppsInstallExportDump", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var install string
+
+		resp, httpRes, err := apiClient.DeploykitAppsAPI.PostClustersIdAppsInstallExportDump(context.Background(), id, install).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test DeploykitAppsAPIService PostClustersIdAppsInstallPromote", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -309,6 +340,21 @@ func Test_bmc_DeploykitAppsAPIService(t *testing.T) {
 		var install string
 
 		resp, httpRes, err := apiClient.DeploykitAppsAPI.PostClustersIdAppsInstallRestore(context.Background(), id, install).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test DeploykitAppsAPIService PostClustersIdAppsInstallRestoreDump", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var install string
+
+		resp, httpRes, err := apiClient.DeploykitAppsAPI.PostClustersIdAppsInstallRestoreDump(context.Background(), id, install).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
@@ -385,6 +431,21 @@ func Test_bmc_DeploykitAppsAPIService(t *testing.T) {
 		var install string
 
 		resp, httpRes, err := apiClient.DeploykitAppsAPI.PostClustersIdAppsInstallUpgradeParkWithdraw(context.Background(), id, install).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test DeploykitAppsAPIService PutClustersIdAppsInstallDurability", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var install string
+
+		resp, httpRes, err := apiClient.DeploykitAppsAPI.PutClustersIdAppsInstallDurability(context.Background(), id, install).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

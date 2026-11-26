@@ -23,6 +23,7 @@ type HandlersStackReviewPayload struct {
 	Changed *bool `json:"changed,omitempty"`
 	Delta *HandlersStackDeltaPayload `json:"delta,omitempty"`
 	Members []HandlersStackMemberPayload `json:"members,omitempty"`
+	SlotOnboarding []HandlersStackSlotOnboardingPayload `json:"slot_onboarding,omitempty"`
 	Stack *string `json:"stack,omitempty"`
 	Strategy *HandlersStackStrategyPayload `json:"strategy,omitempty"`
 	Target *string `json:"target,omitempty"`
@@ -141,6 +142,38 @@ func (o *HandlersStackReviewPayload) HasMembers() bool {
 // SetMembers gets a reference to the given []HandlersStackMemberPayload and assigns it to the Members field.
 func (o *HandlersStackReviewPayload) SetMembers(v []HandlersStackMemberPayload) {
 	o.Members = v
+}
+
+// GetSlotOnboarding returns the SlotOnboarding field value if set, zero value otherwise.
+func (o *HandlersStackReviewPayload) GetSlotOnboarding() []HandlersStackSlotOnboardingPayload {
+	if o == nil || IsNil(o.SlotOnboarding) {
+		var ret []HandlersStackSlotOnboardingPayload
+		return ret
+	}
+	return o.SlotOnboarding
+}
+
+// GetSlotOnboardingOk returns a tuple with the SlotOnboarding field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersStackReviewPayload) GetSlotOnboardingOk() ([]HandlersStackSlotOnboardingPayload, bool) {
+	if o == nil || IsNil(o.SlotOnboarding) {
+		return nil, false
+	}
+	return o.SlotOnboarding, true
+}
+
+// HasSlotOnboarding returns a boolean if a field has been set.
+func (o *HandlersStackReviewPayload) HasSlotOnboarding() bool {
+	if o != nil && !IsNil(o.SlotOnboarding) {
+		return true
+	}
+
+	return false
+}
+
+// SetSlotOnboarding gets a reference to the given []HandlersStackSlotOnboardingPayload and assigns it to the SlotOnboarding field.
+func (o *HandlersStackReviewPayload) SetSlotOnboarding(v []HandlersStackSlotOnboardingPayload) {
+	o.SlotOnboarding = v
 }
 
 // GetStack returns the Stack field value if set, zero value otherwise.
@@ -321,6 +354,9 @@ func (o HandlersStackReviewPayload) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Members) {
 		toSerialize["members"] = o.Members
+	}
+	if !IsNil(o.SlotOnboarding) {
+		toSerialize["slot_onboarding"] = o.SlotOnboarding
 	}
 	if !IsNil(o.Stack) {
 		toSerialize["stack"] = o.Stack

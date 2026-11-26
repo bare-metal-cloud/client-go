@@ -1894,6 +1894,132 @@
         "operationId": "GetAi-agentsTool-catalog"
       }
     },
+    "/alerts/bucket": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Active-alert count, covering rule count (no rules versus quiet) and recent alert history for one bucket",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Storage bucket alert status",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "S3 connection that holds the bucket",
+            "name": "target_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Bucket name",
+            "name": "target_name",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.StorageAlertStatus"
+            }
+          },
+          "400": {
+            "description": "Missing or malformed target",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Connection not found in this org",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetAlertsBucket"
+      }
+    },
+    "/alerts/volume": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Active-alert count, covering rule count (no rules versus quiet) and recent alert history for one volume",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "alerts"
+        ],
+        "summary": "Storage volume alert status",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Cluster that holds the volume",
+            "name": "target_id",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Volume as namespace/pvc",
+            "name": "target_name",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.StorageAlertStatus"
+            }
+          },
+          "400": {
+            "description": "Missing or malformed target",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Cluster not found in this project",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetAlertsVolume"
+      }
+    },
     "/api/clusters/validate-name/{name}": {
       "get": {
         "description": "Validate cluster name for DNS-1123 compliance and uniqueness",
@@ -8206,6 +8332,101 @@
           }
         },
         "operationId": "GetClustersIdAppsInstallDurability"
+      },
+      "put": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Writes the install's durability policy through the same\nvalidators the install lane runs \u2014 the org's grounded\ndestination registry, the stateful pairing law, the\nengine's schedule grammar and retention presets \u2014 then\npersists it with a policy-gen CAS and syncs the backup\nschedule owner. Mode off or scheduled; continuous is\nconfigured at install time and refused here. The response\nis the durability read model (policy, streaks, decay\nclock, ledger points, run ledger, badge). Maintainer+.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "deploykit-apps"
+        ],
+        "summary": "Set an install's durability policy",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Cluster ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Install name",
+            "name": "install",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Durability answers keyed by bundle field id (durability.mode, durability.schedule, durability.destination, durability.retention); string values. Optional policy_gen integer: the gen the client loaded (the GET read model exposes it) \u2014 a different gen answers 409",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.durabilitySection"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PutClustersIdAppsInstallDurability"
       }
     },
     "/clusters/{id}/apps/{install}/edge-metrics": {
@@ -8284,6 +8505,159 @@
           }
         },
         "operationId": "GetClustersIdAppsInstallEdge-metrics"
+      }
+    },
+    "/clusters/{id}/apps/{install}/export-dump": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The per-database export on the cluster surface (BAR-4907):\nexactly ONE database, slotseed's DumpCommand verbatim, into\nthe org's own bucket over a windowed presigned PUT.\nRead-only \u2014 no confirm dialog; the disclosure rides the\nanswer. Maintainer tier.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "deploykit-apps"
+        ],
+        "summary": "Dump (export) ONE stack-member or engine-install database",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Cluster ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Install name",
+            "name": "install",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "destination_ref; object_key optional (defaults under managed-db-dumps/)",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/handlers.dumpExportRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Dump export enqueued (the answer carries the object key + disclosure)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostClustersIdAppsInstallExport-dump"
+      }
+    },
+    "/clusters/{id}/apps/{install}/export-dump/{job}/download": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The install surface's windowed presigned GET (15 minutes,\none object) for a completed database:dump-export job's\noutcome handle. The job row is org+project+resource scoped\nto the caller and the path's cluster. Maintainer tier.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "deploykit-apps"
+        ],
+        "summary": "Download one completed install dump export",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Cluster ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Install name",
+            "name": "install",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The export job id",
+            "name": "job",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The windowed download URL + the outcome's bytes/sha256/disclosure",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetClustersIdAppsInstallExport-dumpJobDownload"
       }
     },
     "/clusters/{id}/apps/{install}/form": {
@@ -9014,7 +9388,7 @@
             "CookieAuth": []
           }
         ],
-        "description": "Drives the engine's restore verb (story 150.1): the point's\narchive handle is pinned against the verified-backup ledger\n(the digest comes from the ledger row, never the request),\na busy install refuses with the named 409, and the first\nPOST answers the confirm dialog (409) with the point's age\nand verification facts plus the environment's backup policy.\nThe dispatch happens only on the confirmed re-post. Target\nis in_place (default) or parallel (a named sibling install\nwhose record already exists). A stack component refuses \u2014\nthe stack lane governs the component order.",
+        "description": "Drives the engine's restore verb (story 150.1): the point's\narchive handle is pinned against the verified-backup ledger\n(the digest comes from the ledger row, never the request),\na busy install refuses with the named 409, and the first\nPOST answers the confirm dialog (409) with the point's age\nand verification facts plus the environment's backup policy.\nThe dispatch happens only on the confirmed re-post. Target\nis in_place (default), parallel (a named sibling install\nwhose record already exists), or clone (BAR-4912: the\nrestore CREATES a new install \u2014 new_install names it,\ndata is the explicit \"with\"|\"without\" choice, and with\nnames a verified backup_point; the with-data arm refuses\nwhile the data seeder is not active). A stack component\nrefuses \u2014 the stack lane governs the component order.",
         "consumes": [
           "application/json"
         ],
@@ -9095,6 +9469,96 @@
           }
         },
         "operationId": "PostClustersIdAppsInstallRestore"
+      }
+    },
+    "/clusters/{id}/apps/{install}/restore-dump": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The per-database data affordance on the cluster surface\n(BAR-4907): ANY engine install, INCLUDING stack members \u2014\nthe managed-slot fence is deliberately not applied (the\ndump verbs are the database's own data affordance, not a\nlane verb). The stack gate keys ONLY on the binding: a\nstack-bundle member carries the stack_consistency block\n(DUMP_RESTORE_STACK_POLICY warn default, block switchable \u2014\nunder block the confirm POST refuses named); a\nDatabase-row install never carries the block. Same\ntwo-phase dialog + completeness verdict as the standalone\ndoor. Maintainer tier.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "deploykit-apps"
+        ],
+        "summary": "Restore ONE stack-member or engine-install database from a raw dump",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Cluster ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Install name",
+            "name": "install",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "destination_ref, object_key, optional digest; confirm on the re-post",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.dumpRestoreRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Dump restore enqueued",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "The install is neither a managed slot nor a database install",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "The confirm dialog, the stack block refusal, or a status-gate refusal",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostClustersIdAppsInstallRestore-dump"
       }
     },
     "/clusters/{id}/apps/{install}/rollback": {
@@ -30041,6 +30505,7 @@
             "CookieAuth": []
           }
         ],
+        "description": "Creating a database also ENQUEUES its database:deploy job (BAR-3876):\nthe row provisions immediately \u2014 the create is a deploy request.\nThe 201 body is the Database row; the job id is in the server log line.",
         "consumes": [
           "application/json"
         ],
@@ -30075,6 +30540,13 @@
               "type": "object",
               "additionalProperties": true
             }
+          },
+          "409": {
+            "description": "Name collides with an existing app install",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
           }
         },
         "operationId": "PostServicesDatabases"
@@ -30097,7 +30569,7 @@
         "parameters": [
           {
             "type": "string",
-            "description": "Database type (postgresql, mariadb)",
+            "description": "Database type (postgresql, mariadb, mysql)",
             "name": "type",
             "in": "query",
             "required": true
@@ -31434,6 +31906,191 @@
         "operationId": "PostServicesDatabasesIdConnectionReset-password"
       }
     },
+    "/services/databases/{id}/deploy": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Deploy a database (first deploy or re-deploy after error/stop)",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdDeploy"
+      }
+    },
+    "/services/databases/{id}/export-dump": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The per-database data affordance (BAR-4907): dumps exactly\nONE database (slotseed's DumpCommand verbatim) into the\norg's own bucket over a windowed presigned PUT. Read-only\non the database \u2014 no confirm dialog; the answer carries the\ndump-scope disclosure (roles/cron/scheduled events do not\ntravel). The default object key lands under the reserved\nmanaged-db-dumps/ prefix. The download read issues a\nwindowed presigned GET once the job completes. Maintainer\ntier; legacy rows refuse.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Dump (export) ONE managed database out for download",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "destination_ref; object_key optional (defaults under managed-db-dumps/)",
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/handlers.dumpExportRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Dump export enqueued (the answer carries the object key + disclosure)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Foreign destination, or role below maintainer",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "Destination or engine/status gate refusal",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdExport-dump"
+      }
+    },
+    "/services/databases/{id}/export-dump/{job}/download": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Issues a windowed presigned GET (15 minutes, one object)\nfor a completed database:dump-export job's outcome handle.\nThe job row is org+project+resource scoped to the caller\nand the path's database's cluster; the destination\nre-resolves through the vault's tenancy gate. Maintainer\ntier.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Download one completed database dump export",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "The export job id",
+            "name": "job",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The windowed download URL + the outcome's bytes/sha256/disclosure",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "No completed export job with that id",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "The job's outcome carries no export handle",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetServicesDatabasesIdExport-dumpJobDownload"
+      }
+    },
     "/services/databases/{id}/extensions": {
       "get": {
         "security": [
@@ -31782,6 +32439,89 @@
           }
         },
         "operationId": "PostServicesDatabasesIdRestore"
+      }
+    },
+    "/services/databases/{id}/restore-dump": {
+      "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The per-database data affordance (BAR-4907): the first\nPOST (no confirm) answers the 409 confirm dialog with the\nengine + installed major, the dump's server-side size, the\nreset/overwrite warnings (the scope law: only THIS database\nresets; sibling databases on the instance are untouched),\nthe dump-scope disclosure, and \u2014 only for stack-bundle\nmembers \u2014 the stack_consistency warning. The confirmed\nre-post enqueues the database:dump-restore leg (202 + job\nid); the job's outcome carries the per-table completeness\nverdict. Maintainer tier; legacy rows refuse.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "databases"
+        ],
+        "summary": "Restore ONE managed database from a raw dump file",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Database ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "destination_ref, object_key, optional digest; confirm on the re-post",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.dumpRestoreRequest"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Dump restore enqueued",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Foreign destination, or role below maintainer",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "The confirm dialog",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "422": {
+            "description": "Object not visible on the destination, or engine/status gate refusal",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "PostServicesDatabasesIdRestore-dump"
       }
     },
     "/services/databases/{id}/scale-resources": {
@@ -43946,6 +44686,26 @@
         }
       }
     },
+    "handlers.StorageAlertStatus": {
+      "type": "object",
+      "properties": {
+        "active_count": {
+          "type": "integer"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/models.AlertEvent"
+          }
+        },
+        "rule_count": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.StorageVolumesResponse": {
       "type": "object",
       "properties": {
@@ -44757,11 +45517,28 @@
         }
       }
     },
+    "handlers.appsRestoreClonePoint": {
+      "type": "object",
+      "properties": {
+        "destination": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.appsRestoreRequest": {
       "type": "object",
       "properties": {
+        "backup_point": {
+          "$ref": "#/definitions/handlers.appsRestoreClonePoint"
+        },
         "confirm": {
           "description": "Confirm is the user's fresh consent (the dialog's confirm). Empty on\nthe first POST \u2014 the dialog answer.",
+          "type": "string"
+        },
+        "data": {
           "type": "string"
         },
         "destination": {
@@ -44769,6 +45546,10 @@
           "type": "string"
         },
         "key": {
+          "type": "string"
+        },
+        "new_install": {
+          "description": "The clone mode's fields (BAR-4912): NewInstall is the name of the\ninstall to create (required on clone), Data is the explicit\nwith/without choice (required on clone), and BackupPoint is the\nwith-data clone's point handle (absent on without).",
           "type": "string"
         },
         "parallel_install": {
@@ -45661,6 +46442,34 @@
         }
       }
     },
+    "handlers.dumpExportRequest": {
+      "type": "object",
+      "properties": {
+        "destination_ref": {
+          "type": "string"
+        },
+        "object_key": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.dumpRestoreRequest": {
+      "type": "object",
+      "properties": {
+        "confirm": {
+          "type": "string"
+        },
+        "destination_ref": {
+          "type": "string"
+        },
+        "digest": {
+          "type": "string"
+        },
+        "object_key": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.durabilityBadge": {
       "type": "object",
       "properties": {
@@ -45741,6 +46550,10 @@
           "items": {
             "$ref": "#/definitions/handlers.durabilityPoint"
           }
+        },
+        "policy_gen": {
+          "description": "PolicyGen is the store-assigned CAS generation: the write route's\noptional policy_gen answer echoes it back, and a stale answer is\nthe named 409 (BAR-5597 review \u2014 the panel's edit door races\nexactly like any other write door).",
+          "type": "integer"
         },
         "retention_preset": {
           "type": "string"
@@ -46915,6 +47728,12 @@
             "$ref": "#/definitions/handlers.stackMemberPayload"
           }
         },
+        "slot_onboarding": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/handlers.stackSlotOnboardingPayload"
+          }
+        },
         "stack": {
           "type": "string"
         },
@@ -46932,6 +47751,29 @@
         },
         "wiring_delta": {
           "$ref": "#/definitions/handlers.stackWiringDeltaPayload"
+        }
+      }
+    },
+    "handlers.stackSlotOnboardingPayload": {
+      "type": "object",
+      "properties": {
+        "class": {
+          "type": "string"
+        },
+        "database": {
+          "type": "string"
+        },
+        "disclosure": {
+          "type": "string"
+        },
+        "slot": {
+          "type": "string"
+        },
+        "source_member": {
+          "type": "string"
+        },
+        "user": {
+          "type": "string"
         }
       }
     },
@@ -47214,6 +48056,10 @@
         "rule_id": {
           "type": "string"
         },
+        "severity": {
+          "description": "Severity copies the firing rule's severity (AlertSeverity*).",
+          "type": "string"
+        },
         "target_id": {
           "type": "integer"
         },
@@ -47268,6 +48114,14 @@
         },
         "project_id": {
           "type": "integer"
+        },
+        "scope": {
+          "description": "Scope says which resources a storage_volume rule covers (AlertScope*).\nDefaults to resource; other kinds ignore it.",
+          "type": "string"
+        },
+        "severity": {
+          "description": "Severity is warning or critical (AlertSeverity*). It rides every fired\nevent and the notification text. Defaults to warning.",
+          "type": "string"
         },
         "status": {
           "description": "Status is the evaluator-owned rule lifecycle surfaced in CRUD\n(AlertRuleStatus*). CRUD writes only Active; the sweep owns the\ntarget_missing flip (and never flips it back except through rule\nupdate, which re-arms the rule).",
@@ -48017,12 +48871,16 @@
       "enum": [
         "postgresql",
         "mongodb",
-        "mariadb"
+        "mariadb",
+        "mysql",
+        "redis"
       ],
       "x-enum-varnames": [
         "DatabaseTypePostgreSQL",
         "DatabaseTypeMongoDB",
-        "DatabaseTypeMariaDB"
+        "DatabaseTypeMariaDB",
+        "DatabaseTypeMySQL",
+        "DatabaseTypeRedis"
       ]
     },
     "models.DnsMigrationConsent": {
