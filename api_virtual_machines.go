@@ -39,6 +39,22 @@ type VirtualMachinesAPI interface {
 	DeleteVirtualMachinesIdExecute(r ApiDeleteVirtualMachinesIdRequest) (*DeleteVirtualMachinesId200Response, *http.Response, error)
 
 	/*
+	GetAgentReenrollCommand Get the guard-key re-enroll command
+
+	Server-rendered base command for the console's re-enroll-guard panel.
+The token-less curl one-liner for the guard-reenroll install render,
+served on the agent-service public URL the SPA cannot know.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetAgentReenrollCommandRequest
+	*/
+	GetAgentReenrollCommand(ctx context.Context) ApiGetAgentReenrollCommandRequest
+
+	// GetAgentReenrollCommandExecute executes the request
+	//  @return HandlersAgentReenrollCommandResponse
+	GetAgentReenrollCommandExecute(r ApiGetAgentReenrollCommandRequest) (*HandlersAgentReenrollCommandResponse, *http.Response, error)
+
+	/*
 	GetVirtualMachines List my virtual machines
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -373,6 +389,8 @@ Persists the observed k3s_state on definitive evidence.
 	/*
 	PostVirtualMachinesImportManual Get the manual install command for a machine
 
+	Guard key enrolment comes from the console, not this call: install commands rendered with the org vault unlocked carry the guard env, and machines imported without it are enrolled afterwards with the console re-enroll command (Re-enroll guard key on the machine page).
+
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiPostVirtualMachinesImportManualRequest
 	*/
@@ -572,6 +590,145 @@ func (a *VirtualMachinesAPIService) DeleteVirtualMachinesIdExecute(r ApiDeleteVi
 		}
 		if localVarHTTPResponse.StatusCode == 409 {
 			var v DeleteVirtualMachinesId403Response
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetAgentReenrollCommandRequest struct {
+	ctx context.Context
+	ApiService VirtualMachinesAPI
+}
+
+func (r ApiGetAgentReenrollCommandRequest) Execute() (*HandlersAgentReenrollCommandResponse, *http.Response, error) {
+	return r.ApiService.GetAgentReenrollCommandExecute(r)
+}
+
+/*
+GetAgentReenrollCommand Get the guard-key re-enroll command
+
+Server-rendered base command for the console's re-enroll-guard panel.
+The token-less curl one-liner for the guard-reenroll install render,
+served on the agent-service public URL the SPA cannot know.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiGetAgentReenrollCommandRequest
+*/
+func (a *VirtualMachinesAPIService) GetAgentReenrollCommand(ctx context.Context) ApiGetAgentReenrollCommandRequest {
+	return ApiGetAgentReenrollCommandRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersAgentReenrollCommandResponse
+func (a *VirtualMachinesAPIService) GetAgentReenrollCommandExecute(r ApiGetAgentReenrollCommandRequest) (*HandlersAgentReenrollCommandResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersAgentReenrollCommandResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VirtualMachinesAPIService.GetAgentReenrollCommand")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/agent/reenroll-command"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v map[string]string
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {
 				newErr.error = err.Error()
@@ -3933,6 +4090,8 @@ func (r ApiPostVirtualMachinesImportManualRequest) Execute() (*HandlersUnifiedIn
 
 /*
 PostVirtualMachinesImportManual Get the manual install command for a machine
+
+Guard key enrolment comes from the console, not this call: install commands rendered with the org vault unlocked carry the guard env, and machines imported without it are enrolled afterwards with the console re-enroll command (Re-enroll guard key on the machine page).
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostVirtualMachinesImportManualRequest

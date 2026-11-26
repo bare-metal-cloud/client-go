@@ -665,10 +665,18 @@ paths:
   /agent/install.sh:
     get:
       description: Returns a dynamically generated bash script for installing the
-        BMC agent. Without a token query the script prompts for the token at run time;
-        with ?token= the token is validated (not consumed) and baked in.
+        BMC agent. mode=guard-reenroll renders the guard-key re-enrollment for an
+        already-installed machine (no token); without a token query the script prompts
+        for the token at run time; with ?token= the token is validated (not consumed)
+        and baked in.
       operationId: GetAgentInstall.sh
       parameters:
+      - description: guard-reenroll renders the guard-key re-enrollment script for
+          an already-installed machine
+        in: query
+        name: mode
+        schema:
+          type: string
       - description: Agent registration token (short token) — omit for the runtime-prompt
           script
         in: query
@@ -682,6 +690,12 @@ paths:
               schema:
                 type: string
           description: Bash installation script
+        "400":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: "unknown mode, or mode=guard-reenroll combined with a token"
         "401":
           content:
             '*/*':
@@ -822,6 +836,34 @@ paths:
       summary: Get agent installation manifest
       tags:
       - agent
+  /agent/reenroll-command:
+    get:
+      description: |-
+        Server-rendered base command for the console's re-enroll-guard panel.
+        The token-less curl one-liner for the guard-reenroll install render,
+        served on the agent-service public URL the SPA cannot know.
+      operationId: GetAgentReenroll-command
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.AgentReenrollCommandResponse'
+          description: OK
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Service Unavailable
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
+      summary: Get the guard-key re-enroll command
+      tags:
+      - virtual-machines
   /agent/registration-token:
     post:
       description: "Generates a short, human-friendly registration token for agent\
@@ -1522,6 +1564,67 @@ paths:
       summary: List the AI agent's tool catalog
       tags:
       - delegation
+  /alerts:
+    get:
+      description: |-
+        Newest-first fired alerts for the tenant list scope (single
+        project or all), used by the Monitoring overview page. The
+        payload carries the firing list's delivery gap: per channel,
+        the picks whose health reached FAILING and the distinct
+        undelivered-rule count (story 163.7). The gap uses the SAME
+        project filter as the events, so it names exactly the rules
+        the list shows. Empty channels = no gaps = an empty array.
+      operationId: GetAlerts
+      parameters:
+      - description: Organization selector (PAT callers; session callers resolve the
+          org from the session)
+        in: header
+        name: X-Org-ID
+        schema:
+          type: integer
+      - description: "Project selector: a project id or the value all (a PAT caller\
+          \ without it: 428 project_required)"
+        in: header
+        name: X-Project-Id
+        schema:
+          type: string
+      - description: "Filter: active returns only unacknowledged events"
+        in: query
+        name: status
+        schema:
+          type: string
+      - description: "Page size (default 100, max 500)"
+        in: query
+        name: limit
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.accountAlertEventsResponse'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "428":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Precondition Required
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
+      summary: List the account's fired alert events
+      tags:
+      - alerts
   /alerts/bucket:
     get:
       description: "Active-alert count, covering rule count (no rules versus quiet)\
@@ -3290,6 +3393,65 @@ paths:
       tags:
       - multipass_vms
       x-codegen-request-body-name: request
+  /api/v1/organizations/{org_id}/usage-measurement:
+    put:
+      description: Turn the org's S3 usage measurement on or off (ADR-107 D3). Owner-tier
+        and sudo-gated. The default is on.
+      operationId: PutApiV1OrganizationsOrg_idUsage-measurement
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/handlers.updateUsageMeasurementRequest'
+        description: Toggle value
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+      summary: Set the organization's usage-measurement toggle
+      tags:
+      - Organizations
+      x-codegen-request-body-name: body
   /api/v1/orgs/{org_id}/elevation-approvers:
     get:
       operationId: GetApiV1OrgsOrg_idElevation-approvers
@@ -9135,6 +9297,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Update the cluster's backup plan
       tags:
       - clusters
@@ -9195,6 +9358,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List the cluster backup plan's runs
       tags:
       - clusters
@@ -9347,6 +9511,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Get the cluster backup plan's status
       tags:
       - clusters
@@ -15161,6 +15326,7 @@ paths:
           description: Alert not found in this organization
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Acknowledge an org alert event
       tags:
       - alerts
@@ -15221,6 +15387,7 @@ paths:
           description: Alert not found in this organization
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Resolve an org alert event
       tags:
       - alerts
@@ -21200,6 +21367,56 @@ paths:
       tags:
       - builds
       x-codegen-request-body-name: body
+  /orgs/{org_id}/storage/overview:
+    get:
+      description: |-
+        One org-scoped aggregate over the measured storage data: bucket bytes, volume used and provisioned bytes.
+        Volumes projected full within 14 days, and unresolved storage alert events (volume and bucket kinds).
+        Byte fields are null when nothing was measured, never 0; the *_measured counts name the sets the byte sums cover.
+      operationId: GetOrgsOrg_idStorageOverview
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.StorageOverviewResponse'
+          description: the overview strip
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: Get the org's storage overview
+      tags:
+      - storage
   /orgs/{org_id}/storage/volumes:
     get:
       description: |-
@@ -26578,6 +26795,92 @@ paths:
       summary: List the Postgres extensions installed on a database
       tags:
       - databases
+  /services/databases/{id}/import-dump:
+    post:
+      description: |-
+        The customer-supplied dump import (BAR-5730): the first
+        POST (no confirm) answers the 409 confirm dialog — the
+        engine + installed major, the scope-law reset warning, the
+        dump-scope disclosure — plus an `upload` handle: a windowed
+        presigned PUT (60 minutes, one object) over a key under the
+        reserved managed-db-dumps/imports/ prefix. The customer's
+        bytes go browser→bucket directly (they never transit the
+        control plane); the PUT must send no Content-Type. The
+        confirmed re-post (with the handle's object_key) refuses
+        named while the uploaded dump is not visible on the
+        destination, then enqueues the database:dump-restore leg —
+        the job's outcome carries the per-table completeness
+        verdict and the optional digest is verified in-pod before
+        anything touches the database. The dialog's object_size is
+        0 by law (the server has not seen the dump yet); the
+        console renders the picked file's own size. Maintainer
+        tier; legacy rows refuse.
+      operationId: PostServicesDatabasesIdImport-dump
+      parameters:
+      - description: Database ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/handlers.dumpRestoreRequest'
+        description: destination_ref; object_key (the handle's key) and optional digest
+          on the confirm
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Dump import enqueued
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: "Foreign destination, or role below maintainer"
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The confirm dialog + the upload handle
+        "422":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: "The uploaded dump is not visible, or an engine/status gate\
+            \ refusal"
+      security:
+      - CookieAuth: []
+      summary: Import a customer dump file into ONE managed database
+      tags:
+      - databases
+      x-codegen-request-body-name: body
   /services/databases/{id}/query:
     post:
       description: |-
@@ -27814,6 +28117,10 @@ paths:
       x-codegen-request-body-name: request
   /virtual-machines/import/manual:
     post:
+      description: "Guard key enrolment comes from the console, not this call: install\
+        \ commands rendered with the org vault unlocked carry the guard env, and machines\
+        \ imported without it are enrolled afterwards with the console re-enroll command\
+        \ (Re-enroll guard key on the machine page)."
       operationId: PostVirtual-machinesImportManual
       requestBody:
         content:
@@ -30394,6 +30701,22 @@ components:
           type: string
         version:
           type: string
+      type: object
+    alertpicks.Gap:
+      example:
+        undelivered_rules: 6
+        channel_kind: channel_kind
+        message: message
+        channel_id: 0
+      properties:
+        channel_id:
+          type: integer
+        channel_kind:
+          type: string
+        message:
+          type: string
+        undelivered_rules:
+          type: integer
       type: object
     blueprintdrift.DegradedReason:
       enum:
@@ -33852,6 +34175,13 @@ components:
       required:
       - role
       - vm_ids
+      type: object
+    handlers.AgentReenrollCommandResponse:
+      example:
+        command: command
+      properties:
+        command:
+          type: string
       type: object
     handlers.AgentToolCatalogResponse:
       example:
@@ -39213,44 +39543,44 @@ components:
           acknowledged: true
           target_name: target_name
           created_at: created_at
-          target_id: 9
+          target_id: 3
           message: message
           rule_id: rule_id
-          resolved_by: 7
-          vm_id: 2
+          resolved_by: 9
+          vm_id: 4
           breached_at: breached_at
-          observed_value: 5.962133916683182
+          observed_value: 5.637376656633329
           metric: metric
-          project_id: 2
-          org_id: 5
+          project_id: 7
+          org_id: 2
           resolved_at: resolved_at
-          threshold_value: 3.616076749251911
+          threshold_value: 2.027123023002322
           target_kind: target_kind
-          acknowledged_by: 6
-          id: 1
+          acknowledged_by: 1
+          id: 5
           acknowledged_at: acknowledged_at
         - severity: severity
           dedup_key: dedup_key
           acknowledged: true
           target_name: target_name
           created_at: created_at
-          target_id: 9
+          target_id: 3
           message: message
           rule_id: rule_id
-          resolved_by: 7
-          vm_id: 2
+          resolved_by: 9
+          vm_id: 4
           breached_at: breached_at
-          observed_value: 5.962133916683182
+          observed_value: 5.637376656633329
           metric: metric
-          project_id: 2
-          org_id: 5
+          project_id: 7
+          org_id: 2
           resolved_at: resolved_at
-          threshold_value: 3.616076749251911
+          threshold_value: 2.027123023002322
           target_kind: target_kind
-          acknowledged_by: 6
-          id: 1
+          acknowledged_by: 1
+          id: 5
           acknowledged_at: acknowledged_at
-        rule_count: 4
+        rule_count: 6
       properties:
         active_count:
           type: integer
@@ -39262,6 +39592,48 @@ components:
           type: integer
         state:
           type: string
+      type: object
+    handlers.StorageOverviewResponse:
+      example:
+        volume_provisioned_bytes: 5
+        buckets_measured: 1
+        volumes_measured: 7
+        active_storage_alerts: 0
+        volume_used_bytes: 5
+        volumes_full_within_14d: 2
+        bucket_bytes: 6
+      properties:
+        active_storage_alerts:
+          description: |-
+            ActiveStorageAlerts counts the org's unresolved storage_volume and
+            storage_bucket alert events — the same active predicate both
+            per-resource status reads use.
+          type: integer
+        bucket_bytes:
+          description: |-
+            BucketBytes sums every bucket's latest snapshot across the org's S3
+            connections. Null until a bucket snapshot carries bytes (LB-1 not
+            landed), and never counting a partial snapshot (a lower bound).
+          type: integer
+        buckets_measured:
+          type: integer
+        volume_provisioned_bytes:
+          type: integer
+        volume_used_bytes:
+          description: |-
+            VolumeUsedBytes and VolumeProvisionedBytes sum the org's latest volume
+            readings over one reading set: the volumes that reported BOTH figures.
+            Null when no volume did. VolumesMeasured counts exactly that set, so
+            the count and the two sums always name the same volumes.
+          type: integer
+        volumes_full_within_14d:
+          description: |-
+            VolumesFullWithin14d counts volumes whose fill projection lands within
+            14 days. A volume with no real projection (not enough history, no
+            growth, no capacity) is never counted.
+          type: integer
+        volumes_measured:
+          type: integer
       type: object
     handlers.StorageVolumesResponse:
       example:
@@ -39918,6 +40290,70 @@ components:
           type: array
         valid:
           type: boolean
+      type: object
+    handlers.accountAlertEventsResponse:
+      example:
+        delivery_gaps:
+        - undelivered_rules: 6
+          channel_kind: channel_kind
+          message: message
+          channel_id: 0
+        - undelivered_rules: 6
+          channel_kind: channel_kind
+          message: message
+          channel_id: 0
+        events:
+        - severity: severity
+          dedup_key: dedup_key
+          acknowledged: true
+          target_name: target_name
+          created_at: created_at
+          target_id: 3
+          message: message
+          rule_id: rule_id
+          resolved_by: 9
+          vm_id: 4
+          breached_at: breached_at
+          observed_value: 5.637376656633329
+          metric: metric
+          project_id: 7
+          org_id: 2
+          resolved_at: resolved_at
+          threshold_value: 2.027123023002322
+          target_kind: target_kind
+          acknowledged_by: 1
+          id: 5
+          acknowledged_at: acknowledged_at
+        - severity: severity
+          dedup_key: dedup_key
+          acknowledged: true
+          target_name: target_name
+          created_at: created_at
+          target_id: 3
+          message: message
+          rule_id: rule_id
+          resolved_by: 9
+          vm_id: 4
+          breached_at: breached_at
+          observed_value: 5.637376656633329
+          metric: metric
+          project_id: 7
+          org_id: 2
+          resolved_at: resolved_at
+          threshold_value: 2.027123023002322
+          target_kind: target_kind
+          acknowledged_by: 1
+          id: 5
+          acknowledged_at: acknowledged_at
+      properties:
+        delivery_gaps:
+          items:
+            $ref: '#/components/schemas/alertpicks.Gap'
+          type: array
+        events:
+          items:
+            $ref: '#/components/schemas/models.AlertEvent'
+          type: array
       type: object
     handlers.activeGrantItem:
       example:
@@ -42710,6 +43146,11 @@ components:
         s3_connection_id:
           type: integer
       type: object
+    handlers.updateUsageMeasurementRequest:
+      properties:
+        usage_measurement:
+          type: boolean
+      type: object
     handlers.upgradeParkView:
       example:
         verdicts:
@@ -42889,21 +43330,21 @@ components:
         acknowledged: true
         target_name: target_name
         created_at: created_at
-        target_id: 9
+        target_id: 3
         message: message
         rule_id: rule_id
-        resolved_by: 7
-        vm_id: 2
+        resolved_by: 9
+        vm_id: 4
         breached_at: breached_at
-        observed_value: 5.962133916683182
+        observed_value: 5.637376656633329
         metric: metric
-        project_id: 2
-        org_id: 5
+        project_id: 7
+        org_id: 2
         resolved_at: resolved_at
-        threshold_value: 3.616076749251911
+        threshold_value: 2.027123023002322
         target_kind: target_kind
-        acknowledged_by: 6
-        id: 1
+        acknowledged_by: 1
+        id: 5
         acknowledged_at: acknowledged_at
       properties:
         acknowledged:

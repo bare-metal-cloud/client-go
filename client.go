@@ -142,6 +142,8 @@ type APIClient struct {
 
 	OrgS3ConnectionsAPI OrgS3ConnectionsAPI
 
+	OrganizationsAPI OrganizationsAPI
+
 	PersonGrantsAPI PersonGrantsAPI
 
 	PodsAPI PodsAPI
@@ -275,6 +277,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.NotificationChannelsAPI = (*NotificationChannelsAPIService)(&c.common)
 	c.NotificationDigestSettingsAPI = (*NotificationDigestSettingsAPIService)(&c.common)
 	c.OrgS3ConnectionsAPI = (*OrgS3ConnectionsAPIService)(&c.common)
+	c.OrganizationsAPI = (*OrganizationsAPIService)(&c.common)
 	c.PersonGrantsAPI = (*PersonGrantsAPIService)(&c.common)
 	c.PodsAPI = (*PodsAPIService)(&c.common)
 	c.RegistrationTokensAPI = (*RegistrationTokensAPIService)(&c.common)

@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost:3001/api/v1*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteVirtualMachinesId**](VirtualMachinesAPI.md#DeleteVirtualMachinesId) | **Delete** /virtual-machines/{id} | Delete a VM
+[**GetAgentReenrollCommand**](VirtualMachinesAPI.md#GetAgentReenrollCommand) | **Get** /agent/reenroll-command | Get the guard-key re-enroll command
 [**GetVirtualMachines**](VirtualMachinesAPI.md#GetVirtualMachines) | **Get** /virtual-machines | List my virtual machines
 [**GetVirtualMachinesId**](VirtualMachinesAPI.md#GetVirtualMachinesId) | **Get** /virtual-machines/{id} | Get one virtual machine
 [**GetVirtualMachinesIdAddressChangeImpact**](VirtualMachinesAPI.md#GetVirtualMachinesIdAddressChangeImpact) | **Get** /virtual-machines/{id}/address-change-impact | Preflight the machine&#39;s detected public-address change
@@ -101,6 +102,67 @@ No authorization required
 
 - **Content-Type**: Not defined
 - **Accept**: */*
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetAgentReenrollCommand
+
+> HandlersAgentReenrollCommandResponse GetAgentReenrollCommand(ctx).Execute()
+
+Get the guard-key re-enroll command
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.VirtualMachinesAPI.GetAgentReenrollCommand(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `VirtualMachinesAPI.GetAgentReenrollCommand``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetAgentReenrollCommand`: HandlersAgentReenrollCommandResponse
+	fmt.Fprintf(os.Stdout, "Response from `VirtualMachinesAPI.GetAgentReenrollCommand`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetAgentReenrollCommandRequest struct via the builder pattern
+
+
+### Return type
+
+[**HandlersAgentReenrollCommandResponse**](HandlersAgentReenrollCommandResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -1488,6 +1550,8 @@ Name | Type | Description  | Notes
 > HandlersUnifiedInstallCommandResponse PostVirtualMachinesImportManual(ctx).Request(request).Execute()
 
 Get the manual install command for a machine
+
+
 
 ### Example
 

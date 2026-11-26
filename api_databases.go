@@ -507,6 +507,37 @@ tier; legacy rows refuse.
 	PostServicesDatabasesIdExportDumpExecute(r ApiPostServicesDatabasesIdExportDumpRequest) (map[string]interface{}, *http.Response, error)
 
 	/*
+	PostServicesDatabasesIdImportDump Import a customer dump file into ONE managed database
+
+	The customer-supplied dump import (BAR-5730): the first
+POST (no confirm) answers the 409 confirm dialog — the
+engine + installed major, the scope-law reset warning, the
+dump-scope disclosure — plus an `upload` handle: a windowed
+presigned PUT (60 minutes, one object) over a key under the
+reserved managed-db-dumps/imports/ prefix. The customer's
+bytes go browser→bucket directly (they never transit the
+control plane); the PUT must send no Content-Type. The
+confirmed re-post (with the handle's object_key) refuses
+named while the uploaded dump is not visible on the
+destination, then enqueues the database:dump-restore leg —
+the job's outcome carries the per-table completeness
+verdict and the optional digest is verified in-pod before
+anything touches the database. The dialog's object_size is
+0 by law (the server has not seen the dump yet); the
+console renders the picked file's own size. Maintainer
+tier; legacy rows refuse.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Database ID
+	@return ApiPostServicesDatabasesIdImportDumpRequest
+	*/
+	PostServicesDatabasesIdImportDump(ctx context.Context, id string) ApiPostServicesDatabasesIdImportDumpRequest
+
+	// PostServicesDatabasesIdImportDumpExecute executes the request
+	//  @return map[string]interface{}
+	PostServicesDatabasesIdImportDumpExecute(r ApiPostServicesDatabasesIdImportDumpRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
 	PostServicesDatabasesIdQuery Run one read-only query on a database
 
 	Runs one customer SELECT against the database through the read-only
@@ -5316,6 +5347,205 @@ func (a *DatabasesAPIService) PostServicesDatabasesIdExportDumpExecute(r ApiPost
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 422 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostServicesDatabasesIdImportDumpRequest struct {
+	ctx context.Context
+	ApiService DatabasesAPI
+	id string
+	body *HandlersDumpRestoreRequest
+}
+
+// destination_ref; object_key (the handle&#39;s key) and optional digest on the confirm
+func (r ApiPostServicesDatabasesIdImportDumpRequest) Body(body HandlersDumpRestoreRequest) ApiPostServicesDatabasesIdImportDumpRequest {
+	r.body = &body
+	return r
+}
+
+func (r ApiPostServicesDatabasesIdImportDumpRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.PostServicesDatabasesIdImportDumpExecute(r)
+}
+
+/*
+PostServicesDatabasesIdImportDump Import a customer dump file into ONE managed database
+
+The customer-supplied dump import (BAR-5730): the first
+POST (no confirm) answers the 409 confirm dialog — the
+engine + installed major, the scope-law reset warning, the
+dump-scope disclosure — plus an `upload` handle: a windowed
+presigned PUT (60 minutes, one object) over a key under the
+reserved managed-db-dumps/imports/ prefix. The customer's
+bytes go browser→bucket directly (they never transit the
+control plane); the PUT must send no Content-Type. The
+confirmed re-post (with the handle's object_key) refuses
+named while the uploaded dump is not visible on the
+destination, then enqueues the database:dump-restore leg —
+the job's outcome carries the per-table completeness
+verdict and the optional digest is verified in-pod before
+anything touches the database. The dialog's object_size is
+0 by law (the server has not seen the dump yet); the
+console renders the picked file's own size. Maintainer
+tier; legacy rows refuse.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Database ID
+ @return ApiPostServicesDatabasesIdImportDumpRequest
+*/
+func (a *DatabasesAPIService) PostServicesDatabasesIdImportDump(ctx context.Context, id string) ApiPostServicesDatabasesIdImportDumpRequest {
+	return ApiPostServicesDatabasesIdImportDumpRequest{
+		ApiService: a,
+		ctx: ctx,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *DatabasesAPIService) PostServicesDatabasesIdImportDumpExecute(r ApiPostServicesDatabasesIdImportDumpRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DatabasesAPIService.PostServicesDatabasesIdImportDump")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/services/databases/{id}/import-dump"
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.body == nil {
+		return localVarReturnValue, nil, reportError("body is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.body
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 409 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

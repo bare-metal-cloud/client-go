@@ -33,6 +33,7 @@ Method | HTTP request | Description
 [**PostServicesDatabasesIdConnectionResetPassword**](DatabasesAPI.md#PostServicesDatabasesIdConnectionResetPassword) | **Post** /services/databases/{id}/connection/reset-password | Reset database password
 [**PostServicesDatabasesIdDeploy**](DatabasesAPI.md#PostServicesDatabasesIdDeploy) | **Post** /services/databases/{id}/deploy | Deploy a database (first deploy or re-deploy after error/stop)
 [**PostServicesDatabasesIdExportDump**](DatabasesAPI.md#PostServicesDatabasesIdExportDump) | **Post** /services/databases/{id}/export-dump | Dump (export) ONE managed database out for download
+[**PostServicesDatabasesIdImportDump**](DatabasesAPI.md#PostServicesDatabasesIdImportDump) | **Post** /services/databases/{id}/import-dump | Import a customer dump file into ONE managed database
 [**PostServicesDatabasesIdQuery**](DatabasesAPI.md#PostServicesDatabasesIdQuery) | **Post** /services/databases/{id}/query | Run one read-only query on a database
 [**PostServicesDatabasesIdRecoverLane**](DatabasesAPI.md#PostServicesDatabasesIdRecoverLane) | **Post** /services/databases/{id}/recover-lane | Recover a stranded backup lane (admin)
 [**PostServicesDatabasesIdRestart**](DatabasesAPI.md#PostServicesDatabasesIdRestart) | **Post** /services/databases/{id}/restart | Restart a database (graceful rolling restart)
@@ -2059,6 +2060,78 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **body** | [**HandlersDumpExportRequest**](HandlersDumpExportRequest.md) | destination_ref; object_key optional (defaults under managed-db-dumps/) | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## PostServicesDatabasesIdImportDump
+
+> map[string]interface{} PostServicesDatabasesIdImportDump(ctx, id).Body(body).Execute()
+
+Import a customer dump file into ONE managed database
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Database ID
+	body := *openapiclient.NewHandlersDumpRestoreRequest() // HandlersDumpRestoreRequest | destination_ref; object_key (the handle's key) and optional digest on the confirm
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.DatabasesAPI.PostServicesDatabasesIdImportDump(context.Background(), id).Body(body).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `DatabasesAPI.PostServicesDatabasesIdImportDump``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `PostServicesDatabasesIdImportDump`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `DatabasesAPI.PostServicesDatabasesIdImportDump`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Database ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiPostServicesDatabasesIdImportDumpRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **body** | [**HandlersDumpRestoreRequest**](HandlersDumpRestoreRequest.md) | destination_ref; object_key (the handle&#39;s key) and optional digest on the confirm | 
 
 ### Return type
 

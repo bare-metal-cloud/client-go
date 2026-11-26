@@ -24,6 +24,23 @@ import (
 type StorageAPI interface {
 
 	/*
+	GetOrgsOrgIdStorageOverview Get the org's storage overview
+
+	One org-scoped aggregate over the measured storage data: bucket bytes, volume used and provisioned bytes.
+Volumes projected full within 14 days, and unresolved storage alert events (volume and bucket kinds).
+Byte fields are null when nothing was measured, never 0; the *_measured counts name the sets the byte sums cover.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Organization ID
+	@return ApiGetOrgsOrgIdStorageOverviewRequest
+	*/
+	GetOrgsOrgIdStorageOverview(ctx context.Context, orgId int32) ApiGetOrgsOrgIdStorageOverviewRequest
+
+	// GetOrgsOrgIdStorageOverviewExecute executes the request
+	//  @return HandlersStorageOverviewResponse
+	GetOrgsOrgIdStorageOverviewExecute(r ApiGetOrgsOrgIdStorageOverviewRequest) (*HandlersStorageOverviewResponse, *http.Response, error)
+
+	/*
 	GetOrgsOrgIdStorageVolumes List PVC usage for an organization
 
 	Latest kubelet-measured used and capacity bytes per PVC across the org's clusters. used_bytes and capacity_bytes are null when unmeasured, never 0. sampled_at is the freshness stamp.
@@ -44,6 +61,157 @@ Otherwise the status names the honest reason: not_enough_history, no_growth, or 
 
 // StorageAPIService StorageAPI service
 type StorageAPIService service
+
+type ApiGetOrgsOrgIdStorageOverviewRequest struct {
+	ctx context.Context
+	ApiService StorageAPI
+	orgId int32
+}
+
+func (r ApiGetOrgsOrgIdStorageOverviewRequest) Execute() (*HandlersStorageOverviewResponse, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdStorageOverviewExecute(r)
+}
+
+/*
+GetOrgsOrgIdStorageOverview Get the org's storage overview
+
+One org-scoped aggregate over the measured storage data: bucket bytes, volume used and provisioned bytes.
+Volumes projected full within 14 days, and unresolved storage alert events (volume and bucket kinds).
+Byte fields are null when nothing was measured, never 0; the *_measured counts name the sets the byte sums cover.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Organization ID
+ @return ApiGetOrgsOrgIdStorageOverviewRequest
+*/
+func (a *StorageAPIService) GetOrgsOrgIdStorageOverview(ctx context.Context, orgId int32) ApiGetOrgsOrgIdStorageOverviewRequest {
+	return ApiGetOrgsOrgIdStorageOverviewRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+	}
+}
+
+// Execute executes the request
+//  @return HandlersStorageOverviewResponse
+func (a *StorageAPIService) GetOrgsOrgIdStorageOverviewExecute(r ApiGetOrgsOrgIdStorageOverviewRequest) (*HandlersStorageOverviewResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *HandlersStorageOverviewResponse
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "StorageAPIService.GetOrgsOrgIdStorageOverview")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/storage/overview"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v map[string]string
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiGetOrgsOrgIdStorageVolumesRequest struct {
 	ctx context.Context

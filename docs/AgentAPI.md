@@ -11,7 +11,7 @@ Method | HTTP request | Description
 
 ## GetAgentInstallSh
 
-> string GetAgentInstallSh(ctx).Token(token).Execute()
+> string GetAgentInstallSh(ctx).Mode(mode).Token(token).Execute()
 
 Get agent installation script
 
@@ -30,11 +30,12 @@ import (
 )
 
 func main() {
+	mode := "mode_example" // string | guard-reenroll renders the guard-key re-enrollment script for an already-installed machine (optional)
 	token := "token_example" // string | Agent registration token (short token) — omit for the runtime-prompt script (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.AgentAPI.GetAgentInstallSh(context.Background()).Token(token).Execute()
+	resp, r, err := apiClient.AgentAPI.GetAgentInstallSh(context.Background()).Mode(mode).Token(token).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AgentAPI.GetAgentInstallSh``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -55,6 +56,7 @@ Other parameters are passed through a pointer to a apiGetAgentInstallShRequest s
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **mode** | **string** | guard-reenroll renders the guard-key re-enrollment script for an already-installed machine | 
  **token** | **string** | Agent registration token (short token) — omit for the runtime-prompt script | 
 
 ### Return type
