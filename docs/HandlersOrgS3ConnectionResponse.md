@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **HasVaultCredentials** | Pointer to **bool** | HasVaultCredentials tells the FE whether a \&quot;rotate\&quot; affordance applies (104.4). It does NOT leak the secret. | [optional] 
 **Id** | Pointer to **int32** |  | [optional] 
 **LastUsedAt** | Pointer to **map[string]interface{}** |  | [optional] 
+**LastVerifiedAt** | Pointer to **string** | LastVerifiedAt is RFC3339 (UTC) or \&quot;\&quot; when the connection has never passed a check (BAR-5678). Populated by the LIST path from one bulk read of the verification ledger; the create/update/rotate responses carry \&quot;\&quot; (the zero value) — the same law as the project scope. | [optional] 
 **LinkedCredentialId** | Pointer to **int32** | LinkedCredentialID is set on link-mode rows of every provider (issue #3874; azblob since #3576): the connection authenticates through that org cloud credential and stores no vault credentials of its own, so a key rotation does not apply to it. | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **Provider** | Pointer to **string** |  | [optional] 
@@ -262,6 +263,31 @@ SetLastUsedAt sets LastUsedAt field to given value.
 `func (o *HandlersOrgS3ConnectionResponse) HasLastUsedAt() bool`
 
 HasLastUsedAt returns a boolean if a field has been set.
+
+### GetLastVerifiedAt
+
+`func (o *HandlersOrgS3ConnectionResponse) GetLastVerifiedAt() string`
+
+GetLastVerifiedAt returns the LastVerifiedAt field if non-nil, zero value otherwise.
+
+### GetLastVerifiedAtOk
+
+`func (o *HandlersOrgS3ConnectionResponse) GetLastVerifiedAtOk() (*string, bool)`
+
+GetLastVerifiedAtOk returns a tuple with the LastVerifiedAt field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastVerifiedAt
+
+`func (o *HandlersOrgS3ConnectionResponse) SetLastVerifiedAt(v string)`
+
+SetLastVerifiedAt sets LastVerifiedAt field to given value.
+
+### HasLastVerifiedAt
+
+`func (o *HandlersOrgS3ConnectionResponse) HasLastVerifiedAt() bool`
+
+HasLastVerifiedAt returns a boolean if a field has been set.
 
 ### GetLinkedCredentialId
 

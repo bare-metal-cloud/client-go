@@ -32,6 +32,8 @@ type HandlersOrgS3ConnectionResponse struct {
 	HasVaultCredentials *bool `json:"has_vault_credentials,omitempty"`
 	Id *int32 `json:"id,omitempty"`
 	LastUsedAt map[string]interface{} `json:"last_used_at,omitempty"`
+	// LastVerifiedAt is RFC3339 (UTC) or \"\" when the connection has never passed a check (BAR-5678). Populated by the LIST path from one bulk read of the verification ledger; the create/update/rotate responses carry \"\" (the zero value) — the same law as the project scope.
+	LastVerifiedAt *string `json:"last_verified_at,omitempty"`
 	// LinkedCredentialID is set on link-mode rows of every provider (issue #3874; azblob since #3576): the connection authenticates through that org cloud credential and stores no vault credentials of its own, so a key rotation does not apply to it.
 	LinkedCredentialId *int32 `json:"linked_credential_id,omitempty"`
 	Name *string `json:"name,omitempty"`
@@ -346,6 +348,38 @@ func (o *HandlersOrgS3ConnectionResponse) SetLastUsedAt(v map[string]interface{}
 	o.LastUsedAt = v
 }
 
+// GetLastVerifiedAt returns the LastVerifiedAt field value if set, zero value otherwise.
+func (o *HandlersOrgS3ConnectionResponse) GetLastVerifiedAt() string {
+	if o == nil || IsNil(o.LastVerifiedAt) {
+		var ret string
+		return ret
+	}
+	return *o.LastVerifiedAt
+}
+
+// GetLastVerifiedAtOk returns a tuple with the LastVerifiedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *HandlersOrgS3ConnectionResponse) GetLastVerifiedAtOk() (*string, bool) {
+	if o == nil || IsNil(o.LastVerifiedAt) {
+		return nil, false
+	}
+	return o.LastVerifiedAt, true
+}
+
+// HasLastVerifiedAt returns a boolean if a field has been set.
+func (o *HandlersOrgS3ConnectionResponse) HasLastVerifiedAt() bool {
+	if o != nil && !IsNil(o.LastVerifiedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastVerifiedAt gets a reference to the given string and assigns it to the LastVerifiedAt field.
+func (o *HandlersOrgS3ConnectionResponse) SetLastVerifiedAt(v string) {
+	o.LastVerifiedAt = &v
+}
+
 // GetLinkedCredentialId returns the LinkedCredentialId field value if set, zero value otherwise.
 func (o *HandlersOrgS3ConnectionResponse) GetLinkedCredentialId() int32 {
 	if o == nil || IsNil(o.LinkedCredentialId) {
@@ -542,6 +576,9 @@ func (o HandlersOrgS3ConnectionResponse) ToMap() (map[string]interface{}, error)
 	}
 	if !IsNil(o.LastUsedAt) {
 		toSerialize["last_used_at"] = o.LastUsedAt
+	}
+	if !IsNil(o.LastVerifiedAt) {
+		toSerialize["last_verified_at"] = o.LastVerifiedAt
 	}
 	if !IsNil(o.LinkedCredentialId) {
 		toSerialize["linked_credential_id"] = o.LinkedCredentialId

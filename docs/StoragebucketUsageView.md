@@ -5,8 +5,10 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Bucket** | Pointer to **string** |  | [optional] 
+**CapacityBytes** | Pointer to **int32** |  | [optional] 
 **Latest** | Pointer to [**StoragebucketLatestView**](StoragebucketLatestView.md) |  | [optional] 
 **Projection** | Pointer to [**StoragebucketProjectionView**](StoragebucketProjectionView.md) |  | [optional] 
+**Trend** | Pointer to [**[]StoragebucketPoint**](StoragebucketPoint.md) |  | [optional] 
 
 ## Methods
 
@@ -51,6 +53,31 @@ SetBucket sets Bucket field to given value.
 `func (o *StoragebucketUsageView) HasBucket() bool`
 
 HasBucket returns a boolean if a field has been set.
+
+### GetCapacityBytes
+
+`func (o *StoragebucketUsageView) GetCapacityBytes() int32`
+
+GetCapacityBytes returns the CapacityBytes field if non-nil, zero value otherwise.
+
+### GetCapacityBytesOk
+
+`func (o *StoragebucketUsageView) GetCapacityBytesOk() (*int32, bool)`
+
+GetCapacityBytesOk returns a tuple with the CapacityBytes field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetCapacityBytes
+
+`func (o *StoragebucketUsageView) SetCapacityBytes(v int32)`
+
+SetCapacityBytes sets CapacityBytes field to given value.
+
+### HasCapacityBytes
+
+`func (o *StoragebucketUsageView) HasCapacityBytes() bool`
+
+HasCapacityBytes returns a boolean if a field has been set.
 
 ### GetLatest
 
@@ -101,6 +128,31 @@ SetProjection sets Projection field to given value.
 `func (o *StoragebucketUsageView) HasProjection() bool`
 
 HasProjection returns a boolean if a field has been set.
+
+### GetTrend
+
+`func (o *StoragebucketUsageView) GetTrend() []StoragebucketPoint`
+
+GetTrend returns the Trend field if non-nil, zero value otherwise.
+
+### GetTrendOk
+
+`func (o *StoragebucketUsageView) GetTrendOk() (*[]StoragebucketPoint, bool)`
+
+GetTrendOk returns a tuple with the Trend field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTrend
+
+`func (o *StoragebucketUsageView) SetTrend(v []StoragebucketPoint)`
+
+SetTrend sets Trend field to given value.
+
+### HasTrend
+
+`func (o *StoragebucketUsageView) HasTrend() bool`
+
+HasTrend returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

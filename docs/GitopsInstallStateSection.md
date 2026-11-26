@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **RegistrationRotate** | Pointer to **bool** | RegistrationRotate is the render hint for the registration-token rotate verb (issue #2501, additive and omitempty): set true ONLY on the enabled-registration path. It derives from the registration row&#39;s existence and state — NEVER from an active token existing (the dead-credential install is exactly the install that must show the verb). A render hint only; the verb&#39;s own guards remain the authority. | [optional] 
 **Repo** | Pointer to **string** |  | [optional] 
 **State** | Pointer to **string** |  | [optional] 
+**TriggerId** | Pointer to **int32** | TriggerID is the binding id (BAR-5749 row 1, additive + omitempty): the git_build_triggers row bound to this install&#39;s repo, so the manual deploy affordance addresses the binding directly (the deploy route&#39;s trigger_id half). Org-scoped through the connection join (the binding&#39;s tenancy law); absent when the repo has no binding — the deploy control stays hidden. | [optional] 
 **WorkflowPath** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -232,6 +233,31 @@ SetState sets State field to given value.
 `func (o *GitopsInstallStateSection) HasState() bool`
 
 HasState returns a boolean if a field has been set.
+
+### GetTriggerId
+
+`func (o *GitopsInstallStateSection) GetTriggerId() int32`
+
+GetTriggerId returns the TriggerId field if non-nil, zero value otherwise.
+
+### GetTriggerIdOk
+
+`func (o *GitopsInstallStateSection) GetTriggerIdOk() (*int32, bool)`
+
+GetTriggerIdOk returns a tuple with the TriggerId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTriggerId
+
+`func (o *GitopsInstallStateSection) SetTriggerId(v int32)`
+
+SetTriggerId sets TriggerId field to given value.
+
+### HasTriggerId
+
+`func (o *GitopsInstallStateSection) HasTriggerId() bool`
+
+HasTriggerId returns a boolean if a field has been set.
 
 ### GetWorkflowPath
 

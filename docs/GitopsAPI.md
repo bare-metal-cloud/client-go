@@ -12,6 +12,7 @@ Method | HTTP request | Description
 [**GetOrgsOrgIdGitopsConnections**](GitopsAPI.md#GetOrgsOrgIdGitopsConnections) | **Get** /orgs/{org_id}/gitops/connections | List the org&#39;s git connections
 [**GetOrgsOrgIdGitopsConnectionsIdBranches**](GitopsAPI.md#GetOrgsOrgIdGitopsConnectionsIdBranches) | **Get** /orgs/{org_id}/gitops/connections/{id}/branches | List branches of a repository on a git connection
 [**GetOrgsOrgIdGitopsConnectionsIdRepos**](GitopsAPI.md#GetOrgsOrgIdGitopsConnectionsIdRepos) | **Get** /orgs/{org_id}/gitops/connections/{id}/repos | List repositories on a git connection
+[**GetOrgsOrgIdGitopsVerifyingMachines**](GitopsAPI.md#GetOrgsOrgIdGitopsVerifyingMachines) | **Get** /orgs/{org_id}/gitops/verifying-machines | List the org&#39;s verifying machines (public delivery keys)
 [**PostClustersIdAppsInstallGitopsEnable**](GitopsAPI.md#PostClustersIdAppsInstallGitopsEnable) | **Post** /clusters/{id}/apps/{install}/gitops/enable | Enable CI deploys for an app install
 [**PostClustersIdAppsInstallGitopsRegistration**](GitopsAPI.md#PostClustersIdAppsInstallGitopsRegistration) | **Post** /clusters/{id}/apps/{install}/gitops/registration | Create the deploy setup for a repository
 [**PostClustersIdAppsInstallGitopsRegistrationRotate**](GitopsAPI.md#PostClustersIdAppsInstallGitopsRegistrationRotate) | **Post** /clusters/{id}/apps/{install}/gitops/registration/rotate | Rotate the registration-class deploy token
@@ -584,6 +585,78 @@ Name | Type | Description  | Notes
 ### Authorization
 
 [CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetOrgsOrgIdGitopsVerifyingMachines
+
+> []HandlersVerifyingMachineRow GetOrgsOrgIdGitopsVerifyingMachines(ctx, orgId).ConnectionId(connectionId).Execute()
+
+List the org's verifying machines (public delivery keys)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	orgId := int32(56) // int32 | The org id
+	connectionId := int32(56) // int32 | The git connection id (optional; scopes the list to its pinned verifier) (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.GitopsAPI.GetOrgsOrgIdGitopsVerifyingMachines(context.Background(), orgId).ConnectionId(connectionId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `GitopsAPI.GetOrgsOrgIdGitopsVerifyingMachines``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetOrgsOrgIdGitopsVerifyingMachines`: []HandlersVerifyingMachineRow
+	fmt.Fprintf(os.Stdout, "Response from `GitopsAPI.GetOrgsOrgIdGitopsVerifyingMachines`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32** | The org id | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetOrgsOrgIdGitopsVerifyingMachinesRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **connectionId** | **int32** | The git connection id (optional; scopes the list to its pinned verifier) | 
+
+### Return type
+
+[**[]HandlersVerifyingMachineRow**](HandlersVerifyingMachineRow.md)
+
+### Authorization
+
+No authorization required
 
 ### HTTP request headers
 

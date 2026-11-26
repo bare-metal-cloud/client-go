@@ -401,7 +401,7 @@ import (
 
 func main() {
 	orgId := int32(56) // int32 | The org id
-	body := *openapiclient.NewHandlersBuildDeployRequest() // HandlersBuildDeployRequest | The binding identity
+	body := *openapiclient.NewHandlersBuildDeployRequest() // HandlersBuildDeployRequest | The binding identity (ref optional: branch, tag, or SHA)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -431,7 +431,7 @@ Other parameters are passed through a pointer to a apiPostOrgsOrgIdStacksDeployR
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **body** | [**HandlersBuildDeployRequest**](HandlersBuildDeployRequest.md) | The binding identity | 
+ **body** | [**HandlersBuildDeployRequest**](HandlersBuildDeployRequest.md) | The binding identity (ref optional: branch, tag, or SHA) | 
 
 ### Return type
 

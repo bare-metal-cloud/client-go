@@ -119,7 +119,10 @@ builds:write scope answers the typed 403 insufficient_scope (ADR-096).
 	PostOrgsOrgIdStacksDeploy Trigger a bound build manually (the CLI deploy verb)
 
 	Deploys a bound trigger's watched branch at the provider's current tip through the builder's
-ruled gate. The body names the binding by trigger_id or by repo_full (exactly one). Every
+ruled gate. The body names the binding by trigger_id or by repo_full (exactly one), and may
+carry an optional ref: empty = the bound branch's current tip; a branch, tag, or commit SHA
+resolves to a full SHA the dispatch pins (an unknown ref answers 404 ref_not_found). The deploy
+identity stays the bound branch's install. Every
 outcome state answers 200: dispatched (the attempt is out), queued (every capable machine was
 busy — the ledger row is durable and the reconciler drives it), or held (no assigned/reachable
 machines — the honest gate state). The answer carries the run reference and, for a dispatched or
@@ -940,7 +943,7 @@ type ApiPostOrgsOrgIdStacksDeployRequest struct {
 	body *HandlersBuildDeployRequest
 }
 
-// The binding identity
+// The binding identity (ref optional: branch, tag, or SHA)
 func (r ApiPostOrgsOrgIdStacksDeployRequest) Body(body HandlersBuildDeployRequest) ApiPostOrgsOrgIdStacksDeployRequest {
 	r.body = &body
 	return r
@@ -954,7 +957,10 @@ func (r ApiPostOrgsOrgIdStacksDeployRequest) Execute() (*HandlersBuildDeployView
 PostOrgsOrgIdStacksDeploy Trigger a bound build manually (the CLI deploy verb)
 
 Deploys a bound trigger's watched branch at the provider's current tip through the builder's
-ruled gate. The body names the binding by trigger_id or by repo_full (exactly one). Every
+ruled gate. The body names the binding by trigger_id or by repo_full (exactly one), and may
+carry an optional ref: empty = the bound branch's current tip; a branch, tag, or commit SHA
+resolves to a full SHA the dispatch pins (an unknown ref answers 404 ref_not_found). The deploy
+identity stays the bound branch's install. Every
 outcome state answers 200: dispatched (the attempt is out), queued (every capable machine was
 busy — the ledger row is durable and the reconciler drives it), or held (no assigned/reachable
 machines — the honest gate state). The answer carries the run reference and, for a dispatched or

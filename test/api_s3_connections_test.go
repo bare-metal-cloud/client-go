@@ -126,11 +126,39 @@ func Test_bmc_S3ConnectionsAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test S3ConnectionsAPIService PostS3ConnectionsIdRotateCredentials", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.S3ConnectionsAPI.PostS3ConnectionsIdRotateCredentials(context.Background(), id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test S3ConnectionsAPIService PostS3ConnectionsTest", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
 
 		resp, httpRes, err := apiClient.S3ConnectionsAPI.PostS3ConnectionsTest(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test S3ConnectionsAPIService PutS3ConnectionsId", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id int32
+
+		resp, httpRes, err := apiClient.S3ConnectionsAPI.PutS3ConnectionsId(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
