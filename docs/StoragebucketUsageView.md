@@ -4,6 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ActiveAlerts** | Pointer to **int32** |  | [optional] 
+**AlertSeverity** | Pointer to **string** |  | [optional] 
 **Bucket** | Pointer to **string** |  | [optional] 
 **CapacityBytes** | Pointer to **int32** |  | [optional] 
 **Latest** | Pointer to [**StoragebucketLatestView**](StoragebucketLatestView.md) |  | [optional] 
@@ -28,6 +30,56 @@ will change when the set of required properties is changed
 NewStoragebucketUsageViewWithDefaults instantiates a new StoragebucketUsageView object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetActiveAlerts
+
+`func (o *StoragebucketUsageView) GetActiveAlerts() int32`
+
+GetActiveAlerts returns the ActiveAlerts field if non-nil, zero value otherwise.
+
+### GetActiveAlertsOk
+
+`func (o *StoragebucketUsageView) GetActiveAlertsOk() (*int32, bool)`
+
+GetActiveAlertsOk returns a tuple with the ActiveAlerts field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetActiveAlerts
+
+`func (o *StoragebucketUsageView) SetActiveAlerts(v int32)`
+
+SetActiveAlerts sets ActiveAlerts field to given value.
+
+### HasActiveAlerts
+
+`func (o *StoragebucketUsageView) HasActiveAlerts() bool`
+
+HasActiveAlerts returns a boolean if a field has been set.
+
+### GetAlertSeverity
+
+`func (o *StoragebucketUsageView) GetAlertSeverity() string`
+
+GetAlertSeverity returns the AlertSeverity field if non-nil, zero value otherwise.
+
+### GetAlertSeverityOk
+
+`func (o *StoragebucketUsageView) GetAlertSeverityOk() (*string, bool)`
+
+GetAlertSeverityOk returns a tuple with the AlertSeverity field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAlertSeverity
+
+`func (o *StoragebucketUsageView) SetAlertSeverity(v string)`
+
+SetAlertSeverity sets AlertSeverity field to given value.
+
+### HasAlertSeverity
+
+`func (o *StoragebucketUsageView) HasAlertSeverity() bool`
+
+HasAlertSeverity returns a boolean if a field has been set.
 
 ### GetBucket
 

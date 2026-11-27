@@ -343,6 +343,10 @@ type ApiGetAlertsRequest struct {
 	xOrgID *int32
 	xProjectId *string
 	status *string
+	severity *string
+	targetKind *string
+	targetId *int32
+	targetName *string
 	limit *int32
 }
 
@@ -361,6 +365,30 @@ func (r ApiGetAlertsRequest) XProjectId(xProjectId string) ApiGetAlertsRequest {
 // Filter: active returns only unacknowledged events
 func (r ApiGetAlertsRequest) Status(status string) ApiGetAlertsRequest {
 	r.status = &status
+	return r
+}
+
+// Filter: warning or critical
+func (r ApiGetAlertsRequest) Severity(severity string) ApiGetAlertsRequest {
+	r.severity = &severity
+	return r
+}
+
+// Filter by target kind — one kind or a comma-separated list (storage_bucket,storage_volume)
+func (r ApiGetAlertsRequest) TargetKind(targetKind string) ApiGetAlertsRequest {
+	r.targetKind = &targetKind
+	return r
+}
+
+// Filter by target id (S3 connection for buckets, cluster for volumes)
+func (r ApiGetAlertsRequest) TargetId(targetId int32) ApiGetAlertsRequest {
+	r.targetId = &targetId
+	return r
+}
+
+// Filter by target name (the bucket, or the volume as namespace/pvc)
+func (r ApiGetAlertsRequest) TargetName(targetName string) ApiGetAlertsRequest {
+	r.targetName = &targetName
 	return r
 }
 
@@ -418,6 +446,18 @@ func (a *AlertsAPIService) GetAlertsExecute(r ApiGetAlertsRequest) (*HandlersAcc
 
 	if r.status != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "status", r.status, "", "")
+	}
+	if r.severity != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "severity", r.severity, "", "")
+	}
+	if r.targetKind != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "target_kind", r.targetKind, "", "")
+	}
+	if r.targetId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "target_id", r.targetId, "", "")
+	}
+	if r.targetName != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "target_name", r.targetName, "", "")
 	}
 	if r.limit != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
@@ -629,6 +669,20 @@ func (a *AlertsAPIService) GetAlertsBucketExecute(r ApiGetAlertsBucketRequest) (
 			}
 		}
 	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -793,6 +847,20 @@ func (a *AlertsAPIService) GetAlertsVolumeExecute(r ApiGetAlertsVolumeRequest) (
 					key = apiKey.Key
 				}
 				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
 			}
 		}
 	}

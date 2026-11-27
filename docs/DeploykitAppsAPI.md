@@ -546,7 +546,7 @@ Name | Type | Description  | Notes
 
 ## GetClustersIdAppsInstallDurability
 
-> HandlersDurabilitySection GetClustersIdAppsInstallDurability(ctx, id, install).Limit(limit).Execute()
+> HandlersDurabilitySection GetClustersIdAppsInstallDurability(ctx, id, install).XOrgID(xOrgID).XProjectId(xProjectId).Limit(limit).Execute()
 
 Get an install's durability read model
 
@@ -567,11 +567,13 @@ import (
 func main() {
 	id := "id_example" // string | Cluster ID
 	install := "install_example" // string | Install name
+	xOrgID := int32(56) // int32 | Organization selector (PAT callers; session callers resolve the org from the session) (optional)
+	xProjectId := "xProjectId_example" // string | Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404) (optional)
 	limit := int32(56) // int32 | Maximum run-ledger rows served (1-200, default 50) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.DeploykitAppsAPI.GetClustersIdAppsInstallDurability(context.Background(), id, install).Limit(limit).Execute()
+	resp, r, err := apiClient.DeploykitAppsAPI.GetClustersIdAppsInstallDurability(context.Background(), id, install).XOrgID(xOrgID).XProjectId(xProjectId).Limit(limit).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DeploykitAppsAPI.GetClustersIdAppsInstallDurability``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -599,6 +601,8 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
+ **xOrgID** | **int32** | Organization selector (PAT callers; session callers resolve the org from the session) | 
+ **xProjectId** | **string** | Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404) | 
  **limit** | **int32** | Maximum run-ledger rows served (1-200, default 50) | 
 
 ### Return type
@@ -607,7 +611,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

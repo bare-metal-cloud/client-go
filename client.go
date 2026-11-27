@@ -100,6 +100,8 @@ type APIClient struct {
 
 	DomainsAPI DomainsAPI
 
+	DurabilityAPI DurabilityAPI
+
 	EdgeGitAPI EdgeGitAPI
 
 	ElevationsAPI ElevationsAPI
@@ -256,6 +258,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.DeploykitAppsAPI = (*DeploykitAppsAPIService)(&c.common)
 	c.DevicesAPI = (*DevicesAPIService)(&c.common)
 	c.DomainsAPI = (*DomainsAPIService)(&c.common)
+	c.DurabilityAPI = (*DurabilityAPIService)(&c.common)
 	c.EdgeGitAPI = (*EdgeGitAPIService)(&c.common)
 	c.ElevationsAPI = (*ElevationsAPIService)(&c.common)
 	c.EngineAPI = (*EngineAPIService)(&c.common)

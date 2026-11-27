@@ -4,6 +4,7 @@ All URIs are relative to *http://localhost:3001/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**GetOrgsOrgIdS3ConnectionsIdVersions**](SecretsAPI.md#GetOrgsOrgIdS3ConnectionsIdVersions) | **Get** /orgs/{org_id}/s3-connections/{id}/versions | List an org-scoped S3 connection&#39;s credential versions
 [**GetSecrets**](SecretsAPI.md#GetSecrets) | **Get** /secrets | List all secrets in the unified secrets hub
 [**GetSecretsTypeId**](SecretsAPI.md#GetSecretsTypeId) | **Get** /secrets/{type}/{id} | Get one keyring secret&#39;s detail bundle
 [**GetSecretsTypeIdUsage**](SecretsAPI.md#GetSecretsTypeIdUsage) | **Get** /secrets/{type}/{id}/usage | List active usages for a secret
@@ -12,6 +13,85 @@ Method | HTTP request | Description
 [**PostSecretsTypeIdTestConnection**](SecretsAPI.md#PostSecretsTypeIdTestConnection) | **Post** /secrets/{type}/{id}/test-connection | Test a secret&#39;s connection
 [**PostSecretsTypeIdVersionsVersionNumberRollback**](SecretsAPI.md#PostSecretsTypeIdVersionsVersionNumberRollback) | **Post** /secrets/{type}/{id}/versions/{version_number}/rollback | Roll back secret to a prior version (copy-forward)
 
+
+
+## GetOrgsOrgIdS3ConnectionsIdVersions
+
+> map[string]interface{} GetOrgsOrgIdS3ConnectionsIdVersions(ctx, orgId, id).FieldName(fieldName).Cursor(cursor).Limit(limit).Execute()
+
+List an org-scoped S3 connection's credential versions
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	orgId := int32(56) // int32 | Numeric org id (the page org)
+	id := int32(56) // int32 | Numeric S3 connection id
+	fieldName := "fieldName_example" // string | Encrypted field name (defaults to credentials) (optional)
+	cursor := "cursor_example" // string | Opaque pagination cursor (optional)
+	limit := int32(56) // int32 | Page size (default 50, max 200) (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.SecretsAPI.GetOrgsOrgIdS3ConnectionsIdVersions(context.Background(), orgId, id).FieldName(fieldName).Cursor(cursor).Limit(limit).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `SecretsAPI.GetOrgsOrgIdS3ConnectionsIdVersions``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetOrgsOrgIdS3ConnectionsIdVersions`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `SecretsAPI.GetOrgsOrgIdS3ConnectionsIdVersions`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32** | Numeric org id (the page org) | 
+**id** | **int32** | Numeric S3 connection id | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetOrgsOrgIdS3ConnectionsIdVersionsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **fieldName** | **string** | Encrypted field name (defaults to credentials) | 
+ **cursor** | **string** | Opaque pagination cursor | 
+ **limit** | **int32** | Page size (default 50, max 200) | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## GetSecrets

@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **Buckets** | Pointer to **[]string** |  | [optional] 
 **Message** | Pointer to **string** |  | [optional] 
 **Success** | Pointer to **bool** |  | [optional] 
+**Verdict** | Pointer to [**ServicesStorageProbeVerdict**](ServicesStorageProbeVerdict.md) | Verdict is the structured FR-Z-4 verdict (BAR-5948): on a listing failure it names the missing permission and carries the three-state listing_permitted; nil on success and on unclassified failures. | [optional] 
 
 ## Methods
 
@@ -127,6 +128,31 @@ SetSuccess sets Success field to given value.
 `func (o *ServicesTestConnectionResponse) HasSuccess() bool`
 
 HasSuccess returns a boolean if a field has been set.
+
+### GetVerdict
+
+`func (o *ServicesTestConnectionResponse) GetVerdict() ServicesStorageProbeVerdict`
+
+GetVerdict returns the Verdict field if non-nil, zero value otherwise.
+
+### GetVerdictOk
+
+`func (o *ServicesTestConnectionResponse) GetVerdictOk() (*ServicesStorageProbeVerdict, bool)`
+
+GetVerdictOk returns a tuple with the Verdict field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetVerdict
+
+`func (o *ServicesTestConnectionResponse) SetVerdict(v ServicesStorageProbeVerdict)`
+
+SetVerdict sets Verdict field to given value.
+
+### HasVerdict
+
+`func (o *ServicesTestConnectionResponse) HasVerdict() bool`
+
+HasVerdict returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

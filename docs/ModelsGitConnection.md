@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **CreatedByUserId** | Pointer to **int32** |  | [optional] 
 **Id** | Pointer to **int32** |  | [optional] 
 **LastTestedAt** | Pointer to **string** |  | [optional] 
+**Login** | Pointer to **string** | Login is the derived view of a GitHub App installation connection (BAR-5959): the GitHub account login the picker surfaces (\&quot;installed for acme\&quot;). Not a column — app rows carry it in Name behind the \&quot;github-app:\&quot; prefix; hand rows carry none. Populated by the gitops service&#39;s list/get paths. | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
 **OrgId** | Pointer to **int32** |  | [optional] 
 **Provider** | Pointer to **string** |  | [optional] 
@@ -185,6 +186,31 @@ SetLastTestedAt sets LastTestedAt field to given value.
 `func (o *ModelsGitConnection) HasLastTestedAt() bool`
 
 HasLastTestedAt returns a boolean if a field has been set.
+
+### GetLogin
+
+`func (o *ModelsGitConnection) GetLogin() string`
+
+GetLogin returns the Login field if non-nil, zero value otherwise.
+
+### GetLoginOk
+
+`func (o *ModelsGitConnection) GetLoginOk() (*string, bool)`
+
+GetLoginOk returns a tuple with the Login field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLogin
+
+`func (o *ModelsGitConnection) SetLogin(v string)`
+
+SetLogin sets Login field to given value.
+
+### HasLogin
+
+`func (o *ModelsGitConnection) HasLogin() bool`
+
+HasLogin returns a boolean if a field has been set.
 
 ### GetName
 
