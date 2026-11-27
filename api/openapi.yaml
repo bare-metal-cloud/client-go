@@ -1593,6 +1593,27 @@ paths:
         name: status
         schema:
           type: string
+      - description: "Filter: warning or critical"
+        in: query
+        name: severity
+        schema:
+          type: string
+      - description: "Filter by target kind — one kind or a comma-separated list (storage_bucket,storage_volume)"
+        in: query
+        name: target_kind
+        schema:
+          type: string
+      - description: "Filter by target id (S3 connection for buckets, cluster for\
+          \ volumes)"
+        in: query
+        name: target_id
+        schema:
+          type: integer
+      - description: "Filter by target name (the bucket, or the volume as namespace/pvc)"
+        in: query
+        name: target_name
+        schema:
+          type: string
       - description: "Page size (default 100, max 500)"
         in: query
         name: limit
@@ -1673,6 +1694,7 @@ paths:
           description: Connection not found in this org
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Storage bucket alert status
       tags:
       - alerts
@@ -1724,6 +1746,7 @@ paths:
           description: Cluster not found in this project
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Storage volume alert status
       tags:
       - alerts
@@ -6817,6 +6840,18 @@ paths:
         rows with dates), and the computed badge state. Read-only.
       operationId: GetClustersIdAppsInstallDurability
       parameters:
+      - description: Organization selector (PAT callers; session callers resolve the
+          org from the session)
+        in: header
+        name: X-Org-ID
+        schema:
+          type: integer
+      - description: "Project selector: the project owning the cluster (a PAT caller\
+          \ without it resolves project 0, and the scoped cluster lookup answers 404)"
+        in: header
+        name: X-Project-Id
+        schema:
+          type: string
       - description: Cluster ID
         in: path
         name: id
@@ -6848,6 +6883,13 @@ paths:
                 additionalProperties: true
                 type: object
           description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
         "404":
           content:
             application/json:
@@ -6857,6 +6899,7 @@ paths:
           description: Not Found
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Get an install's durability read model
       tags:
       - deploykit-apps
@@ -12008,6 +12051,86 @@ paths:
       summary: Update trust status of a device
       tags:
       - devices
+      x-codegen-request-body-name: request
+  /durability/backup-runs/authorize:
+    post:
+      description: |-
+        Decision-only endpoint the executor calls as its FIRST
+        action per backup run: resolves the run's authorization
+        window (a vault-rental ticket minted at dispatch, bound to
+        target backup_job:run:<run id>) and checks the org's
+        backup entitlement. Authorization is the bearer — no
+        session, no CSRF; the ticket is single-run, TTL-bounded,
+        and burned by exactly one allow (a refused call consumes
+        nothing). 204 = the run may start; every refusal carries a
+        stable code and an actionable reason and stops the run
+        before it starts. A started run is never re-checked (it
+        completes). The per-IP rate limiter's 429 is a
+        transport-level refusal the executor branches on by status
+        alone — its body carries no machine code.
+      operationId: PostDurabilityBackup-runsAuthorize
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/handlers.BackupRunAuthorizeRequest'
+        description: "org_id, run_id, rental_id (the ticket)"
+        required: true
+      responses:
+        "204":
+          content: {}
+          description: The run is authorized — the executor may start
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: bad_request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: not_entitled
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: window_not_found
+        "410":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: window_expired | window_consumed
+        "429":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: rate limited
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: entitlement_unavailable | authorization_unavailable
+      summary: Authorize one backup run (backend#4180 component 3)
+      tags:
+      - durability
       x-codegen-request-body-name: request
   /explore/de-elevate:
     post:
@@ -20921,6 +21044,12 @@ paths:
         required: true
         schema:
           type: integer
+      - description: Force the delete past the secret-reference guard (admin/owner
+          only); a backup-plan or managed-database consumer is never forceable
+        in: query
+        name: force
+        schema:
+          type: boolean
       responses:
         "204":
           content:
@@ -20959,6 +21088,7 @@ paths:
             \ database (the body lists the consumers)"
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Delete an org-scoped S3 connection
       tags:
       - org-s3-connections
@@ -21028,10 +21158,98 @@ paths:
           description: Duplicate name
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Update an org-scoped S3 connection (non-credential fields only)
       tags:
       - org-s3-connections
       x-codegen-request-body-name: request
+  /orgs/{org_id}/s3-connections/{id}/buckets:
+    get:
+      description: "File browser (FR-Z-6, decision S2): proxies ListBuckets for one\
+        \ org-scoped connection (project_id IS NULL). Org admins/owners only, read-only\
+        \ — a non-admin member is 403 even with an active org vault grant. Grant/unlock\
+        \ denial is 423 + X-Org-Vault-Required. Never returns credentials."
+      operationId: GetOrgsOrg_idS3-connectionsIdBuckets
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      - description: S3 Connection ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      - description: Substring filter on bucket name
+        in: query
+        name: q
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/services.S3BucketListResult'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "423":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Locked
+        "429":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Too Many Requests
+        "502":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Gateway
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
+      summary: List buckets for an org-scoped S3 connection
+      tags:
+      - org-s3-connections
   /orgs/{org_id}/s3-connections/{id}/buckets/{bucket}/goal:
     delete:
       description: "Removes the bucket's fill goal. The occupancy bar and \"full in\
@@ -21176,7 +21394,9 @@ paths:
         \ null until an admin sets one, which is also when occupancy percent and projection.days_to_full\
         \ can become non-null. projection.status explains what the fill claim rests\
         \ on: projected, not_enough_history (fewer than 12 measured points in the\
-        \ 7-day window), no_growth, or no_capacity."
+        \ 7-day window), no_growth, or no_capacity. active_alerts counts the bucket's\
+        \ unresolved alerts (a measured zero when none fire) and alert_severity is\
+        \ the loudest one."
       operationId: GetOrgsOrg_idS3-connectionsIdBucketsBucketUsage
       parameters:
       - description: Organization ID
@@ -21229,6 +21449,223 @@ paths:
       - CookieAuth: []
       - BearerAuth: []
       summary: Get bucket usage for an org-scoped S3 connection
+      tags:
+      - org-s3-connections
+  /orgs/{org_id}/s3-connections/{id}/objects:
+    get:
+      description: "File browser (FR-Z-6, decision S2): proxies ListObjectsV2 for\
+        \ one org-scoped connection (project_id IS NULL). Requires bucket=. Optional\
+        \ prefix, continuation_token, q (key substring on current page), delimiter.\
+        \ Org admins/owners only, read-only. Grant/unlock denial is 423 + X-Org-Vault-Required.\
+        \ Never returns credentials."
+      operationId: GetOrgsOrg_idS3-connectionsIdObjects
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      - description: S3 Connection ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      - description: Bucket name
+        in: query
+        name: bucket
+        required: true
+        schema:
+          type: string
+      - description: Key prefix
+        in: query
+        name: prefix
+        schema:
+          type: string
+      - description: ListObjectsV2 continuation token
+        in: query
+        name: continuation_token
+        schema:
+          type: string
+      - description: Substring filter on object key (current page)
+        in: query
+        name: q
+        schema:
+          type: string
+      - description: "Page size (default 50, max 100)"
+        in: query
+        name: "n"
+        schema:
+          type: integer
+      - description: Delimiter (e.g. / for folder-style prefixes)
+        in: query
+        name: delimiter
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/services.S3ObjectListResult'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "423":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Locked
+        "429":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Too Many Requests
+        "502":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Gateway
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
+      summary: List objects in a bucket of an org-scoped S3 connection
+      tags:
+      - org-s3-connections
+  /orgs/{org_id}/s3-connections/{id}/objects/download:
+    get:
+      description: "File browser (FR-Z-6, decision S2): streams object bytes for one\
+        \ org-scoped connection (project_id IS NULL), SSRF-locked to the stored endpoint.\
+        \ Size/time capped — an over-cap download answers 413 with an honest reason.\
+        \ Org admins/owners only, read-only. Grant/unlock denial is 423 + X-Org-Vault-Required.\
+        \ Never returns credentials."
+      operationId: GetOrgsOrg_idS3-connectionsIdObjectsDownload
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      - description: S3 Connection ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      - description: Bucket name
+        in: query
+        name: bucket
+        required: true
+        schema:
+          type: string
+      - description: Object key
+        in: query
+        name: key
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/octet-stream:
+              schema:
+                format: binary
+                type: string
+          description: OK
+        "400":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+        "404":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "413":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Request Entity Too Large
+        "423":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Locked
+        "429":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Too Many Requests
+        "502":
+          content:
+            application/octet-stream:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Gateway
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
+      summary: Download an object from an org-scoped S3 connection
       tags:
       - org-s3-connections
   /orgs/{org_id}/s3-connections/{id}/rotate-credentials:
@@ -21291,10 +21728,83 @@ paths:
           description: Not Found
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Rotate credentials for an org-scoped S3 connection
       tags:
       - org-s3-connections
       x-codegen-request-body-name: request
+  /orgs/{org_id}/s3-connections/{id}/versions:
+    get:
+      description: "Paginated metadata (no plaintext) for one ORG-scoped S3 connection's\
+        \ saved credential versions (project_id IS NULL row), scoped to the org in\
+        \ the PATH. Admin/owner of THAT org only — membership is checked directly\
+        \ against the path org, NOT the active org, so the route keeps working while\
+        \ a different org is active in the console (the active-org /secrets/s3_connection/:id/versions\
+        \ endpoint 403s under the console's default X-Project-Id header when ?org_id=\
+        \ disagrees with it — BAR-5949 round 3). Same {items, next_cursor} shape."
+      operationId: GetOrgsOrg_idS3-connectionsIdVersions
+      parameters:
+      - description: Numeric org id (the page org)
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      - description: Numeric S3 connection id
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      - description: Encrypted field name (defaults to credentials)
+        in: query
+        name: field_name
+        schema:
+          type: string
+      - description: Opaque pagination cursor
+        in: query
+        name: cursor
+        schema:
+          type: string
+      - description: "Page size (default 50, max 200)"
+        in: query
+        name: limit
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Forbidden
+      security:
+      - CookieAuth: []
+      summary: List an org-scoped S3 connection's credential versions
+      tags:
+      - secrets
   /orgs/{org_id}/stacks/build-timeline:
     post:
       description: "Renders the 06.5 timeline: one row per service, in the manifest's\
@@ -21588,6 +22098,46 @@ paths:
       tags:
       - builds
       x-codegen-request-body-name: body
+  /orgs/{org_id}/storage/connections:
+    get:
+      description: "One register of the org's project- AND org-scoped S3 connections\
+        \ (FR-Z-3): each row carries its real scope chip (org|project), the owning\
+        \ project's name, provider, endpoint, default bucket, a masked credential\
+        \ view (never a secret value), and the last-verified stamp from the verification\
+        \ ledger. Read-only — management verbs live on the credentials surface (org\
+        \ rows in Org Settings, project rows via the project connection handlers)."
+      operationId: GetOrgsOrg_idStorageConnections
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.StorageConnectionsResponse'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fiber.Map'
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/fiber.Map'
+          description: Forbidden
+      security:
+      - CookieAuth: []
+      summary: List the org's storage connections (both scopes)
+      tags:
+      - storage
   /orgs/{org_id}/storage/overview:
     get:
       description: |-
@@ -21636,6 +22186,55 @@ paths:
       security:
       - CookieAuth: []
       summary: Get the org's storage overview
+      tags:
+      - storage
+  /orgs/{org_id}/storage/usage:
+    get:
+      description: |-
+        One verdict for EVERY S3 connection of the org (project- and org-scoped), keyed by connection id: used true/false plus the live consumers (clusters with backup plans, managed databases, runner store / artifact store when stored rows exist).
+        A used connection must not be modified or deleted (FR-Z-2); an unused one may. The same lookup backs the delete guard, so the register and the guard cannot disagree.
+      operationId: GetOrgsOrg_idStorageUsage
+      parameters:
+      - description: Organization ID
+        in: path
+        name: org_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/handlers.StorageUsageResponse'
+          description: usage verdicts keyed by connection id
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Bad Request
+        "403":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: Get which resources use each of the org's S3 connections
       tags:
       - storage
   /orgs/{org_id}/storage/volumes:
@@ -34621,6 +35220,15 @@ components:
       required:
       - vm_ids
       type: object
+    handlers.BackupRunAuthorizeRequest:
+      properties:
+        org_id:
+          type: integer
+        rental_id:
+          type: string
+        run_id:
+          type: string
+      type: object
     handlers.BuildCancelView:
       example:
         idempotent: true
@@ -39745,6 +40353,25 @@ components:
         storageGB:
           type: number
       type: object
+    handlers.S3ConnectionConsumer:
+      example:
+        scope: scope
+        link: link
+        name: name
+        id: 0
+        type: type
+      properties:
+        id:
+          type: integer
+        link:
+          type: string
+        name:
+          type: string
+        scope:
+          type: string
+        type:
+          type: string
+      type: object
     handlers.SSHConnectionRequest:
       properties:
         client_envelope:
@@ -40038,6 +40665,154 @@ components:
         state:
           type: string
       type: object
+    handlers.StorageConnectionRegisterRow:
+      example:
+        container: container
+        credentials:
+          key: credentials
+        created_at: created_at
+        project_name: project_name
+        default_bucket: default_bucket
+        last_used_at: last_used_at
+        endpoint: endpoint
+        updated_at: updated_at
+        project_id: 1
+        provider: provider
+        scope: scope
+        last_verified_at: last_verified_at
+        name: name
+        has_vault_credentials: true
+        id: 0
+        region: region
+        account: account
+        linked_credential_id: 6
+      properties:
+        account:
+          type: string
+        container:
+          type: string
+        created_at:
+          type: string
+        credentials:
+          additionalProperties:
+            type: string
+          description: Always masked — never the plaintext credential material.
+          type: object
+        default_bucket:
+          type: string
+        endpoint:
+          type: string
+        has_vault_credentials:
+          type: boolean
+        id:
+          type: integer
+        last_used_at:
+          type: string
+        last_verified_at:
+          description: |-
+            RFC3339 UTC of the last SUCCESSFUL check; "" when never verified
+            (FR-Z-13: an unreported value is empty, never faked).
+          type: string
+        linked_credential_id:
+          type: integer
+        name:
+          type: string
+        project_id:
+          type: integer
+        project_name:
+          type: string
+        provider:
+          type: string
+        region:
+          type: string
+        scope:
+          description: |-
+            FR-Z-3: the row's real scope — "org" (ProjectID nil) or "project".
+            Not the ADR-067 secrets-tier hard-coded value: the storage register
+            reintroduces the real distinction per FR-Z-3.
+          type: string
+        updated_at:
+          type: string
+      type: object
+    handlers.StorageConnectionUsage:
+      example:
+        consumers:
+        - scope: scope
+          link: link
+          name: name
+          id: 0
+          type: type
+        - scope: scope
+          link: link
+          name: name
+          id: 0
+          type: type
+        used: true
+      properties:
+        consumers:
+          description: |-
+            Consumers is every live resource storing its backups or artifacts in
+            this connection (clusters with backup plans, managed databases, and
+            the runner store / artifact store chips when stored rows exist) — the
+            same shape the delete guard's 409 body carries.
+          items:
+            $ref: '#/components/schemas/handlers.S3ConnectionConsumer'
+          type: array
+        used:
+          description: |-
+            Used is Consumers non-empty; false means genuinely unused, and the
+            console may then allow every verb (FR-Z-2). A read the handler could
+            not make is a 500, never a false — unknown is never "unused"
+            (FR-Z-13).
+          type: boolean
+      type: object
+    handlers.StorageConnectionsResponse:
+      example:
+        connections:
+        - container: container
+          credentials:
+            key: credentials
+          created_at: created_at
+          project_name: project_name
+          default_bucket: default_bucket
+          last_used_at: last_used_at
+          endpoint: endpoint
+          updated_at: updated_at
+          project_id: 1
+          provider: provider
+          scope: scope
+          last_verified_at: last_verified_at
+          name: name
+          has_vault_credentials: true
+          id: 0
+          region: region
+          account: account
+          linked_credential_id: 6
+        - container: container
+          credentials:
+            key: credentials
+          created_at: created_at
+          project_name: project_name
+          default_bucket: default_bucket
+          last_used_at: last_used_at
+          endpoint: endpoint
+          updated_at: updated_at
+          project_id: 1
+          provider: provider
+          scope: scope
+          last_verified_at: last_verified_at
+          name: name
+          has_vault_credentials: true
+          id: 0
+          region: region
+          account: account
+          linked_credential_id: 6
+      properties:
+        connections:
+          items:
+            $ref: '#/components/schemas/handlers.StorageConnectionRegisterRow'
+          type: array
+      type: object
     handlers.StorageOverviewResponse:
       example:
         volume_provisioned_bytes: 5
@@ -40079,6 +40854,28 @@ components:
           type: integer
         volumes_measured:
           type: integer
+      type: object
+    handlers.StorageUsageResponse:
+      example:
+        connections:
+          key:
+            consumers:
+            - scope: scope
+              link: link
+              name: name
+              id: 0
+              type: type
+            - scope: scope
+              link: link
+              name: name
+              id: 0
+              type: type
+            used: true
+      properties:
+        connections:
+          additionalProperties:
+            $ref: '#/components/schemas/handlers.StorageConnectionUsage'
+          type: object
       type: object
     handlers.StorageVolumesResponse:
       example:
@@ -45270,15 +46067,16 @@ components:
       example:
         last_tested_at: last_tested_at
         auth_kind: auth_kind
+        created_at: created_at
+        login: login
+        verifying_agent_id: 5
+        created_by_user_id: 0
         updated_at: updated_at
         provider: provider
         org_id: 1
         api_base: api_base
         name: name
-        created_at: created_at
         id: 6
-        verifying_agent_id: 5
-        created_by_user_id: 0
         status: status
       properties:
         api_base:
@@ -45305,6 +46103,14 @@ components:
         id:
           type: integer
         last_tested_at:
+          type: string
+        login:
+          description: |-
+            Login is the derived view of a GitHub App installation connection
+            (BAR-5959): the GitHub account login the picker surfaces ("installed
+            for acme"). Not a column — app rows carry it in Name behind the
+            "github-app:" prefix; hand rows carry none. Populated by the gitops
+            service's list/get paths.
           type: string
         name:
           type: string
@@ -48985,6 +49791,50 @@ components:
         size:
           type: integer
       type: object
+    services.StorageBucketVerdict:
+      enum:
+      - permitted
+      - bucket_not_found
+      - no_access
+      type: string
+      x-enum-varnames:
+      - BucketVerdictPermitted
+      - BucketVerdictNotFound
+      - BucketVerdictNoAccess
+    services.StorageProbeVerdict:
+      properties:
+        bucket_name:
+          description: |-
+            BucketName and BucketVerdict are set when the per-bucket fallback
+            check ran (listing denied + a bucket was typed). BucketVerdict uses
+            the StorageBucketVerdict states above.
+          type: string
+        bucket_verdict:
+          $ref: '#/components/schemas/services.StorageBucketVerdict'
+        listing_permitted:
+          description: |-
+            ListingPermitted is the three-state listing answer: true when the
+            list call succeeded, false when it was classified as
+            permission-denied, nil when unknown (bad key, unreachable endpoint,
+            timeout, wrong region, or anything unclassified). Null is an honest
+            "we do not know", never a fabricated 0 (FR-Z-13).
+          type: boolean
+        message:
+          description: |-
+            Message is a human sentence naming the gate. Credential material is
+            redacted out (see RedactCredentials).
+          type: string
+        missing_permission:
+          description: |-
+            MissingPermission is the provider permission the call needs, set ONLY
+            when the failure was classified as permission-denied. Empty otherwise.
+          type: string
+        permission_doc:
+          description: |-
+            PermissionDoc is the provider's documentation URL for
+            MissingPermission, so the console can link the fix.
+          type: string
+      type: object
     services.TagsListResult:
       example:
         name: name
@@ -49008,6 +49858,7 @@ components:
         buckets:
         - buckets
         - buckets
+        verdict: "{}"
         message: message
         bucket_count: 0
       properties:
@@ -49021,6 +49872,14 @@ components:
           type: string
         success:
           type: boolean
+        verdict:
+          allOf:
+          - $ref: '#/components/schemas/services.StorageProbeVerdict'
+          description: |-
+            Verdict is the structured FR-Z-4 verdict (BAR-5948): on a listing
+            failure it names the missing permission and carries the three-state
+            listing_permitted; nil on success and on unclassified failures.
+          type: object
       type: object
     services.UserRequirementStatus:
       example:
@@ -49094,9 +49953,9 @@ components:
     storagebucket.LatestView:
       example:
         unmeasured_reason: unmeasured_reason
-        bytes: 6
+        bytes: 1
         captured_at: captured_at
-        object_count: 1
+        object_count: 5
         partial: true
       properties:
         bytes:
@@ -49113,7 +49972,7 @@ components:
     storagebucket.Point:
       example:
         at: at
-        bytes: 2
+        bytes: 7
       properties:
         at:
           type: string
@@ -49123,8 +49982,8 @@ components:
     storagebucket.ProjectionView:
       example:
         confidence: high
-        days_to_full: 5.962133916683182
-        points: 5
+        days_to_full: 5.637376656633329
+        points: 2
         status: projected
       properties:
         confidence:
@@ -49151,24 +50010,30 @@ components:
     storagebucket.UsageView:
       example:
         bucket: bucket
-        capacity_bytes: 0
+        capacity_bytes: 6
+        active_alerts: 0
         trend:
         - at: at
-          bytes: 2
+          bytes: 7
         - at: at
-          bytes: 2
+          bytes: 7
+        alert_severity: alert_severity
         projection:
           confidence: high
-          days_to_full: 5.962133916683182
-          points: 5
+          days_to_full: 5.637376656633329
+          points: 2
           status: projected
         latest:
           unmeasured_reason: unmeasured_reason
-          bytes: 6
+          bytes: 1
           captured_at: captured_at
-          object_count: 1
+          object_count: 5
           partial: true
       properties:
+        active_alerts:
+          type: integer
+        alert_severity:
+          type: string
         bucket:
           type: string
         capacity_bytes:

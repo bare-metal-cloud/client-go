@@ -24,6 +24,22 @@ import (
 type SecretsAPI interface {
 
 	/*
+	GetOrgsOrgIdS3ConnectionsIdVersions List an org-scoped S3 connection's credential versions
+
+	Paginated metadata (no plaintext) for one ORG-scoped S3 connection's saved credential versions (project_id IS NULL row), scoped to the org in the PATH. Admin/owner of THAT org only — membership is checked directly against the path org, NOT the active org, so the route keeps working while a different org is active in the console (the active-org /secrets/s3_connection/:id/versions endpoint 403s under the console's default X-Project-Id header when ?org_id= disagrees with it — BAR-5949 round 3). Same {items, next_cursor} shape.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param orgId Numeric org id (the page org)
+	@param id Numeric S3 connection id
+	@return ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest
+	*/
+	GetOrgsOrgIdS3ConnectionsIdVersions(ctx context.Context, orgId int32, id int32) ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest
+
+	// GetOrgsOrgIdS3ConnectionsIdVersionsExecute executes the request
+	//  @return map[string]interface{}
+	GetOrgsOrgIdS3ConnectionsIdVersionsExecute(r ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest) (map[string]interface{}, *http.Response, error)
+
+	/*
 	GetSecrets List all secrets in the unified secrets hub
 
 	Returns the org's secret-bearing rows across the 5 source types (ssh_key, cloud_credential, s3_connection, image_registry, ssh_connection) as metadata only — never secret material, no decrypt path. Each item also carries the keyring projection the Secrets console draws (provider, variant, linked_via, affordances, pickup, uses, discovered). s3_connection items additionally carry last_verified_at (RFC3339 UTC; omitted when the connection has never passed a check or the verification ledger read failed — BAR-5678). Keyset-paginated on (name, type, id); the envelope carries items plus next_cursor (null on the last page), and freshness_available=false when the freshness aggregate could not be computed. Org-scoped via the tenant list scope (X-Project-Id header or ?project_id= selects the project filter). The ?scope= query is accepted for compatibility but no longer filters (ADR-067).
@@ -137,6 +153,189 @@ type SecretsAPI interface {
 
 // SecretsAPIService SecretsAPI service
 type SecretsAPIService service
+
+type ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest struct {
+	ctx context.Context
+	ApiService SecretsAPI
+	orgId int32
+	id int32
+	fieldName *string
+	cursor *string
+	limit *int32
+}
+
+// Encrypted field name (defaults to credentials)
+func (r ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest) FieldName(fieldName string) ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest {
+	r.fieldName = &fieldName
+	return r
+}
+
+// Opaque pagination cursor
+func (r ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest) Cursor(cursor string) ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest {
+	r.cursor = &cursor
+	return r
+}
+
+// Page size (default 50, max 200)
+func (r ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest) Limit(limit int32) ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest) Execute() (map[string]interface{}, *http.Response, error) {
+	return r.ApiService.GetOrgsOrgIdS3ConnectionsIdVersionsExecute(r)
+}
+
+/*
+GetOrgsOrgIdS3ConnectionsIdVersions List an org-scoped S3 connection's credential versions
+
+Paginated metadata (no plaintext) for one ORG-scoped S3 connection's saved credential versions (project_id IS NULL row), scoped to the org in the PATH. Admin/owner of THAT org only — membership is checked directly against the path org, NOT the active org, so the route keeps working while a different org is active in the console (the active-org /secrets/s3_connection/:id/versions endpoint 403s under the console's default X-Project-Id header when ?org_id= disagrees with it — BAR-5949 round 3). Same {items, next_cursor} shape.
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param orgId Numeric org id (the page org)
+ @param id Numeric S3 connection id
+ @return ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest
+*/
+func (a *SecretsAPIService) GetOrgsOrgIdS3ConnectionsIdVersions(ctx context.Context, orgId int32, id int32) ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest {
+	return ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest{
+		ApiService: a,
+		ctx: ctx,
+		orgId: orgId,
+		id: id,
+	}
+}
+
+// Execute executes the request
+//  @return map[string]interface{}
+func (a *SecretsAPIService) GetOrgsOrgIdS3ConnectionsIdVersionsExecute(r ApiGetOrgsOrgIdS3ConnectionsIdVersionsRequest) (map[string]interface{}, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  map[string]interface{}
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SecretsAPIService.GetOrgsOrgIdS3ConnectionsIdVersions")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/orgs/{org_id}/s3-connections/{id}/versions"
+	localVarPath = strings.Replace(localVarPath, "{"+"org_id"+"}", url.PathEscape(parameterValueToString(r.orgId, "orgId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.fieldName != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "field_name", r.fieldName, "", "")
+	}
+	if r.cursor != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "cursor", r.cursor, "", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["CookieAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
 
 type ApiGetSecretsRequest struct {
 	ctx context.Context

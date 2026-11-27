@@ -28,6 +28,8 @@ type ModelsGitConnection struct {
 	CreatedByUserId *int32 `json:"created_by_user_id,omitempty"`
 	Id *int32 `json:"id,omitempty"`
 	LastTestedAt *string `json:"last_tested_at,omitempty"`
+	// Login is the derived view of a GitHub App installation connection (BAR-5959): the GitHub account login the picker surfaces (\"installed for acme\"). Not a column — app rows carry it in Name behind the \"github-app:\" prefix; hand rows carry none. Populated by the gitops service's list/get paths.
+	Login *string `json:"login,omitempty"`
 	Name *string `json:"name,omitempty"`
 	OrgId *int32 `json:"org_id,omitempty"`
 	Provider *string `json:"provider,omitempty"`
@@ -245,6 +247,38 @@ func (o *ModelsGitConnection) HasLastTestedAt() bool {
 // SetLastTestedAt gets a reference to the given string and assigns it to the LastTestedAt field.
 func (o *ModelsGitConnection) SetLastTestedAt(v string) {
 	o.LastTestedAt = &v
+}
+
+// GetLogin returns the Login field value if set, zero value otherwise.
+func (o *ModelsGitConnection) GetLogin() string {
+	if o == nil || IsNil(o.Login) {
+		var ret string
+		return ret
+	}
+	return *o.Login
+}
+
+// GetLoginOk returns a tuple with the Login field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ModelsGitConnection) GetLoginOk() (*string, bool) {
+	if o == nil || IsNil(o.Login) {
+		return nil, false
+	}
+	return o.Login, true
+}
+
+// HasLogin returns a boolean if a field has been set.
+func (o *ModelsGitConnection) HasLogin() bool {
+	if o != nil && !IsNil(o.Login) {
+		return true
+	}
+
+	return false
+}
+
+// SetLogin gets a reference to the given string and assigns it to the Login field.
+func (o *ModelsGitConnection) SetLogin(v string) {
+	o.Login = &v
 }
 
 // GetName returns the Name field value if set, zero value otherwise.
@@ -466,6 +500,9 @@ func (o ModelsGitConnection) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.LastTestedAt) {
 		toSerialize["last_tested_at"] = o.LastTestedAt
+	}
+	if !IsNil(o.Login) {
+		toSerialize["login"] = o.Login
 	}
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name

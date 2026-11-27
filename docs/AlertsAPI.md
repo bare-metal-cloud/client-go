@@ -89,7 +89,7 @@ Name | Type | Description  | Notes
 
 ## GetAlerts
 
-> HandlersAccountAlertEventsResponse GetAlerts(ctx).XOrgID(xOrgID).XProjectId(xProjectId).Status(status).Limit(limit).Execute()
+> HandlersAccountAlertEventsResponse GetAlerts(ctx).XOrgID(xOrgID).XProjectId(xProjectId).Status(status).Severity(severity).TargetKind(targetKind).TargetId(targetId).TargetName(targetName).Limit(limit).Execute()
 
 List the account's fired alert events
 
@@ -111,11 +111,15 @@ func main() {
 	xOrgID := int32(56) // int32 | Organization selector (PAT callers; session callers resolve the org from the session) (optional)
 	xProjectId := "xProjectId_example" // string | Project selector: a project id or the value all (a PAT caller without it: 428 project_required) (optional)
 	status := "status_example" // string | Filter: active returns only unacknowledged events (optional)
+	severity := "severity_example" // string | Filter: warning or critical (optional)
+	targetKind := "targetKind_example" // string | Filter by target kind — one kind or a comma-separated list (storage_bucket,storage_volume) (optional)
+	targetId := int32(56) // int32 | Filter by target id (S3 connection for buckets, cluster for volumes) (optional)
+	targetName := "targetName_example" // string | Filter by target name (the bucket, or the volume as namespace/pvc) (optional)
 	limit := int32(56) // int32 | Page size (default 100, max 500) (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.AlertsAPI.GetAlerts(context.Background()).XOrgID(xOrgID).XProjectId(xProjectId).Status(status).Limit(limit).Execute()
+	resp, r, err := apiClient.AlertsAPI.GetAlerts(context.Background()).XOrgID(xOrgID).XProjectId(xProjectId).Status(status).Severity(severity).TargetKind(targetKind).TargetId(targetId).TargetName(targetName).Limit(limit).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AlertsAPI.GetAlerts``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -139,6 +143,10 @@ Name | Type | Description  | Notes
  **xOrgID** | **int32** | Organization selector (PAT callers; session callers resolve the org from the session) | 
  **xProjectId** | **string** | Project selector: a project id or the value all (a PAT caller without it: 428 project_required) | 
  **status** | **string** | Filter: active returns only unacknowledged events | 
+ **severity** | **string** | Filter: warning or critical | 
+ **targetKind** | **string** | Filter by target kind — one kind or a comma-separated list (storage_bucket,storage_volume) | 
+ **targetId** | **int32** | Filter by target id (S3 connection for buckets, cluster for volumes) | 
+ **targetName** | **string** | Filter by target name (the bucket, or the volume as namespace/pvc) | 
  **limit** | **int32** | Page size (default 100, max 500) | 
 
 ### Return type
@@ -215,7 +223,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -283,7 +291,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

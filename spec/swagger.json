@@ -1985,6 +1985,30 @@
             "in": "query"
           },
           {
+            "type": "string",
+            "description": "Filter: warning or critical",
+            "name": "severity",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Filter by target kind \u2014 one kind or a comma-separated list (storage_bucket,storage_volume)",
+            "name": "target_kind",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Filter by target id (S3 connection for buckets, cluster for volumes)",
+            "name": "target_id",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Filter by target name (the bucket, or the volume as namespace/pvc)",
+            "name": "target_name",
+            "in": "query"
+          },
+          {
             "type": "integer",
             "description": "Page size (default 100, max 500)",
             "name": "limit",
@@ -2021,6 +2045,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "Active-alert count, covering rule count (no rules versus quiet) and recent alert history for one bucket",
@@ -2084,6 +2111,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "Active-alert count, covering rule count (no rules versus quiet) and recent alert history for one volume",
@@ -8470,6 +8500,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "description": "The install's (or, through the components section, a\nstack's per-component) durability facts: streaks (last\nbackup age, next run), the recorded backup points with\nper-point drill truth (VERIFIED requires a passing recent\nexercise \u2014 the decay law badges a stamp beyond 2x the\nschedule interval as DECAYED), the run ledger (pass/fail\nrows with dates), and the computed badge state. Read-only.",
@@ -8481,6 +8514,18 @@
         ],
         "summary": "Get an install's durability read model",
         "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization selector (PAT callers; session callers resolve the org from the session)",
+            "name": "X-Org-ID",
+            "in": "header"
+          },
+          {
+            "type": "string",
+            "description": "Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404)",
+            "name": "X-Project-Id",
+            "in": "header"
+          },
           {
             "type": "string",
             "description": "Cluster ID",
@@ -8511,6 +8556,13 @@
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -14643,6 +14695,92 @@
           }
         },
         "operationId": "PutDevicesDevice_idTrust"
+      }
+    },
+    "/durability/backup-runs/authorize": {
+      "post": {
+        "description": "Decision-only endpoint the executor calls as its FIRST\naction per backup run: resolves the run's authorization\nwindow (a vault-rental ticket minted at dispatch, bound to\ntarget backup_job:run:<run id>) and checks the org's\nbackup entitlement. Authorization is the bearer \u2014 no\nsession, no CSRF; the ticket is single-run, TTL-bounded,\nand burned by exactly one allow (a refused call consumes\nnothing). 204 = the run may start; every refusal carries a\nstable code and an actionable reason and stops the run\nbefore it starts. A started run is never re-checked (it\ncompletes). The per-IP rate limiter's 429 is a\ntransport-level refusal the executor branches on by status\nalone \u2014 its body carries no machine code.",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "durability"
+        ],
+        "summary": "Authorize one backup run (backend#4180 component 3)",
+        "parameters": [
+          {
+            "description": "org_id, run_id, rental_id (the ticket)",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.BackupRunAuthorizeRequest"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "The run is authorized \u2014 the executor may start"
+          },
+          "400": {
+            "description": "bad_request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "403": {
+            "description": "not_entitled",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "404": {
+            "description": "window_not_found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "410": {
+            "description": "window_expired | window_consumed",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "429": {
+            "description": "rate limited",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "503": {
+            "description": "entitlement_unavailable | authorization_unavailable",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "operationId": "PostDurabilityBackup-runsAuthorize"
       }
     },
     "/explore/de-elevate": {
@@ -25392,6 +25530,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "consumes": [
@@ -25478,6 +25619,9 @@
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "produces": [
@@ -25501,6 +25645,12 @@
             "name": "id",
             "in": "path",
             "required": true
+          },
+          {
+            "type": "boolean",
+            "description": "Force the delete past the secret-reference guard (admin/owner only); a backup-plan or managed-database consumer is never forceable",
+            "name": "force",
+            "in": "query"
           }
         ],
         "responses": {
@@ -25540,6 +25690,106 @@
           }
         },
         "operationId": "DeleteOrgsOrg_idS3-connectionsId"
+      }
+    },
+    "/orgs/{org_id}/s3-connections/{id}/buckets": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "File browser (FR-Z-6, decision S2): proxies ListBuckets for one org-scoped connection (project_id IS NULL). Org admins/owners only, read-only \u2014 a non-admin member is 403 even with an active org vault grant. Grant/unlock denial is 423 + X-Org-Vault-Required. Never returns credentials.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "org-s3-connections"
+        ],
+        "summary": "List buckets for an org-scoped S3 connection",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Substring filter on bucket name",
+            "name": "q",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/services.S3BucketListResult"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idS3-connectionsIdBuckets"
       }
     },
     "/orgs/{org_id}/s3-connections/{id}/buckets/{bucket}/goal": {
@@ -25716,7 +25966,7 @@
             "BearerAuth": []
           }
         ],
-        "description": "Latest bucket occupancy snapshot with its freshness stamp, partial flag, the measured trend points, and the fill projection. bytes and object_count are null when the bucket was not measured (for example, the platform cannot read its credential), never 0. capacity_bytes is the org-set fill goal; null until an admin sets one, which is also when occupancy percent and projection.days_to_full can become non-null. projection.status explains what the fill claim rests on: projected, not_enough_history (fewer than 12 measured points in the 7-day window), no_growth, or no_capacity.",
+        "description": "Latest bucket occupancy snapshot with its freshness stamp, partial flag, the measured trend points, and the fill projection. bytes and object_count are null when the bucket was not measured (for example, the platform cannot read its credential), never 0. capacity_bytes is the org-set fill goal; null until an admin sets one, which is also when occupancy percent and projection.days_to_full can become non-null. projection.status explains what the fill claim rests on: projected, not_enough_history (fewer than 12 measured points in the 7-day window), no_growth, or no_capacity. active_alerts counts the bucket's unresolved alerts (a measured zero when none fire) and alert_severity is the loudest one.",
         "produces": [
           "application/json"
         ],
@@ -25779,11 +26029,260 @@
         "operationId": "GetOrgsOrg_idS3-connectionsIdBucketsBucketUsage"
       }
     },
+    "/orgs/{org_id}/s3-connections/{id}/objects": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "File browser (FR-Z-6, decision S2): proxies ListObjectsV2 for one org-scoped connection (project_id IS NULL). Requires bucket=. Optional prefix, continuation_token, q (key substring on current page), delimiter. Org admins/owners only, read-only. Grant/unlock denial is 423 + X-Org-Vault-Required. Never returns credentials.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "org-s3-connections"
+        ],
+        "summary": "List objects in a bucket of an org-scoped S3 connection",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Bucket name",
+            "name": "bucket",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Key prefix",
+            "name": "prefix",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "ListObjectsV2 continuation token",
+            "name": "continuation_token",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Substring filter on object key (current page)",
+            "name": "q",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Page size (default 50, max 100)",
+            "name": "n",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Delimiter (e.g. / for folder-style prefixes)",
+            "name": "delimiter",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/services.S3ObjectListResult"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idS3-connectionsIdObjects"
+      }
+    },
+    "/orgs/{org_id}/s3-connections/{id}/objects/download": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "File browser (FR-Z-6, decision S2): streams object bytes for one org-scoped connection (project_id IS NULL), SSRF-locked to the stored endpoint. Size/time capped \u2014 an over-cap download answers 413 with an honest reason. Org admins/owners only, read-only. Grant/unlock denial is 423 + X-Org-Vault-Required. Never returns credentials.",
+        "produces": [
+          "application/octet-stream"
+        ],
+        "tags": [
+          "org-s3-connections"
+        ],
+        "summary": "Download an object from an org-scoped S3 connection",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "S3 Connection ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Bucket name",
+            "name": "bucket",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Object key",
+            "name": "key",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "file"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "413": {
+            "description": "Request Entity Too Large",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "423": {
+            "description": "Locked",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idS3-connectionsIdObjectsDownload"
+      }
+    },
     "/orgs/{org_id}/s3-connections/{id}/rotate-credentials": {
       "post": {
         "security": [
           {
             "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
           }
         ],
         "consumes": [
@@ -25858,6 +26357,88 @@
           }
         },
         "operationId": "PostOrgsOrg_idS3-connectionsIdRotate-credentials"
+      }
+    },
+    "/orgs/{org_id}/s3-connections/{id}/versions": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "Paginated metadata (no plaintext) for one ORG-scoped S3 connection's saved credential versions (project_id IS NULL row), scoped to the org in the PATH. Admin/owner of THAT org only \u2014 membership is checked directly against the path org, NOT the active org, so the route keeps working while a different org is active in the console (the active-org /secrets/s3_connection/:id/versions endpoint 403s under the console's default X-Project-Id header when ?org_id= disagrees with it \u2014 BAR-5949 round 3). Same {items, next_cursor} shape.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "secrets"
+        ],
+        "summary": "List an org-scoped S3 connection's credential versions",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Numeric org id (the page org)",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Numeric S3 connection id",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Encrypted field name (defaults to credentials)",
+            "name": "field_name",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Opaque pagination cursor",
+            "name": "cursor",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Page size (default 50, max 200)",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idS3-connectionsIdVersions"
       }
     },
     "/orgs/{org_id}/stacks/build-timeline": {
@@ -26190,6 +26771,53 @@
         "operationId": "PostOrgsOrg_idStacksRollback"
       }
     },
+    "/orgs/{org_id}/storage/connections": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "One register of the org's project- AND org-scoped S3 connections (FR-Z-3): each row carries its real scope chip (org|project), the owning project's name, provider, endpoint, default bucket, a masked credential view (never a secret value), and the last-verified stamp from the verification ledger. Read-only \u2014 management verbs live on the credentials surface (org rows in Org Settings, project rows via the project connection handlers).",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "storage"
+        ],
+        "summary": "List the org's storage connections (both scopes)",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/handlers.StorageConnectionsResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/fiber.Map"
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idStorageConnections"
+      }
+    },
     "/orgs/{org_id}/storage/overview": {
       "get": {
         "security": [
@@ -26250,6 +26878,68 @@
           }
         },
         "operationId": "GetOrgsOrg_idStorageOverview"
+      }
+    },
+    "/orgs/{org_id}/storage/usage": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "One verdict for EVERY S3 connection of the org (project- and org-scoped), keyed by connection id: used true/false plus the live consumers (clusters with backup plans, managed databases, runner store / artifact store when stored rows exist).\nA used connection must not be modified or deleted (FR-Z-2); an unused one may. The same lookup backs the delete guard, so the register and the guard cannot disagree.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "storage"
+        ],
+        "summary": "Get which resources use each of the org's S3 connections",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Organization ID",
+            "name": "org_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "usage verdicts keyed by connection id",
+            "schema": {
+              "$ref": "#/definitions/handlers.StorageUsageResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "operationId": "GetOrgsOrg_idStorageUsage"
       }
     },
     "/orgs/{org_id}/storage/volumes": {
@@ -40512,6 +41202,20 @@
         }
       }
     },
+    "handlers.BackupRunAuthorizeRequest": {
+      "type": "object",
+      "properties": {
+        "org_id": {
+          "type": "integer"
+        },
+        "rental_id": {
+          "type": "string"
+        },
+        "run_id": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.BuildCancelView": {
       "type": "object",
       "properties": {
@@ -45295,6 +45999,26 @@
         }
       }
     },
+    "handlers.S3ConnectionConsumer": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "link": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "scope": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      }
+    },
     "handlers.SSHConnectionRequest": {
       "type": "object",
       "properties": {
@@ -45578,6 +46302,98 @@
         }
       }
     },
+    "handlers.StorageConnectionRegisterRow": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "container": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "credentials": {
+          "description": "Always masked \u2014 never the plaintext credential material.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "default_bucket": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "has_vault_credentials": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "last_used_at": {
+          "type": "string"
+        },
+        "last_verified_at": {
+          "description": "RFC3339 UTC of the last SUCCESSFUL check; \"\" when never verified\n(FR-Z-13: an unreported value is empty, never faked).",
+          "type": "string"
+        },
+        "linked_credential_id": {
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "project_id": {
+          "type": "integer"
+        },
+        "project_name": {
+          "type": "string"
+        },
+        "provider": {
+          "type": "string"
+        },
+        "region": {
+          "type": "string"
+        },
+        "scope": {
+          "description": "FR-Z-3: the row's real scope \u2014 \"org\" (ProjectID nil) or \"project\".\nNot the ADR-067 secrets-tier hard-coded value: the storage register\nreintroduces the real distinction per FR-Z-3.",
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.StorageConnectionUsage": {
+      "type": "object",
+      "properties": {
+        "consumers": {
+          "description": "Consumers is every live resource storing its backups or artifacts in\nthis connection (clusters with backup plans, managed databases, and\nthe runner store / artifact store chips when stored rows exist) \u2014 the\nsame shape the delete guard's 409 body carries.",
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/handlers.S3ConnectionConsumer"
+          }
+        },
+        "used": {
+          "description": "Used is Consumers non-empty; false means genuinely unused, and the\nconsole may then allow every verb (FR-Z-2). A read the handler could\nnot make is a 500, never a false \u2014 unknown is never \"unused\"\n(FR-Z-13).",
+          "type": "boolean"
+        }
+      }
+    },
+    "handlers.StorageConnectionsResponse": {
+      "type": "object",
+      "properties": {
+        "connections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/handlers.StorageConnectionRegisterRow"
+          }
+        }
+      }
+    },
     "handlers.StorageOverviewResponse": {
       "type": "object",
       "properties": {
@@ -45605,6 +46421,17 @@
         },
         "volumes_measured": {
           "type": "integer"
+        }
+      }
+    },
+    "handlers.StorageUsageResponse": {
+      "type": "object",
+      "properties": {
+        "connections": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/handlers.StorageConnectionUsage"
+          }
         }
       }
     },
@@ -50061,6 +50888,10 @@
         "last_tested_at": {
           "type": "string"
         },
+        "login": {
+          "description": "Login is the derived view of a GitHub App installation connection\n(BAR-5959): the GitHub account login the picker surfaces (\"installed\nfor acme\"). Not a column \u2014 app rows carry it in Name behind the\n\"github-app:\" prefix; hand rows carry none. Populated by the gitops\nservice's list/get paths.",
+          "type": "string"
+        },
         "name": {
           "type": "string"
         },
@@ -52516,6 +53347,47 @@
         }
       }
     },
+    "services.StorageBucketVerdict": {
+      "type": "string",
+      "enum": [
+        "permitted",
+        "bucket_not_found",
+        "no_access"
+      ],
+      "x-enum-varnames": [
+        "BucketVerdictPermitted",
+        "BucketVerdictNotFound",
+        "BucketVerdictNoAccess"
+      ]
+    },
+    "services.StorageProbeVerdict": {
+      "type": "object",
+      "properties": {
+        "bucket_name": {
+          "description": "BucketName and BucketVerdict are set when the per-bucket fallback\ncheck ran (listing denied + a bucket was typed). BucketVerdict uses\nthe StorageBucketVerdict states above.",
+          "type": "string"
+        },
+        "bucket_verdict": {
+          "$ref": "#/definitions/services.StorageBucketVerdict"
+        },
+        "listing_permitted": {
+          "description": "ListingPermitted is the three-state listing answer: true when the\nlist call succeeded, false when it was classified as\npermission-denied, nil when unknown (bad key, unreachable endpoint,\ntimeout, wrong region, or anything unclassified). Null is an honest\n\"we do not know\", never a fabricated 0 (FR-Z-13).",
+          "type": "boolean"
+        },
+        "message": {
+          "description": "Message is a human sentence naming the gate. Credential material is\nredacted out (see RedactCredentials).",
+          "type": "string"
+        },
+        "missing_permission": {
+          "description": "MissingPermission is the provider permission the call needs, set ONLY\nwhen the failure was classified as permission-denied. Empty otherwise.",
+          "type": "string"
+        },
+        "permission_doc": {
+          "description": "PermissionDoc is the provider's documentation URL for\nMissingPermission, so the console can link the fix.",
+          "type": "string"
+        }
+      }
+    },
     "services.TagsListResult": {
       "type": "object",
       "properties": {
@@ -52550,6 +53422,14 @@
         },
         "success": {
           "type": "boolean"
+        },
+        "verdict": {
+          "description": "Verdict is the structured FR-Z-4 verdict (BAR-5948): on a listing\nfailure it names the missing permission and carries the three-state\nlisting_permitted; nil on success and on unclassified failures.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/services.StorageProbeVerdict"
+            }
+          ]
         }
       }
     },
@@ -52691,6 +53571,12 @@
     "storagebucket.UsageView": {
       "type": "object",
       "properties": {
+        "active_alerts": {
+          "type": "integer"
+        },
+        "alert_severity": {
+          "type": "string"
+        },
         "bucket": {
           "type": "string"
         },

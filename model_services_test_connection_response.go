@@ -24,6 +24,8 @@ type ServicesTestConnectionResponse struct {
 	Buckets []string `json:"buckets,omitempty"`
 	Message *string `json:"message,omitempty"`
 	Success *bool `json:"success,omitempty"`
+	// Verdict is the structured FR-Z-4 verdict (BAR-5948): on a listing failure it names the missing permission and carries the three-state listing_permitted; nil on success and on unclassified failures.
+	Verdict *ServicesStorageProbeVerdict `json:"verdict,omitempty"`
 }
 
 // NewServicesTestConnectionResponse instantiates a new ServicesTestConnectionResponse object
@@ -171,6 +173,38 @@ func (o *ServicesTestConnectionResponse) SetSuccess(v bool) {
 	o.Success = &v
 }
 
+// GetVerdict returns the Verdict field value if set, zero value otherwise.
+func (o *ServicesTestConnectionResponse) GetVerdict() ServicesStorageProbeVerdict {
+	if o == nil || IsNil(o.Verdict) {
+		var ret ServicesStorageProbeVerdict
+		return ret
+	}
+	return *o.Verdict
+}
+
+// GetVerdictOk returns a tuple with the Verdict field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServicesTestConnectionResponse) GetVerdictOk() (*ServicesStorageProbeVerdict, bool) {
+	if o == nil || IsNil(o.Verdict) {
+		return nil, false
+	}
+	return o.Verdict, true
+}
+
+// HasVerdict returns a boolean if a field has been set.
+func (o *ServicesTestConnectionResponse) HasVerdict() bool {
+	if o != nil && !IsNil(o.Verdict) {
+		return true
+	}
+
+	return false
+}
+
+// SetVerdict gets a reference to the given ServicesStorageProbeVerdict and assigns it to the Verdict field.
+func (o *ServicesTestConnectionResponse) SetVerdict(v ServicesStorageProbeVerdict) {
+	o.Verdict = &v
+}
+
 func (o ServicesTestConnectionResponse) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -192,6 +226,9 @@ func (o ServicesTestConnectionResponse) ToMap() (map[string]interface{}, error) 
 	}
 	if !IsNil(o.Success) {
 		toSerialize["success"] = o.Success
+	}
+	if !IsNil(o.Verdict) {
+		toSerialize["verdict"] = o.Verdict
 	}
 	return toSerialize, nil
 }

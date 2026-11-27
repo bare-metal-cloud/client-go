@@ -20,6 +20,8 @@ var _ MappedNullable = &StoragebucketUsageView{}
 
 // StoragebucketUsageView struct for StoragebucketUsageView
 type StoragebucketUsageView struct {
+	ActiveAlerts *int32 `json:"active_alerts,omitempty"`
+	AlertSeverity *string `json:"alert_severity,omitempty"`
 	Bucket *string `json:"bucket,omitempty"`
 	CapacityBytes *int32 `json:"capacity_bytes,omitempty"`
 	Latest *StoragebucketLatestView `json:"latest,omitempty"`
@@ -42,6 +44,70 @@ func NewStoragebucketUsageView() *StoragebucketUsageView {
 func NewStoragebucketUsageViewWithDefaults() *StoragebucketUsageView {
 	this := StoragebucketUsageView{}
 	return &this
+}
+
+// GetActiveAlerts returns the ActiveAlerts field value if set, zero value otherwise.
+func (o *StoragebucketUsageView) GetActiveAlerts() int32 {
+	if o == nil || IsNil(o.ActiveAlerts) {
+		var ret int32
+		return ret
+	}
+	return *o.ActiveAlerts
+}
+
+// GetActiveAlertsOk returns a tuple with the ActiveAlerts field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StoragebucketUsageView) GetActiveAlertsOk() (*int32, bool) {
+	if o == nil || IsNil(o.ActiveAlerts) {
+		return nil, false
+	}
+	return o.ActiveAlerts, true
+}
+
+// HasActiveAlerts returns a boolean if a field has been set.
+func (o *StoragebucketUsageView) HasActiveAlerts() bool {
+	if o != nil && !IsNil(o.ActiveAlerts) {
+		return true
+	}
+
+	return false
+}
+
+// SetActiveAlerts gets a reference to the given int32 and assigns it to the ActiveAlerts field.
+func (o *StoragebucketUsageView) SetActiveAlerts(v int32) {
+	o.ActiveAlerts = &v
+}
+
+// GetAlertSeverity returns the AlertSeverity field value if set, zero value otherwise.
+func (o *StoragebucketUsageView) GetAlertSeverity() string {
+	if o == nil || IsNil(o.AlertSeverity) {
+		var ret string
+		return ret
+	}
+	return *o.AlertSeverity
+}
+
+// GetAlertSeverityOk returns a tuple with the AlertSeverity field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *StoragebucketUsageView) GetAlertSeverityOk() (*string, bool) {
+	if o == nil || IsNil(o.AlertSeverity) {
+		return nil, false
+	}
+	return o.AlertSeverity, true
+}
+
+// HasAlertSeverity returns a boolean if a field has been set.
+func (o *StoragebucketUsageView) HasAlertSeverity() bool {
+	if o != nil && !IsNil(o.AlertSeverity) {
+		return true
+	}
+
+	return false
+}
+
+// SetAlertSeverity gets a reference to the given string and assigns it to the AlertSeverity field.
+func (o *StoragebucketUsageView) SetAlertSeverity(v string) {
+	o.AlertSeverity = &v
 }
 
 // GetBucket returns the Bucket field value if set, zero value otherwise.
@@ -214,6 +280,12 @@ func (o StoragebucketUsageView) MarshalJSON() ([]byte, error) {
 
 func (o StoragebucketUsageView) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.ActiveAlerts) {
+		toSerialize["active_alerts"] = o.ActiveAlerts
+	}
+	if !IsNil(o.AlertSeverity) {
+		toSerialize["alert_severity"] = o.AlertSeverity
+	}
 	if !IsNil(o.Bucket) {
 		toSerialize["bucket"] = o.Bucket
 	}

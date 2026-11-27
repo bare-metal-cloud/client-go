@@ -1633,7 +1633,21 @@ type ApiGetClustersIdAppsInstallDurabilityRequest struct {
 	ApiService DeploykitAppsAPI
 	id string
 	install string
+	xOrgID *int32
+	xProjectId *string
 	limit *int32
+}
+
+// Organization selector (PAT callers; session callers resolve the org from the session)
+func (r ApiGetClustersIdAppsInstallDurabilityRequest) XOrgID(xOrgID int32) ApiGetClustersIdAppsInstallDurabilityRequest {
+	r.xOrgID = &xOrgID
+	return r
+}
+
+// Project selector: the project owning the cluster (a PAT caller without it resolves project 0, and the scoped cluster lookup answers 404)
+func (r ApiGetClustersIdAppsInstallDurabilityRequest) XProjectId(xProjectId string) ApiGetClustersIdAppsInstallDurabilityRequest {
+	r.xProjectId = &xProjectId
+	return r
 }
 
 // Maximum run-ledger rows served (1-200, default 50)
@@ -1714,6 +1728,12 @@ func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallDurabilityExecute(r Ap
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.xOrgID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Org-ID", r.xOrgID, "", "")
+	}
+	if r.xProjectId != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Project-Id", r.xProjectId, "", "")
+	}
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -1725,6 +1745,20 @@ func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallDurabilityExecute(r Ap
 					key = apiKey.Key
 				}
 				localVarHeaderParams["Cookie"] = key
+			}
+		}
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["BearerAuth"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
 			}
 		}
 	}
@@ -1751,6 +1785,17 @@ func (a *DeploykitAppsAPIService) GetClustersIdAppsInstallDurabilityExecute(r Ap
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
+			var v map[string]interface{}
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
 			var v map[string]interface{}
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

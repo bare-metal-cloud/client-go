@@ -4,9 +4,81 @@ All URIs are relative to *http://localhost:3001/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**GetOrgsOrgIdStorageConnections**](StorageAPI.md#GetOrgsOrgIdStorageConnections) | **Get** /orgs/{org_id}/storage/connections | List the org&#39;s storage connections (both scopes)
 [**GetOrgsOrgIdStorageOverview**](StorageAPI.md#GetOrgsOrgIdStorageOverview) | **Get** /orgs/{org_id}/storage/overview | Get the org&#39;s storage overview
+[**GetOrgsOrgIdStorageUsage**](StorageAPI.md#GetOrgsOrgIdStorageUsage) | **Get** /orgs/{org_id}/storage/usage | Get which resources use each of the org&#39;s S3 connections
 [**GetOrgsOrgIdStorageVolumes**](StorageAPI.md#GetOrgsOrgIdStorageVolumes) | **Get** /orgs/{org_id}/storage/volumes | List PVC usage for an organization
 
+
+
+## GetOrgsOrgIdStorageConnections
+
+> HandlersStorageConnectionsResponse GetOrgsOrgIdStorageConnections(ctx, orgId).Execute()
+
+List the org's storage connections (both scopes)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	orgId := int32(56) // int32 | Organization ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.StorageAPI.GetOrgsOrgIdStorageConnections(context.Background(), orgId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `StorageAPI.GetOrgsOrgIdStorageConnections``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetOrgsOrgIdStorageConnections`: HandlersStorageConnectionsResponse
+	fmt.Fprintf(os.Stdout, "Response from `StorageAPI.GetOrgsOrgIdStorageConnections`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32** | Organization ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetOrgsOrgIdStorageConnectionsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**HandlersStorageConnectionsResponse**](HandlersStorageConnectionsResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## GetOrgsOrgIdStorageOverview
@@ -64,6 +136,76 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**HandlersStorageOverviewResponse**](HandlersStorageOverviewResponse.md)
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetOrgsOrgIdStorageUsage
+
+> HandlersStorageUsageResponse GetOrgsOrgIdStorageUsage(ctx, orgId).Execute()
+
+Get which resources use each of the org's S3 connections
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	orgId := int32(56) // int32 | Organization ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.StorageAPI.GetOrgsOrgIdStorageUsage(context.Background(), orgId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `StorageAPI.GetOrgsOrgIdStorageUsage``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetOrgsOrgIdStorageUsage`: HandlersStorageUsageResponse
+	fmt.Fprintf(os.Stdout, "Response from `StorageAPI.GetOrgsOrgIdStorageUsage`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**orgId** | **int32** | Organization ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetOrgsOrgIdStorageUsageRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**HandlersStorageUsageResponse**](HandlersStorageUsageResponse.md)
 
 ### Authorization
 

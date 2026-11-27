@@ -22,6 +22,20 @@ func Test_bmc_StorageAPIService(t *testing.T) {
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
+	t.Run("Test StorageAPIService GetOrgsOrgIdStorageConnections", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.StorageAPI.GetOrgsOrgIdStorageConnections(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test StorageAPIService GetOrgsOrgIdStorageOverview", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -29,6 +43,20 @@ func Test_bmc_StorageAPIService(t *testing.T) {
 		var orgId int32
 
 		resp, httpRes, err := apiClient.StorageAPI.GetOrgsOrgIdStorageOverview(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test StorageAPIService GetOrgsOrgIdStorageUsage", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+
+		resp, httpRes, err := apiClient.StorageAPI.GetOrgsOrgIdStorageUsage(context.Background(), orgId).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)

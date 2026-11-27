@@ -26,6 +26,7 @@ api_delegation.go
 api_deploykit_apps.go
 api_devices.go
 api_domains.go
+api_durability.go
 api_edge_git.go
 api_elevations.go
 api_engine.go
@@ -189,6 +190,7 @@ docs/DnsregistryScopeCheck.md
 docs/DnsregistryValidateResult.md
 docs/DnsregistryZoneInfo.md
 docs/DomainsAPI.md
+docs/DurabilityAPI.md
 docs/EdgeGitAPI.md
 docs/EdgegitFetchSignalPayload.md
 docs/EdgeinsightsInsightFloorPanel.md
@@ -272,6 +274,7 @@ docs/HandlersAppsUpgradeRequest.md
 docs/HandlersArrivalRegisterRequest.md
 docs/HandlersAssignVMsRequest.md
 docs/HandlersBackupRestoreRequest.md
+docs/HandlersBackupRunAuthorizeRequest.md
 docs/HandlersBlueprintDismissRequest.md
 docs/HandlersBlueprintDriftResponse.md
 docs/HandlersBlueprintSourceReconnect.md
@@ -543,6 +546,7 @@ docs/HandlersRunnerUsagePreviousPeriod.md
 docs/HandlersRunnerUsageResponse.md
 docs/HandlersRunnerUsageStorage.md
 docs/HandlersRunnerUsageStoragePoint.md
+docs/HandlersS3ConnectionConsumer.md
 docs/HandlersSSHConnectionRequest.md
 docs/HandlersSSHConnectionResponse.md
 docs/HandlersSaveConnectionMappingBody.md
@@ -577,7 +581,11 @@ docs/HandlersStackWavePayload.md
 docs/HandlersStackWiringDeltaPayload.md
 docs/HandlersStopDatabaseRequest.md
 docs/HandlersStorageAlertStatus.md
+docs/HandlersStorageConnectionRegisterRow.md
+docs/HandlersStorageConnectionUsage.md
+docs/HandlersStorageConnectionsResponse.md
 docs/HandlersStorageOverviewResponse.md
+docs/HandlersStorageUsageResponse.md
 docs/HandlersStorageVolumesResponse.md
 docs/HandlersStoreDelegationMandatesRequest.md
 docs/HandlersStoreDelegationMandatesResponse.md
@@ -766,6 +774,8 @@ docs/ServicesS3BucketListResult.md
 docs/ServicesS3ObjectInfo.md
 docs/ServicesS3ObjectListResult.md
 docs/ServicesS3UploadResult.md
+docs/ServicesStorageBucketVerdict.md
+docs/ServicesStorageProbeVerdict.md
 docs/ServicesTagsListResult.md
 docs/ServicesTestConnectionResponse.md
 docs/ServicesUserRequirementStatus.md
@@ -949,6 +959,7 @@ model_handlers_assign_vms_request.go
 model_handlers_awsvm_worker_request.go
 model_handlers_awsvm_worker_response.go
 model_handlers_backup_restore_request.go
+model_handlers_backup_run_authorize_request.go
 model_handlers_blueprint_dismiss_request.go
 model_handlers_blueprint_drift_response.go
 model_handlers_blueprint_source_reconnect.go
@@ -1220,6 +1231,7 @@ model_handlers_runner_usage_previous_period.go
 model_handlers_runner_usage_response.go
 model_handlers_runner_usage_storage.go
 model_handlers_runner_usage_storage_point.go
+model_handlers_s3_connection_consumer.go
 model_handlers_save_connection_mapping_body.go
 model_handlers_save_connection_mapping_body_repositories_inner.go
 model_handlers_scale_resources_request.go
@@ -1254,7 +1266,11 @@ model_handlers_stack_wave_payload.go
 model_handlers_stack_wiring_delta_payload.go
 model_handlers_stop_database_request.go
 model_handlers_storage_alert_status.go
+model_handlers_storage_connection_register_row.go
+model_handlers_storage_connection_usage.go
+model_handlers_storage_connections_response.go
 model_handlers_storage_overview_response.go
+model_handlers_storage_usage_response.go
 model_handlers_storage_volumes_response.go
 model_handlers_store_delegation_mandates_request.go
 model_handlers_store_delegation_mandates_response.go
@@ -1404,6 +1420,8 @@ model_services_s3_bucket_list_result.go
 model_services_s3_object_info.go
 model_services_s3_object_list_result.go
 model_services_s3_upload_result.go
+model_services_storage_bucket_verdict.go
+model_services_storage_probe_verdict.go
 model_services_tags_list_result.go
 model_services_test_connection_response.go
 model_services_user_requirement_status.go
@@ -1446,6 +1464,7 @@ test/api_delegation_test.go
 test/api_deploykit_apps_test.go
 test/api_devices_test.go
 test/api_domains_test.go
+test/api_durability_test.go
 test/api_edge_git_test.go
 test/api_elevations_test.go
 test/api_engine_test.go

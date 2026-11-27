@@ -67,6 +67,21 @@ func Test_bmc_OrgS3ConnectionsAPIService(t *testing.T) {
 
 	})
 
+	t.Run("Test OrgS3ConnectionsAPIService GetOrgsOrgIdS3ConnectionsIdBuckets", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var id int32
+
+		resp, httpRes, err := apiClient.OrgS3ConnectionsAPI.GetOrgsOrgIdS3ConnectionsIdBuckets(context.Background(), orgId, id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test OrgS3ConnectionsAPIService GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsage", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -76,6 +91,36 @@ func Test_bmc_OrgS3ConnectionsAPIService(t *testing.T) {
 		var bucket string
 
 		resp, httpRes, err := apiClient.OrgS3ConnectionsAPI.GetOrgsOrgIdS3ConnectionsIdBucketsBucketUsage(context.Background(), orgId, id, bucket).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test OrgS3ConnectionsAPIService GetOrgsOrgIdS3ConnectionsIdObjects", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var id int32
+
+		resp, httpRes, err := apiClient.OrgS3ConnectionsAPI.GetOrgsOrgIdS3ConnectionsIdObjects(context.Background(), orgId, id).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test OrgS3ConnectionsAPIService GetOrgsOrgIdS3ConnectionsIdObjectsDownload", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var orgId int32
+		var id int32
+
+		resp, httpRes, err := apiClient.OrgS3ConnectionsAPI.GetOrgsOrgIdS3ConnectionsIdObjectsDownload(context.Background(), orgId, id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
