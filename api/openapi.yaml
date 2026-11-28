@@ -2380,6 +2380,172 @@ paths:
       tags:
       - admin
       x-codegen-request-body-name: request
+  /api/v1/admin/clusters:
+    get:
+      description: |-
+        The Staff panel's cluster picker: id, name and owner
+        organization only (org name + slug). A triage entry point,
+        not a cluster drill-in. Sensitive read (platform audit rows).
+      operationId: GetApiV1AdminClusters
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: List clusters across orgs (platform admin)
+      tags:
+      - admin
+  /api/v1/admin/clusters/{id}/installs:
+    get:
+      description: |-
+        One row per install on the cluster: name, status, owner
+        organization and project, created time, and the owning
+        table as source (deploykit_installs for engine installs,
+        blueprint_pending_installs for active pending builds).
+        Component installs (`<stack>-<component>`) nest under their
+        stack install's row in components — backed by the captured
+        stack DAG, never guessed from the name. A name in neither
+        owning table that the trace tables still remember shows as
+        a trace_only row whose source names the owning tables.
+      operationId: GetApiV1AdminClustersIdInstalls
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: List one cluster's installs across orgs (platform admin)
+      tags:
+      - admin
+  /api/v1/admin/clusters/{id}/installs/{install}:
+    delete:
+      description: |-
+        The platform-admin keep-data teardown — the SAME shared
+        body the tenant route runs (fence, terminal no-op,
+        never-deployed valve, busy 409, database-owns-name 409,
+        enqueue), never a hand-row deletion. Requires a typed
+        reason (3–300 chars) and sudo mode. Every outcome lands on
+        the platform audit trail (who, when, why, cluster, install,
+        outcome): a fail-closed pre row before the teardown,
+        corrective error rows on every refusal. An active pending
+        build row under the name refuses with 409 (its owning
+        table is named); a name in neither owning table that the
+        trace tables still remember is 404 naming those tables; a
+        name in none of them is the plain 404.
+      operationId: DeleteApiV1AdminClustersIdInstallsInstall
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Install name
+        in: path
+        name: install
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/handlers.adminInstallDeleteBody'
+        description: Delete reason
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Named no-op (already terminal / never deployed)
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The platform audit row could not be recorded; nothing was deleted
+      security:
+      - CookieAuth: []
+      summary: Delete one install on a cluster (platform admin)
+      tags:
+      - admin
+      x-codegen-request-body-name: body
   /api/v1/admin/deploy-triage:
     get:
       description: |-
@@ -41683,6 +41849,11 @@ components:
     handlers.addressChangeExecuteRequest:
       properties:
         impact_fingerprint:
+          type: string
+      type: object
+    handlers.adminInstallDeleteBody:
+      properties:
+        reason:
           type: string
       type: object
     handlers.applyRefusal:

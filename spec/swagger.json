@@ -2918,6 +2918,184 @@
         "operationId": "PutApiV1AdminBackupOrgsOrg_idEntitlement"
       }
     },
+    "/api/v1/admin/clusters": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The Staff panel's cluster picker: id, name and owner\norganization only (org name + slug). A triage entry point,\nnot a cluster drill-in. Sensitive read (platform audit rows).",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "List clusters across orgs (platform admin)",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetApiV1AdminClusters"
+      }
+    },
+    "/api/v1/admin/clusters/{id}/installs": {
+      "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "One row per install on the cluster: name, status, owner\norganization and project, created time, and the owning\ntable as source (deploykit_installs for engine installs,\nblueprint_pending_installs for active pending builds).\nComponent installs (`<stack>-<component>`) nest under their\nstack install's row in components \u2014 backed by the captured\nstack DAG, never guessed from the name. A name in neither\nowning table that the trace tables still remember shows as\na trace_only row whose source names the owning tables.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "List one cluster's installs across orgs (platform admin)",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Cluster ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "GetApiV1AdminClustersIdInstalls"
+      }
+    },
+    "/api/v1/admin/clusters/{id}/installs/{install}": {
+      "delete": {
+        "security": [
+          {
+            "CookieAuth": []
+          }
+        ],
+        "description": "The platform-admin keep-data teardown \u2014 the SAME shared\nbody the tenant route runs (fence, terminal no-op,\nnever-deployed valve, busy 409, database-owns-name 409,\nenqueue), never a hand-row deletion. Requires a typed\nreason (3\u2013300 chars) and sudo mode. Every outcome lands on\nthe platform audit trail (who, when, why, cluster, install,\noutcome): a fail-closed pre row before the teardown,\ncorrective error rows on every refusal. An active pending\nbuild row under the name refuses with 409 (its owning\ntable is named); a name in neither owning table that the\ntrace tables still remember is 404 naming those tables; a\nname in none of them is the plain 404.",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "admin"
+        ],
+        "summary": "Delete one install on a cluster (platform admin)",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Cluster ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Install name",
+            "name": "install",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Delete reason",
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/handlers.adminInstallDeleteBody"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Named no-op (already terminal / never deployed)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "The platform audit row could not be recorded; nothing was deleted",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "operationId": "DeleteApiV1AdminClustersIdInstallsInstall"
+      }
+    },
     "/api/v1/admin/deploy-triage": {
       "get": {
         "security": [
@@ -47256,6 +47434,14 @@
       "type": "object",
       "properties": {
         "impact_fingerprint": {
+          "type": "string"
+        }
+      }
+    },
+    "handlers.adminInstallDeleteBody": {
+      "type": "object",
+      "properties": {
+        "reason": {
           "type": "string"
         }
       }

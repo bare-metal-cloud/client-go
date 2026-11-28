@@ -258,6 +258,7 @@ docs/HandlersActiveGrantItem.md
 docs/HandlersAddVMToNetworkRequest.md
 docs/HandlersAddVirtualMachinesToClusterRequest.md
 docs/HandlersAddressChangeExecuteRequest.md
+docs/HandlersAdminInstallDeleteBody.md
 docs/HandlersAgentReenrollCommandResponse.md
 docs/HandlersAgentToolCatalogResponse.md
 docs/HandlersAgentToolView.md
@@ -941,6 +942,7 @@ model_handlers_active_grant_item.go
 model_handlers_add_virtual_machines_to_cluster_request.go
 model_handlers_add_vmto_network_request.go
 model_handlers_address_change_execute_request.go
+model_handlers_admin_install_delete_body.go
 model_handlers_agent_reenroll_command_response.go
 model_handlers_agent_tool_catalog_response.go
 model_handlers_agent_tool_view.go
