@@ -10,8 +10,8 @@
 // ones BAR-5949 landed on the backend: list, versions, rename/repoint (PUT),
 // rotate-credentials, and delete with the force query and its 409 consumers
 // body. Per the BAR-5949 plan-review rule, the SDK sends no force parameter by
-// default and merely surfaces the 409 and its consumers; it offers no force
-// affordance of its own.
+// default and merely surfaces the 409 and its consumers; beyond the API's own
+// force query parameter it adds nothing.
 package handtest
 
 import (
@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	openapiclient "github.com/bare-metal-cloud/client-go"
@@ -100,7 +99,7 @@ func TestGetOrgS3ConnectionVersionsWithPAT(t *testing.T) {
 		assertPATRequest(t, r)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(`{"versions":[{"version":2,"created_at":"2026-11-28T00:00:00Z"}]}`))
+		_, _ = w.Write([]byte(`{"items":[{"version_number":2,"is_current":true}],"next_cursor":null}`))
 	})
 
 	versions, httpRes, err := client.SecretsAPI.
@@ -111,8 +110,12 @@ func TestGetOrgS3ConnectionVersionsWithPAT(t *testing.T) {
 	if httpRes.StatusCode != http.StatusOK {
 		t.Fatalf("status = %d, want 200", httpRes.StatusCode)
 	}
-	if _, ok := versions["versions"]; !ok {
-		t.Errorf("versions payload missing versions key: %+v", versions)
+	items, ok := versions["items"].([]interface{})
+	if !ok {
+		t.Fatalf("versions payload missing items array: %+v", versions)
+	}
+	if len(items) != 1 {
+		t.Errorf("len(items) = %d, want 1 (backend sends {items, next_cursor}): %+v", len(items), versions)
 	}
 }
 
@@ -128,7 +131,8 @@ func TestRenameAndRepointOrgS3ConnectionWithPAT(t *testing.T) {
 		assertPATRequest(t, r)
 		var body openapiclient.HandlersUpdateOrgS3ConnectionRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			t.Fatalf("decode request body: %v", err)
+			t.Errorf("decode request body: %v", err)
+			return
 		}
 		if body.GetName() != newName {
 			t.Errorf("name in body = %q, want %q", body.GetName(), newName)
@@ -169,7 +173,8 @@ func TestRotateOrgS3ConnectionCredentialsWithPAT(t *testing.T) {
 		assertPATRequest(t, r)
 		var body openapiclient.HandlersRotateOrgS3ConnectionCredentialsRequest
 		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-			t.Fatalf("decode request body: %v", err)
+			t.Errorf("decode request body: %v", err)
+			return
 		}
 		if body.GetAccessKeyId() != accessKey || body.GetSecretAccessKey() != secretKey {
 			t.Errorf("rotate body = %q/%q, want %q/%q",
@@ -198,8 +203,8 @@ func TestRotateOrgS3ConnectionCredentialsWithPAT(t *testing.T) {
 // TestDeleteOrgS3ConnectionSurfaces409Consumers pins the BAR-5949 plan-review
 // rule on the client: a plain delete carries NO force query parameter, and a
 // 409 from the secret-reference guard surfaces to the caller with the
-// consumers list intact — the SDK does not swallow it and offers no force
-// button of its own.
+// consumers list intact — the SDK does not swallow it and adds nothing beyond
+// the API's own force query.
 func TestDeleteOrgS3ConnectionSurfaces409Consumers(t *testing.T) {
 	client, _ := newPATClient(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodDelete || r.URL.Path != "/orgs/42/s3-connections/7" {
@@ -213,7 +218,7 @@ func TestDeleteOrgS3ConnectionSurfaces409Consumers(t *testing.T) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusConflict)
-		_, _ = w.Write([]byte(`{"consumers":[{"kind":"backup_plan","id":3},{"kind":"managed_database","id":9}]}`))
+		_, _ = w.Write([]byte(`{"error":"s3 connection still in use","consumers":[{"id":3,"name":"nightly-backups","type":"backup_plan","scope":"org","link":"/api/v1/backup-plans/3"},{"id":9,"name":"pg-orders","type":"managed_database","scope":"org","link":"/api/v1/databases/9"}]}`))
 	})
 
 	_, httpRes, err := client.OrgS3ConnectionsAPI.
@@ -228,8 +233,28 @@ func TestDeleteOrgS3ConnectionSurfaces409Consumers(t *testing.T) {
 	if !ok {
 		t.Fatalf("error type %T, want *GenericOpenAPIError", err)
 	}
-	if !strings.Contains(string(apiErr.Body()), "backup_plan") || !strings.Contains(string(apiErr.Body()), "managed_database") {
-		t.Errorf("409 body does not surface the consumers: %s", apiErr.Body())
+	model, ok := apiErr.Model().(map[string]interface{})
+	if !ok {
+		t.Fatalf("409 model type %T, want map[string]interface{}", apiErr.Model())
+	}
+	consumers, ok := model["consumers"].([]interface{})
+	if !ok {
+		t.Fatalf("409 model missing consumers array: %+v", model)
+	}
+	if len(consumers) != 2 {
+		t.Errorf("len(consumers) = %d, want 2: %+v", len(consumers), consumers)
+	}
+	first, ok := consumers[0].(map[string]interface{})
+	if !ok {
+		t.Fatalf("consumer[0] type %T, want object", consumers[0])
+	}
+	for _, key := range []string{"id", "name", "type", "scope", "link"} {
+		if _, present := first[key]; !present {
+			t.Errorf("consumer[0] missing %q key (S3ConnectionConsumer shape): %+v", key, first)
+		}
+	}
+	if first["type"] != "backup_plan" {
+		t.Errorf("consumer[0].type = %v, want backup_plan", first["type"])
 	}
 }
 
