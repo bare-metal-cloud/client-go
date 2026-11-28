@@ -20279,6 +20279,14 @@
     },
     "/orgs/{org_id}/build-attempts/{attempt_id}/cancel": {
       "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
         "description": "Cancels one build attempt by its ledger row id. State semantics (D20): submitting/queued\nterminal-cancel locally (the dispatch hold is released; no machine was touched); running\n(dispatched) persists the cancel request server-side and makes the signed stop directive\npickable at the machine's cancel poll, awaiting the machine's terminal (first terminal\nwins \u2014 a completion beating the cancel is the machine's honest terminal); lost lands\ncancelled and suppresses the re-dispatch (D11); succeeded/failed answer 409 verbatim;\nrepeat calls are idempotent 200s. Every transition emits a build_attempt.state event on\nthe org-scoped \"org:{org_id}:builds\" gateway topic (the contract spelled in this file's\nheader). The body is empty \u2014 the cancel carries nothing but its address. A foreign or unknown\nattempt answers the uniform 404 (no existence oracle). A Bearer API key lacking the\nbuilds:write scope answers the typed 403 insufficient_scope (ADR-096).",
         "produces": [
           "application/json"
@@ -20361,6 +20369,14 @@
     },
     "/orgs/{org_id}/build-attempts/{attempt_id}/console": {
       "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
         "description": "Renders the 06.5.1 build console: the attempt's proven state, the plan steps with per-step evidence (the registry step is done only by the registered revision \u2014 publish-before-pin), the log cursor and tail (log_status \"starting\" until the first line lands, then \"streaming\" while live; a terminal attempt reads \"complete\" or \"failed\" per the ledger fact), and the failed-build (06.5.2) / failed-pull (06.5.3) states with their read-only saw/likely/to-try diagnosis where the facts exist. A foreign attempt is the same 404 as a nonexistent one. A Bearer API key lacking the builds:read scope answers the typed 403 insufficient_scope (ADR-096).",
         "produces": [
           "application/json"
@@ -20434,6 +20450,14 @@
     },
     "/orgs/{org_id}/build-attempts/{attempt_id}/logs": {
       "get": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
         "description": "Streams the attempt's complete log as text/plain (attempt-scoped, tenancy-bound). The same 404 as the console read for a foreign or nonexistent attempt \u2014 no existence oracle. A Bearer API key lacking the builds:read scope answers the typed 403 insufficient_scope (ADR-096).",
         "produces": [
           "text/plain"
@@ -26701,6 +26725,14 @@
     },
     "/orgs/{org_id}/stacks/build-timeline": {
       "post": {
+        "security": [
+          {
+            "CookieAuth": []
+          },
+          {
+            "BearerAuth": []
+          }
+        ],
         "description": "Renders the 06.5 timeline: one row per service, in the manifest's dependency order, scoped to the session's active org AND project. Every stage is PROVEN or PENDING \u2014 a state appears only when its fact exists (the attempt ledger proves build, the registered revision proves publish, health awaits the probe gates), absence renders as absence, and a digest appears only when it exists. A Bearer API key lacking the builds:read scope answers the typed 403 insufficient_scope (ADR-096).",
         "consumes": [
           "application/json"
@@ -32430,6 +32462,13 @@
               "type": "object",
               "additionalProperties": true
             }
+          },
+          "503": {
+            "description": "Cluster lane did not answer within its bound \u2014 row retained unchanged (error_code: cluster_unreachable)",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
           }
         },
         "operationId": "DeleteServicesDatabasesId"
@@ -34721,6 +34760,13 @@
           },
           "400": {
             "description": "Bad Request",
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "503": {
+            "description": "Cluster lane did not answer within its bound (error_code: cluster_unreachable)",
             "schema": {
               "type": "object",
               "additionalProperties": true

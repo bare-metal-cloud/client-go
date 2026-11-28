@@ -16633,6 +16633,9 @@ paths:
                   type: string
                 type: object
           description: Service Unavailable
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: Cancel a build attempt (the deploys ledger's cancel verb)
       tags:
       - builds
@@ -16700,6 +16703,9 @@ paths:
                   type: string
                 type: object
           description: Internal Server Error
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: "Read a build attempt's console (plan steps, evidence, log tail)"
       tags:
       - builds
@@ -16762,6 +16768,9 @@ paths:
                   type: string
                 type: object
           description: Internal Server Error
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: Download a build attempt's full log
       tags:
       - builds
@@ -22060,6 +22069,9 @@ paths:
                   type: string
                 type: object
           description: Internal Server Error
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: "Read a stack deploy's timeline (proven states, dependency order)"
       tags:
       - builds
@@ -26665,6 +26677,14 @@ paths:
                 type: object
           description: "Cluster agent unreachable — teardown cannot run; row retained\
             \ (error_code: cluster_agent_unreachable)"
+        "503":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: "Cluster lane did not answer within its bound — row retained\
+            \ unchanged (error_code: cluster_unreachable)"
       security:
       - CookieAuth: []
       summary: Delete a database
@@ -28723,6 +28743,14 @@ paths:
                 additionalProperties: true
                 type: object
           description: Bad Request
+        "503":
+          content:
+            '*/*':
+              schema:
+                additionalProperties: true
+                type: object
+          description: "Cluster lane did not answer within its bound (error_code:\
+            \ cluster_unreachable)"
       security:
       - CookieAuth: []
       summary: Stop a database (scale to 0 replicas)
