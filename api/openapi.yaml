@@ -2210,6 +2210,8 @@ paths:
         Filters: actor_user_id, action, resource_type, outcome,
         subject_org_id, from, to (RFC3339), cursor, limit; and for the
         impersonated query: subject_user_id and reason (substring).
+        read_reason is a staff-typed reason for the read itself,
+        recorded on the read's own audit row.
       operationId: GetApiV1AdminAudit-events
       parameters:
       - description: Filter by actor user id (both queries)
@@ -2245,6 +2247,12 @@ paths:
       - description: Substring match on the impersonated reason
         in: query
         name: reason
+        schema:
+          type: string
+      - description: "Staff-typed reason for this read, recorded on the read's own\
+          \ trail row (capped at 500 characters)"
+        in: query
+        name: read_reason
         schema:
           type: string
       - description: Inclusive lower bound (RFC3339)
@@ -2380,6 +2388,172 @@ paths:
       tags:
       - admin
       x-codegen-request-body-name: request
+  /api/v1/admin/clusters:
+    get:
+      description: |-
+        The Staff panel's cluster picker: id, name and owner
+        organization only (org name + slug). A triage entry point,
+        not a cluster drill-in. Sensitive read (platform audit rows).
+      operationId: GetApiV1AdminClusters
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: List clusters across orgs (platform admin)
+      tags:
+      - admin
+  /api/v1/admin/clusters/{id}/installs:
+    get:
+      description: |-
+        One row per install on the cluster: name, status, owner
+        organization and project, created time, and the owning
+        table as source (deploykit_installs for engine installs,
+        blueprint_pending_installs for active pending builds).
+        Component installs (`<stack>-<component>`) nest under their
+        stack install's row in components — backed by the captured
+        stack DAG, never guessed from the name. A name in neither
+        owning table that the trace tables still remember shows as
+        a trace_only row whose source names the owning tables.
+      operationId: GetApiV1AdminClustersIdInstalls
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Internal Server Error
+      security:
+      - CookieAuth: []
+      summary: List one cluster's installs across orgs (platform admin)
+      tags:
+      - admin
+  /api/v1/admin/clusters/{id}/installs/{install}:
+    delete:
+      description: |-
+        The platform-admin keep-data teardown — the SAME shared
+        body the tenant route runs (fence, terminal no-op,
+        never-deployed valve, busy 409, database-owns-name 409,
+        enqueue), never a hand-row deletion. Requires a typed
+        reason (3–300 chars) and sudo mode. Every outcome lands on
+        the platform audit trail (who, when, why, cluster, install,
+        outcome): a fail-closed pre row before the teardown,
+        corrective error rows on every refusal. An active pending
+        build row under the name refuses with 409 (its owning
+        table is named); a name in neither owning table that the
+        trace tables still remember is 404 naming those tables; a
+        name in none of them is the plain 404.
+      operationId: DeleteApiV1AdminClustersIdInstallsInstall
+      parameters:
+      - description: Cluster ID
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+      - description: Install name
+        in: path
+        name: install
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/handlers.adminInstallDeleteBody'
+        description: Delete reason
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Named no-op (already terminal / never deployed)
+        "202":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Accepted
+        "400":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Bad Request
+        "404":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Not Found
+        "409":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: Conflict
+        "503":
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+          description: The platform audit row could not be recorded; nothing was deleted
+      security:
+      - CookieAuth: []
+      summary: Delete one install on a cluster (platform admin)
+      tags:
+      - admin
+      x-codegen-request-body-name: body
   /api/v1/admin/deploy-triage:
     get:
       description: |-
@@ -6365,6 +6539,7 @@ paths:
           description: Not Found
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List a cluster's app installs (the engine records)
       tags:
       - deploykit-apps
@@ -6434,6 +6609,7 @@ paths:
           description: OK
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List the catalog versions of one bundle this engine can run
       tags:
       - deploykit-apps
@@ -6554,6 +6730,7 @@ paths:
           description: Unprocessable Entity
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Start an app install on a cluster (the resolved form payload)
       tags:
       - deploykit-apps
@@ -7485,6 +7662,7 @@ paths:
           description: "A named refusal (health-required, registry, DNS-1123)"
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Create the deploy setup for a repository
       tags:
       - gitops
@@ -7543,6 +7721,7 @@ paths:
             \ or the registration's connection row vanished mid-verb"
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Rotate the registration-class deploy token
       tags:
       - gitops
@@ -7613,6 +7792,7 @@ paths:
           description: Service Unavailable
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Inspect an install's declared insight collectors live
       tags:
       - deploykit-apps
@@ -8053,6 +8233,7 @@ paths:
           description: Service Unavailable
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Re-pin an install to a previous revision's CI build digest
       tags:
       - deploykit-apps
@@ -8644,6 +8825,7 @@ paths:
           description: Not Found
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Get one install's record status and progress events
       tags:
       - deploykit-apps
@@ -8718,6 +8900,7 @@ paths:
           description: Unprocessable Entity
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Upgrade an app install to a target catalog version
       tags:
       - deploykit-apps
@@ -10622,6 +10805,7 @@ paths:
           description: A named detection refusal (class + guidance)
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Inspect a repository for the create-from-repo shape
       tags:
       - gitops
@@ -17042,6 +17226,9 @@ paths:
                   type: string
                 type: object
           description: Internal Server Error
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: List the org's external-git build bindings
       tags:
       - gitops
@@ -17096,6 +17283,9 @@ paths:
                   type: string
                 type: object
           description: Internal Server Error
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: Unbind a repo from its project build
       tags:
       - gitops
@@ -17120,6 +17310,7 @@ paths:
           description: OK
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List the org's git connections
       tags:
       - gitops
@@ -17374,6 +17565,9 @@ paths:
                   type: string
                 type: object
           description: Locked
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: Bind a repo to a project's build (external-git trigger)
       tags:
       - gitops
@@ -17621,6 +17815,9 @@ paths:
                   type: string
                 type: object
           description: Internal Server Error
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: List the org's verifying machines (public delivery keys)
       tags:
       - gitops
@@ -20968,6 +21165,7 @@ paths:
           description: Forbidden
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List org-scoped S3 connections
       tags:
       - org-s3-connections
@@ -21024,6 +21222,7 @@ paths:
           description: Duplicate name
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Create an org-scoped S3 connection
       tags:
       - org-s3-connections
@@ -21802,6 +22001,7 @@ paths:
           description: Forbidden
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List an org-scoped S3 connection's credential versions
       tags:
       - secrets
@@ -21954,6 +22154,9 @@ paths:
                   type: string
                 type: object
           description: Service Unavailable
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: Trigger a bound build manually (the CLI deploy verb)
       tags:
       - builds
@@ -22017,6 +22220,9 @@ paths:
                   type: string
                 type: object
           description: Internal Server Error
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: Read a stack's deploy revision ledger (per-service provenance)
       tags:
       - builds
@@ -22094,6 +22300,9 @@ paths:
                   type: string
                 type: object
           description: Service Unavailable
+      security:
+      - CookieAuth: []
+      - BearerAuth: []
       summary: Roll a stack service back to an older registered revision
       tags:
       - builds
@@ -22135,6 +22344,7 @@ paths:
           description: Forbidden
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List the org's storage connections (both scopes)
       tags:
       - storage
@@ -22185,6 +22395,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Get the org's storage overview
       tags:
       - storage
@@ -22234,6 +22445,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Get which resources use each of the org's S3 connections
       tags:
       - storage
@@ -24876,6 +25088,7 @@ paths:
           description: OK
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List all S3 connections
       tags:
       - s3-connections
@@ -24926,6 +25139,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
+      - BearerAuth: []
       - EncryptionKeyAuth: []
       summary: Create a new S3 connection
       tags:
@@ -24954,6 +25168,7 @@ paths:
           description: OK
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Get S3 provider information
       tags:
       - s3-connections
@@ -24995,6 +25210,7 @@ paths:
           description: Org vault locked (linked verification only)
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Test an S3 connection before saving
       tags:
       - s3-connections
@@ -25057,6 +25273,7 @@ paths:
             \ plan or managed database (the body lists the consumers)"
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Delete an S3 connection
       tags:
       - s3-connections
@@ -25121,6 +25338,7 @@ paths:
           description: Vault unlock required for the endpoint re-probe
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Update an S3 connection (rename / endpoint / default bucket)
       tags:
       - s3-connections
@@ -25196,6 +25414,7 @@ paths:
           description: Bad Gateway
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List buckets for an S3 connection
       tags:
       - s3-connections
@@ -25273,6 +25492,7 @@ paths:
           description: Bad Gateway
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Delete an S3 object (nested path)
       tags:
       - s3-connections
@@ -25372,6 +25592,7 @@ paths:
           description: Bad Gateway
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: "Upload an S3 object (nested path, streamed multipart)"
       tags:
       - s3-connections
@@ -25472,6 +25693,7 @@ paths:
           description: Bad Gateway
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: List objects in a bucket
       tags:
       - s3-connections
@@ -25561,6 +25783,7 @@ paths:
           description: Bad Gateway
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Download an S3 object
       tags:
       - s3-connections
@@ -25618,6 +25841,7 @@ paths:
           description: Internal Server Error
       security:
       - CookieAuth: []
+      - BearerAuth: []
       summary: Rotate credentials for an S3 connection
       tags:
       - s3-connections
@@ -41683,6 +41907,11 @@ components:
     handlers.addressChangeExecuteRequest:
       properties:
         impact_fingerprint:
+          type: string
+      type: object
+    handlers.adminInstallDeleteBody:
+      properties:
+        reason:
           type: string
       type: object
     handlers.applyRefusal:
