@@ -75,7 +75,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -149,7 +149,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -206,7 +206,7 @@ Other parameters are passed through a pointer to a apiGetS3ConnectionsRequest st
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -278,7 +278,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -360,7 +360,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -434,7 +434,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -496,7 +496,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -560,7 +560,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth), [EncryptionKeyAuth](../README.md#EncryptionKeyAuth)
+[CookieAuth](../README.md#CookieAuth), [EncryptionKeyAuth](../README.md#EncryptionKeyAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -630,7 +630,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -696,7 +696,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -766,7 +766,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -844,7 +844,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

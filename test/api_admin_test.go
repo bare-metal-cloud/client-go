@@ -22,6 +22,21 @@ func Test_bmc_AdminAPIService(t *testing.T) {
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
 
+	t.Run("Test AdminAPIService DeleteApiV1AdminClustersIdInstallsInstall", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+		var install string
+
+		resp, httpRes, err := apiClient.AdminAPI.DeleteApiV1AdminClustersIdInstallsInstall(context.Background(), id, install).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
 	t.Run("Test AdminAPIService GetAdminExplorerRequests", func(t *testing.T) {
 
 		t.Skip("skip test")  // remove to run test
@@ -91,6 +106,32 @@ func Test_bmc_AdminAPIService(t *testing.T) {
 		var orgId int32
 
 		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminBackupOrgsOrgIdEntitlement(context.Background(), orgId).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminClusters", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminClusters(context.Background()).Execute()
+
+		require.Nil(t, err)
+		require.NotNil(t, resp)
+		assert.Equal(t, 200, httpRes.StatusCode)
+
+	})
+
+	t.Run("Test AdminAPIService GetApiV1AdminClustersIdInstalls", func(t *testing.T) {
+
+		t.Skip("skip test")  // remove to run test
+
+		var id string
+
+		resp, httpRes, err := apiClient.AdminAPI.GetApiV1AdminClustersIdInstalls(context.Background(), id).Execute()
 
 		require.Nil(t, err)
 		require.NotNil(t, resp)
