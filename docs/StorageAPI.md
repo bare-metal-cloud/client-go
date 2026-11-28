@@ -69,7 +69,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -139,7 +139,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 
@@ -209,7 +209,7 @@ Name | Type | Description  | Notes
 
 ### Authorization
 
-[CookieAuth](../README.md#CookieAuth)
+[CookieAuth](../README.md#CookieAuth), [BearerAuth](../README.md#BearerAuth)
 
 ### HTTP request headers
 

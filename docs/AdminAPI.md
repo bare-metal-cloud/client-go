@@ -4,12 +4,15 @@ All URIs are relative to *http://localhost:3001/api/v1*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**DeleteApiV1AdminClustersIdInstallsInstall**](AdminAPI.md#DeleteApiV1AdminClustersIdInstallsInstall) | **Delete** /api/v1/admin/clusters/{id}/installs/{install} | Delete one install on a cluster (platform admin)
 [**GetAdminExplorerRequests**](AdminAPI.md#GetAdminExplorerRequests) | **Get** /admin/explorer/requests | List explorer access requests (BMC-admin queue)
 [**GetAdminExplorerViewas**](AdminAPI.md#GetAdminExplorerViewas) | **Get** /admin/explorer/viewas | View-as session status (BMC-admin)
 [**GetApiV1AdminAgents**](AdminAPI.md#GetApiV1AdminAgents) | **Get** /api/v1/admin/agents | List the agent fleet (platform admin)
 [**GetApiV1AdminAgentsId**](AdminAPI.md#GetApiV1AdminAgentsId) | **Get** /api/v1/admin/agents/{id} | One agent&#39;s fleet detail (platform admin)
 [**GetApiV1AdminAuditEvents**](AdminAPI.md#GetApiV1AdminAuditEvents) | **Get** /api/v1/admin/audit-events | List platform audit events (platform admin)
 [**GetApiV1AdminBackupOrgsOrgIdEntitlement**](AdminAPI.md#GetApiV1AdminBackupOrgsOrgIdEntitlement) | **Get** /api/v1/admin/backup/orgs/{org_id}/entitlement | Get an org&#39;s backup entitlement (admin)
+[**GetApiV1AdminClusters**](AdminAPI.md#GetApiV1AdminClusters) | **Get** /api/v1/admin/clusters | List clusters across orgs (platform admin)
+[**GetApiV1AdminClustersIdInstalls**](AdminAPI.md#GetApiV1AdminClustersIdInstalls) | **Get** /api/v1/admin/clusters/{id}/installs | List one cluster&#39;s installs across orgs (platform admin)
 [**GetApiV1AdminDeployTriage**](AdminAPI.md#GetApiV1AdminDeployTriage) | **Get** /api/v1/admin/deploy-triage | Cross-org failed-deploy triage list (platform admin)
 [**GetApiV1AdminDeployTriageJobsJobId**](AdminAPI.md#GetApiV1AdminDeployTriageJobsJobId) | **Get** /api/v1/admin/deploy-triage/jobs/{job_id} | Job debugger by id across orgs (platform admin)
 [**GetApiV1AdminMonitoringOrgsOrgIdEntitlement**](AdminAPI.md#GetApiV1AdminMonitoringOrgsOrgIdEntitlement) | **Get** /api/v1/admin/monitoring/orgs/{org_id}/entitlement | Get an org&#39;s effective monitoring entitlement (admin)
@@ -34,6 +37,81 @@ Method | HTTP request | Description
 [**PutApiV1AdminMonitoringOrgsOrgIdExemption**](AdminAPI.md#PutApiV1AdminMonitoringOrgsOrgIdExemption) | **Put** /api/v1/admin/monitoring/orgs/{org_id}/exemption | Set or clear an org&#39;s enforcement exemption (admin)
 [**PutApiV1AdminMonitoringOrgsOrgIdLimits**](AdminAPI.md#PutApiV1AdminMonitoringOrgsOrgIdLimits) | **Put** /api/v1/admin/monitoring/orgs/{org_id}/limits | Set an org&#39;s monitoring limits (admin set-path)
 
+
+
+## DeleteApiV1AdminClustersIdInstallsInstall
+
+> map[string]interface{} DeleteApiV1AdminClustersIdInstallsInstall(ctx, id, install).Body(body).Execute()
+
+Delete one install on a cluster (platform admin)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Cluster ID
+	install := "install_example" // string | Install name
+	body := *openapiclient.NewHandlersAdminInstallDeleteBody() // HandlersAdminInstallDeleteBody | Delete reason
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AdminAPI.DeleteApiV1AdminClustersIdInstallsInstall(context.Background(), id, install).Body(body).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AdminAPI.DeleteApiV1AdminClustersIdInstallsInstall``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `DeleteApiV1AdminClustersIdInstallsInstall`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `AdminAPI.DeleteApiV1AdminClustersIdInstallsInstall`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Cluster ID | 
+**install** | **string** | Install name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteApiV1AdminClustersIdInstallsInstallRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **body** | [**HandlersAdminInstallDeleteBody**](HandlersAdminInstallDeleteBody.md) | Delete reason | 
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## GetAdminExplorerRequests
@@ -307,7 +385,7 @@ Name | Type | Description  | Notes
 
 ## GetApiV1AdminAuditEvents
 
-> map[string]interface{} GetApiV1AdminAuditEvents(ctx).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
+> map[string]interface{} GetApiV1AdminAuditEvents(ctx).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).ReadReason(readReason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
 
 List platform audit events (platform admin)
 
@@ -333,6 +411,7 @@ func main() {
 	subjectOrgId := int32(56) // int32 | Filter by subject org (platform rows) (optional)
 	subjectUserId := int32(56) // int32 | Filter by impersonated subject (impersonated rows) (optional)
 	reason := "reason_example" // string | Substring match on the impersonated reason (optional)
+	readReason := "readReason_example" // string | Staff-typed reason for this read, recorded on the read's own trail row (capped at 500 characters) (optional)
 	from := "from_example" // string | Inclusive lower bound (RFC3339) (optional)
 	to := "to_example" // string | Inclusive upper bound (RFC3339) (optional)
 	cursor := "cursor_example" // string | Opaque pagination cursor (platform query) (optional)
@@ -340,7 +419,7 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.AdminAPI.GetApiV1AdminAuditEvents(context.Background()).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
+	resp, r, err := apiClient.AdminAPI.GetApiV1AdminAuditEvents(context.Background()).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).ReadReason(readReason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AdminAPI.GetApiV1AdminAuditEvents``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -368,6 +447,7 @@ Name | Type | Description  | Notes
  **subjectOrgId** | **int32** | Filter by subject org (platform rows) | 
  **subjectUserId** | **int32** | Filter by impersonated subject (impersonated rows) | 
  **reason** | **string** | Substring match on the impersonated reason | 
+ **readReason** | **string** | Staff-typed reason for this read, recorded on the read&#39;s own trail row (capped at 500 characters) | 
  **from** | **string** | Inclusive lower bound (RFC3339) | 
  **to** | **string** | Inclusive upper bound (RFC3339) | 
  **cursor** | **string** | Opaque pagination cursor (platform query) | 
@@ -437,6 +517,137 @@ Name | Type | Description  | Notes
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiGetApiV1AdminBackupOrgsOrgIdEntitlementRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetApiV1AdminClusters
+
+> map[string]interface{} GetApiV1AdminClusters(ctx).Execute()
+
+List clusters across orgs (platform admin)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AdminAPI.GetApiV1AdminClusters(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AdminAPI.GetApiV1AdminClusters``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetApiV1AdminClusters`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `AdminAPI.GetApiV1AdminClusters`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetApiV1AdminClustersRequest struct via the builder pattern
+
+
+### Return type
+
+**map[string]interface{}**
+
+### Authorization
+
+[CookieAuth](../README.md#CookieAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetApiV1AdminClustersIdInstalls
+
+> map[string]interface{} GetApiV1AdminClustersIdInstalls(ctx, id).Execute()
+
+List one cluster's installs across orgs (platform admin)
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID"
+)
+
+func main() {
+	id := "id_example" // string | Cluster ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.AdminAPI.GetApiV1AdminClustersIdInstalls(context.Background(), id).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `AdminAPI.GetApiV1AdminClustersIdInstalls``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetApiV1AdminClustersIdInstalls`: map[string]interface{}
+	fmt.Fprintf(os.Stdout, "Response from `AdminAPI.GetApiV1AdminClustersIdInstalls`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**id** | **string** | Cluster ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetApiV1AdminClustersIdInstallsRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
