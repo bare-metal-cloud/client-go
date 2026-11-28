@@ -135,8 +135,6 @@ audit store across orgs (reason visible — platform-admin only).
 Filters: actor_user_id, action, resource_type, outcome,
 subject_org_id, from, to (RFC3339), cursor, limit; and for the
 impersonated query: subject_user_id and reason (substring).
-read_reason is a staff-typed reason for the read itself,
-recorded on the read's own audit row.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetApiV1AdminAuditEventsRequest
@@ -1382,7 +1380,6 @@ type ApiGetApiV1AdminAuditEventsRequest struct {
 	subjectOrgId *int32
 	subjectUserId *int32
 	reason *string
-	readReason *string
 	from *string
 	to *string
 	cursor *string
@@ -1431,12 +1428,6 @@ func (r ApiGetApiV1AdminAuditEventsRequest) Reason(reason string) ApiGetApiV1Adm
 	return r
 }
 
-// Staff-typed reason for this read, recorded on the read&#39;s own trail row (capped at 500 characters)
-func (r ApiGetApiV1AdminAuditEventsRequest) ReadReason(readReason string) ApiGetApiV1AdminAuditEventsRequest {
-	r.readReason = &readReason
-	return r
-}
-
 // Inclusive lower bound (RFC3339)
 func (r ApiGetApiV1AdminAuditEventsRequest) From(from string) ApiGetApiV1AdminAuditEventsRequest {
 	r.from = &from
@@ -1473,8 +1464,6 @@ audit store across orgs (reason visible — platform-admin only).
 Filters: actor_user_id, action, resource_type, outcome,
 subject_org_id, from, to (RFC3339), cursor, limit; and for the
 impersonated query: subject_user_id and reason (substring).
-read_reason is a staff-typed reason for the read itself,
-recorded on the read's own audit row.
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiGetApiV1AdminAuditEventsRequest
@@ -1527,9 +1516,6 @@ func (a *AdminAPIService) GetApiV1AdminAuditEventsExecute(r ApiGetApiV1AdminAudi
 	}
 	if r.reason != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "reason", r.reason, "", "")
-	}
-	if r.readReason != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "read_reason", r.readReason, "", "")
 	}
 	if r.from != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "from", r.from, "", "")

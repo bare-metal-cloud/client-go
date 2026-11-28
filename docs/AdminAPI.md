@@ -385,7 +385,7 @@ Name | Type | Description  | Notes
 
 ## GetApiV1AdminAuditEvents
 
-> map[string]interface{} GetApiV1AdminAuditEvents(ctx).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).ReadReason(readReason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
+> map[string]interface{} GetApiV1AdminAuditEvents(ctx).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
 
 List platform audit events (platform admin)
 
@@ -411,7 +411,6 @@ func main() {
 	subjectOrgId := int32(56) // int32 | Filter by subject org (platform rows) (optional)
 	subjectUserId := int32(56) // int32 | Filter by impersonated subject (impersonated rows) (optional)
 	reason := "reason_example" // string | Substring match on the impersonated reason (optional)
-	readReason := "readReason_example" // string | Staff-typed reason for this read, recorded on the read's own trail row (capped at 500 characters) (optional)
 	from := "from_example" // string | Inclusive lower bound (RFC3339) (optional)
 	to := "to_example" // string | Inclusive upper bound (RFC3339) (optional)
 	cursor := "cursor_example" // string | Opaque pagination cursor (platform query) (optional)
@@ -419,7 +418,7 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.AdminAPI.GetApiV1AdminAuditEvents(context.Background()).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).ReadReason(readReason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
+	resp, r, err := apiClient.AdminAPI.GetApiV1AdminAuditEvents(context.Background()).ActorUserId(actorUserId).Action(action).ResourceType(resourceType).Outcome(outcome).SubjectOrgId(subjectOrgId).SubjectUserId(subjectUserId).Reason(reason).From(from).To(to).Cursor(cursor).Limit(limit).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `AdminAPI.GetApiV1AdminAuditEvents``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -447,7 +446,6 @@ Name | Type | Description  | Notes
  **subjectOrgId** | **int32** | Filter by subject org (platform rows) | 
  **subjectUserId** | **int32** | Filter by impersonated subject (impersonated rows) | 
  **reason** | **string** | Substring match on the impersonated reason | 
- **readReason** | **string** | Staff-typed reason for this read, recorded on the read&#39;s own trail row (capped at 500 characters) | 
  **from** | **string** | Inclusive lower bound (RFC3339) | 
  **to** | **string** | Inclusive upper bound (RFC3339) | 
  **cursor** | **string** | Opaque pagination cursor (platform query) | 
