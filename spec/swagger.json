@@ -2713,7 +2713,7 @@
             "CookieAuth": []
           }
         ],
-        "description": "The platform audit home, plus the impersonated rows of the org\naudit store across orgs (reason visible \u2014 platform-admin only).\nFilters: actor_user_id, action, resource_type, outcome,\nsubject_org_id, from, to (RFC3339), cursor, limit; and for the\nimpersonated query: subject_user_id and reason (substring).\nread_reason is a staff-typed reason for the read itself,\nrecorded on the read's own audit row.",
+        "description": "The platform audit home, plus the impersonated rows of the org\naudit store across orgs (reason visible \u2014 platform-admin only).\nFilters: actor_user_id, action, resource_type, outcome,\nsubject_org_id, from, to (RFC3339), cursor, limit; and for the\nimpersonated query: subject_user_id and reason (substring).",
         "produces": [
           "application/json"
         ],
@@ -2762,12 +2762,6 @@
             "type": "string",
             "description": "Substring match on the impersonated reason",
             "name": "reason",
-            "in": "query"
-          },
-          {
-            "type": "string",
-            "description": "Staff-typed reason for this read, recorded on the read's own trail row (capped at 500 characters)",
-            "name": "read_reason",
             "in": "query"
           },
           {
@@ -8120,9 +8114,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Every install record in the caller's project scope on this\ncluster, in install-name order. Each entry carries the\nrecord's current state verbatim (the frozen v1 vocabulary)\nand the terminal-failure cause class where one exists; the\nper-install events window is the status route's to serve.",
@@ -8227,9 +8218,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "produces": [
@@ -8268,9 +8256,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Re-resolves the form payload server-side (a client-supplied plan or manifest is never trusted), refuses a live install with the same name by name (409), and enqueues the apps:install task whose worker leg prepares through the enginebridge (record seed, frozen-planner compile, secret escrow) and starts the engine's deploy workflow. The 202 body's provisioning status is the intent this route accepted: the install record itself is seeded when the dispatch lands on a worker. The durability destination (issue #4177) is grounded and enforced HERE: facts.Destinations is the org's vault-guarded S3 connections (the client's list never decides the set), and a stateful bundle installing with durability on and no destination refuses with the structured 409 backup_destination_required (the escape is an explicit durability.mode=off). The imported-cluster consent gate (story 133.3) stays in force: the workflow's gateway ensure consults the cluster's recorded ingress consent \u2014 this route adds no bypass.",
@@ -9350,9 +9335,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Lands the pending registration row, mints the\nregistration-class token (the presenter is shown once),\nseeds the ghost bundle, and renders the workflow file for\nthe paste step. The first CI run creates the install.",
@@ -9500,9 +9482,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Rotates the deploy token of an enabled create-from-repo\ninstall (the old credential dies with the named \"rotated\"\ncause; when no active token exists a fresh one is minted).\nThe presenter is shown once; the committed workflow file\nstays valid (it carries the secret NAME) \u2014 the paste step\nis updating the CI secret value.",
@@ -9563,9 +9542,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Runs the bundle's declared rich collectors read-only\nagainst the install (the engine's Inspect: record \u2192\ncurrent revision \u2192 pinned bundle \u2192 manifest) and serves\nthe mapped panels: the floors' served facts plus one panel\nper collector, every state honest (ok / empty / degraded /\nunavailable, each degrade carrying its reason). Read-only:\nnothing is persisted and no install state changes. A\ncollector that cannot run never fails the read \u2014 its panel\nrenders the honest state instead.",
@@ -10028,9 +10004,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "The rollback re-pin affordance (story 143.3): dispatches the SAME\ndigest-swap upgrade path (the apps:upgrade task) pinned to the named\nrevision's recorded image digest. Session tier, maintainer role. The\nsource digest is verified against the declared registry first (the\ntri-state precheck): a digest the user's registry compacted refuses\nwith the named honest boundary \u2014 unfixable platform-side. A busy\ninstall refuses with the retryable busy. The new revision carries the\nmanual subject (BuildInfo nil); the audit trail names the source\nrevision and digest.",
@@ -10714,9 +10687,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "The record's current state verbatim (the frozen v1 status\nvocabulary), the install's progress events (paginated,\nnewest-last), and the named cause where one exists \u2014 a\nbackoff names its reason, a terminal failure names its\ncause class. Read-only: the route never mutates the record.\nWith ?job_id= (issue #3355), an install whose record never\nseeded serves the archived dispatch task's error as a\nstatus \"error\" payload with the named failed cause \u2014\ninstead of the lie of absence \u2014 when that task archived.",
@@ -10785,9 +10755,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Drives the transition machinery (ADR-090 D8): the target is resolved through the capability-filtered versions listing, a busy install refuses with the named 409 (the in-flight guard), and the component-set / data-format laws refuse with named guidance (422). A migrating upgrade answers the first POST with the confirm dialog (409) and dispatches only on the confirmed re-post. The backup policy is resolved backend-side per environment and is never a request field. Progress rides the existing status route.",
@@ -13105,9 +13072,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Runs the enumerated detection predicate server-side over the\nconnection (a tree walk at the repo root): the shape\nproposal, the derived install name, and the adoption hint.",
@@ -20279,14 +20243,6 @@
     },
     "/orgs/{org_id}/build-attempts/{attempt_id}/cancel": {
       "post": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Cancels one build attempt by its ledger row id. State semantics (D20): submitting/queued\nterminal-cancel locally (the dispatch hold is released; no machine was touched); running\n(dispatched) persists the cancel request server-side and makes the signed stop directive\npickable at the machine's cancel poll, awaiting the machine's terminal (first terminal\nwins \u2014 a completion beating the cancel is the machine's honest terminal); lost lands\ncancelled and suppresses the re-dispatch (D11); succeeded/failed answer 409 verbatim;\nrepeat calls are idempotent 200s. Every transition emits a build_attempt.state event on\nthe org-scoped \"org:{org_id}:builds\" gateway topic (the contract spelled in this file's\nheader). The body is empty \u2014 the cancel carries nothing but its address. A foreign or unknown\nattempt answers the uniform 404 (no existence oracle). A Bearer API key lacking the\nbuilds:write scope answers the typed 403 insufficient_scope (ADR-096).",
         "produces": [
           "application/json"
@@ -20369,14 +20325,6 @@
     },
     "/orgs/{org_id}/build-attempts/{attempt_id}/console": {
       "get": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Renders the 06.5.1 build console: the attempt's proven state, the plan steps with per-step evidence (the registry step is done only by the registered revision \u2014 publish-before-pin), the log cursor and tail (log_status \"starting\" until the first line lands, then \"streaming\" while live; a terminal attempt reads \"complete\" or \"failed\" per the ledger fact), and the failed-build (06.5.2) / failed-pull (06.5.3) states with their read-only saw/likely/to-try diagnosis where the facts exist. A foreign attempt is the same 404 as a nonexistent one. A Bearer API key lacking the builds:read scope answers the typed 403 insufficient_scope (ADR-096).",
         "produces": [
           "application/json"
@@ -20450,14 +20398,6 @@
     },
     "/orgs/{org_id}/build-attempts/{attempt_id}/logs": {
       "get": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Streams the attempt's complete log as text/plain (attempt-scoped, tenancy-bound). The same 404 as the console read for a foreign or nonexistent attempt \u2014 no existence oracle. A Bearer API key lacking the builds:read scope answers the typed 403 insufficient_scope (ADR-096).",
         "produces": [
           "text/plain"
@@ -21052,14 +20992,6 @@
     },
     "/orgs/{org_id}/gitops/build-triggers": {
       "get": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Lists every provider-repo build binding whose connection belongs to the org. The webhook secret never appears",
         "produces": [
           "application/json"
@@ -21111,14 +21043,6 @@
     },
     "/orgs/{org_id}/gitops/build-triggers/{trigger_id}": {
       "delete": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Removes one external-git build binding. Connection revocation is the OTHER stop switch \u2014 it keeps every binding row",
         "produces": [
           "application/json"
@@ -21189,9 +21113,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "produces": [
@@ -21465,14 +21386,6 @@
     },
     "/orgs/{org_id}/gitops/connections/{id}/build-trigger": {
       "post": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Binds one provider repository (github|gitlab) to one project's build. The request carries CIPHERTEXT ONLY \u2014",
         "consumes": [
           "application/json"
@@ -21807,14 +21720,6 @@
     },
     "/orgs/{org_id}/gitops/verifying-machines": {
       "get": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Lists the org machines eligible to verify a git build binding, with the public delivery key the browser seals the bind secret to. Pass connection_id to see the connection's pinned verifier (SD5: one verifier per connection); a pinned connection offers only its pin. Revoked, terminated, uninstalled and keyless machines are never listed. Never returns private key material. An org with no eligible machine answers 404.",
         "produces": [
           "application/json"
@@ -25680,9 +25585,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "produces": [
@@ -25732,9 +25634,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "consumes": [
@@ -26643,9 +26542,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Paginated metadata (no plaintext) for one ORG-scoped S3 connection's saved credential versions (project_id IS NULL row), scoped to the org in the PATH. Admin/owner of THAT org only \u2014 membership is checked directly against the path org, NOT the active org, so the route keeps working while a different org is active in the console (the active-org /secrets/s3_connection/:id/versions endpoint 403s under the console's default X-Project-Id header when ?org_id= disagrees with it \u2014 BAR-5949 round 3). Same {items, next_cursor} shape.",
@@ -26725,14 +26621,6 @@
     },
     "/orgs/{org_id}/stacks/build-timeline": {
       "post": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Renders the 06.5 timeline: one row per service, in the manifest's dependency order, scoped to the session's active org AND project. Every stage is PROVEN or PENDING \u2014 a state appears only when its fact exists (the attempt ledger proves build, the registered revision proves publish, health awaits the probe gates), absence renders as absence, and a digest appears only when it exists. A Bearer API key lacking the builds:read scope answers the typed 403 insufficient_scope (ADR-096).",
         "consumes": [
           "application/json"
@@ -26802,14 +26690,6 @@
     },
     "/orgs/{org_id}/stacks/deploy": {
       "post": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Deploys a bound trigger's watched branch at the provider's current tip through the builder's\nruled gate. The body names the binding by trigger_id or by repo_full (exactly one), and may\ncarry an optional ref: empty = the bound branch's current tip; a branch, tag, or commit SHA\nresolves to a full SHA the dispatch pins (an unknown ref answers 404 ref_not_found). The deploy\nidentity stays the bound branch's install. Every\noutcome state answers 200: dispatched (the attempt is out), queued (every capable machine was\nbusy \u2014 the ledger row is durable and the reconciler drives it), or held (no assigned/reachable\nmachines \u2014 the honest gate state). The answer carries the run reference and, for a dispatched or\nqueued attempt, the attempt_id the console and logs reads key on. An unbound repo is the typed two-doors 404 (bind a trigger, or connect the repo). A Bearer API key lacking the builds:write scope answers the typed 403 insufficient_scope (ADR-096).",
         "consumes": [
           "application/json"
@@ -26915,14 +26795,6 @@
     },
     "/orgs/{org_id}/stacks/revisions": {
       "get": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Renders the 10.5 Deploys ledger: every registered revision for the stack, grouped per service and\nascending by revision number, scoped to the session's active org AND project. Each row carries the\nrevision number, the outcome, the source commit, the image digest, the registry reference, the\nbuilder image digest, the trigger source, the created time, and the build plan's presence (the plan\nJSON itself is not returned). A scope with zero revisions answers an empty grouping with 200. A Bearer API key lacking the builds:read scope answers the typed 403 insufficient_scope (ADR-096).",
         "produces": [
           "application/json"
@@ -26994,14 +26866,6 @@
     },
     "/orgs/{org_id}/stacks/rollback": {
       "post": {
-        "security": [
-          {
-            "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
-          }
-        ],
         "description": "Re-points the service at the target build revision through the existing install/upgrade machinery and re-enters the probe gate (a rollback is a deploy of a known-good revision): traffic routes only when the component's own probe passes. A probe-failing rollback answers 200 with status \"blocked\" and the probe evidence \u2014 traffic never routes. A rollback clicked while a deploy (or another rollback) owns the service refuses with 409 (one operation at a time). A pruned-image target refuses with 409 and the re-build offer (plan + commit \u2014 offered, never automatic). A cross-org target is the same 404 as a nonexistent one. Every execution lands in the audit log. A Bearer API key lacking the builds:write scope answers the typed 403 insufficient_scope (ADR-096).",
         "consumes": [
           "application/json"
@@ -27090,9 +26954,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "One register of the org's project- AND org-scoped S3 connections (FR-Z-3): each row carries its real scope chip (org|project), the owning project's name, provider, endpoint, default bucket, a masked credential view (never a secret value), and the last-verified stamp from the verification ledger. Read-only \u2014 management verbs live on the credentials surface (org rows in Org Settings, project rows via the project connection handlers).",
@@ -27140,9 +27001,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "One org-scoped aggregate over the measured storage data: bucket bytes, volume used and provisioned bytes.\nVolumes projected full within 14 days, and unresolved storage alert events (volume and bucket kinds).\nByte fields are null when nothing was measured, never 0; the *_measured counts name the sets the byte sums cover.",
@@ -27205,9 +27063,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "One verdict for EVERY S3 connection of the org (project- and org-scoped), keyed by connection id: used true/false plus the live consumers (clusters with backup plans, managed databases, runner store / artifact store when stored rows exist).\nA used connection must not be modified or deleted (FR-Z-2); an unused one may. The same lookup backs the delete guard, so the register and the guard cannot disagree.",
@@ -30515,9 +30370,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "produces": [
@@ -30538,9 +30390,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           },
           {
             "EncryptionKeyAuth": []
@@ -30611,9 +30460,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "produces": [
@@ -30653,9 +30499,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Verifies a storage connection before create. Raw-key requests use the keys in the body; a linked_credential_id request resolves the org-scoped cloud credential through the vault and probes with its secret (vault-gated: 423 with X-Org-Vault-Required while locked). azblob runs a ListContainers check, the S3 family a ListBuckets check.",
@@ -30710,9 +30553,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "consumes": [
@@ -30792,9 +30632,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "tags": [
@@ -30864,9 +30701,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Proxies ListBuckets for one saved S3 connection. Query q filters names (case-insensitive). Casbin admits Viewer and above; Guest is denied. Owner/Admin always pass. Maintainer needs an active org vault grant (JIT approval or admin pre-grant, time-boxed); Viewer needs an admin pre-grant only (no self-service request). Otherwise 423.",
@@ -30950,9 +30784,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Streams one PUT body into the stored connection (SSRF-locked). Bodies at or under one uploader part (5 MiB) are sent as a single PUT; larger bodies stream to S3 multipart, so resident memory stays bounded regardless of object size. Enforces the 5 GiB upload bound \u2192 413 when exceeded. An explicit Content-Type is stored as sent; an omitted one is stored as binary/octet-stream on S3 and as Google's inferred type on a native GCS connection. Rails-like nested path \u2014 object key may contain \"/\". Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials.",
@@ -31064,9 +30895,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Deletes one object via the stored connection (SSRF-locked). Rails-like nested path \u2014 object key may contain \"/\". Owner/Admin only (Casbin admin+). Vault unlock required. Never returns credentials. Canonical mutate path (Story 88.2).",
@@ -31152,9 +30980,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Proxies ListObjectsV2. Requires bucket=. Optional prefix, continuation_token, q (key substring on current page), delimiter. Same access as bucket listing: Viewer and above by Casbin, Guest denied; Maintainer needs a vault grant (JIT or pre-grant), Viewer an admin pre-grant only.",
@@ -31269,9 +31094,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "description": "Streams object bytes for one saved S3 connection (SSRF-locked to stored endpoint). Size/time capped. Casbin admits Viewer and above; Guest is denied. Owner/Admin always pass. Maintainer needs an active org vault grant (JIT approval or admin pre-grant, time-boxed); Viewer needs an admin pre-grant only (no self-service request). Otherwise 423. Never returns credentials.",
@@ -31370,9 +31192,6 @@
         "security": [
           {
             "CookieAuth": []
-          },
-          {
-            "BearerAuth": []
           }
         ],
         "consumes": [
@@ -32458,13 +32277,6 @@
           },
           "409": {
             "description": "Cluster agent unreachable \u2014 teardown cannot run; row retained (error_code: cluster_agent_unreachable)",
-            "schema": {
-              "type": "object",
-              "additionalProperties": true
-            }
-          },
-          "503": {
-            "description": "Cluster lane did not answer within its bound \u2014 row retained unchanged (error_code: cluster_unreachable)",
             "schema": {
               "type": "object",
               "additionalProperties": true
@@ -34760,13 +34572,6 @@
           },
           "400": {
             "description": "Bad Request",
-            "schema": {
-              "type": "object",
-              "additionalProperties": true
-            }
-          },
-          "503": {
-            "description": "Cluster lane did not answer within its bound (error_code: cluster_unreachable)",
             "schema": {
               "type": "object",
               "additionalProperties": true
